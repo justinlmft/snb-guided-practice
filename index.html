@@ -262,6 +262,24 @@ body.playing .brand{display:none}
   .foot{padding-top:8px;gap:9px}
   .chip{padding:6px 13px}
 }
+/* ───── embed → standalone affordance (only shows inside Circle / on installable iOS) ───── */
+.popout,.installhint{display:none}
+body.embedded .popout,body.can-install .installhint{
+  display:flex;align-items:center;gap:10px;justify-content:space-between;flex:none;
+  margin:0 0 clamp(14px,2.6vh,20px);padding:11px 8px 11px 15px;
+  border:1px solid var(--hairline);border-radius:12px;background:rgba(88,145,197,.07)}
+.popout-link{flex:1 1 auto;min-width:0;font:inherit;color:var(--link);background:none;border:0;
+  cursor:pointer;text-align:left;padding:0;display:flex;flex-direction:column;gap:1px}
+.popout-link .ttl{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px}
+.popout-link .sub{font-size:12.5px;font-weight:400;color:var(--muted)}
+.popout-link:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+.installhint .ttl{font-size:14px;color:var(--ink-80);line-height:1.4}
+.installhint .ttl b{font-weight:600;color:var(--ink)}
+.popout-x{flex:none;width:30px;height:30px;border:0;background:none;color:var(--muted);
+  font-size:19px;line-height:1;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.popout-x:hover{color:var(--ink)}
+.popout-x:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+body.playing .popout,body.playing .installhint{display:none}
 /* ───── safe-area insets (notch / home indicator) for installed full-screen app ─────
    Last in the cascade so it adds clearance across every breakpoint without losing the
    responsive vertical rhythm. */
@@ -277,6 +295,19 @@ body.playing .brand{display:none}
 </head>
 <body>
 <div class="page">
+  <!-- shown only when running embedded (e.g. inside Circle): a one-tap jump to the chrome-free app -->
+  <div class="popout" id="popout">
+    <button class="popout-link" id="popoutlink" type="button">
+      <span class="ttl">Open the full-screen app ↗</span>
+      <span class="sub">no menus — just the practice</span>
+    </button>
+    <button class="popout-x" id="popoutx" type="button" aria-label="dismiss">×</button>
+  </div>
+  <!-- shown only on the standalone page in iOS Safari, not yet installed -->
+  <div class="installhint" id="installhint">
+    <span class="ttl">Keep this handy: tap <b>Share</b>, then <b>Add to Home Screen</b>.</span>
+    <button class="popout-x" id="installx" type="button" aria-label="dismiss">×</button>
+  </div>
   <header class="brand">
     <svg class="mark" viewBox="0 0 1288 446.31" role="img" aria-label="Stuck Not Broken">
 <path class="g-heart" d="M 228.6626430999995,414.99967965948633 C 193.0931878499996,414.99967965948633 159.69623824999962,401.15528090948635 134.56332974999987,376.0223724094866 L 42.977307250000194,284.43634990948647 C 17.844398749999527,259.30344140948625 4.0,225.86389365948654 4.0,190.3370365594864 C 4.0,154.76758130948647 17.844398750000437,121.3706317094865 42.977307250000194,96.23772320948629 C 68.11021574999995,71.10481470948653 101.54976350000015,57.26041595948655 137.07662059999984,57.260415959486096 C 171.45332764999966,57.260415959486096 203.82792165000046,70.21025355948623 228.6626430999995,93.76703050948609 C 280.7175823999996,44.35317650948619 363.2727970999995,45.20513950948626 414.34797894999974,96.23772320948629 C 466.23252564999984,148.1222699094864 466.23252564999984,232.5518032094864 414.34797894999974,284.47894805948624 L 322.76195644999916,376.06497055948637 C 297.6290479499994,401.1978790594861 264.1895001999992,415.0422778094861 228.6626430999995,415.0422778094861 L 228.6626430999995,414.99967965948633 M 137.11921875000007,109.86913120948648 C 115.60715299999993,109.86913120948648 95.41562990000057,118.21836860948625 80.20809035000002,133.42590815948634 C 48.813253799999075,164.82074470948638 48.813253799999075,215.8533284094864 80.20809035000002,247.24816495948645 L 171.7941128499997,338.83418745948654 C 187.00165239999933,354.0417270094862 207.1931754999996,362.3909644094864 228.70524124999974,362.3909644094864 C 250.2173069999999,362.3909644094864 270.40883009999925,354.0417270094862 285.6163696499989,338.83418745948654 L 377.20239214999947,247.24816495948645 C 408.5546305500002,215.89592655948618 408.5546305500002,164.82074470948638 377.20239214999947,133.42590815948634 C 345.80755560000034,102.0310716094863 294.7749719000003,102.0310716094863 263.3801353500003,133.42590815948634 L 228.70524124999974,168.10080225948641 L 194.03034714999922,133.42590815948634 C 178.82280759999958,118.21836860948625 158.6312844999993,109.86913120948648 137.11921875000007,109.86913120948648"></path>
@@ -1056,6 +1087,25 @@ function ringLoop(){
   g.fillStyle=rgba(1);g.beginPath();g.arc(cx,cy,dotR,0,Math.PI*2);g.fill();
 }
 
+/* ── embedded-in-Circle awareness ──
+   If we're inside an iframe (Circle), offer a one-tap jump to the chrome-free standalone app.
+   On the standalone page itself (iOS Safari, not yet installed), hint how to add it to the home
+   screen. Both banners are CSS-hidden unless the matching body class is set. */
+(function(){
+  const STANDALONE='https://justinlmft.github.io/snb-guided-practice/';
+  let embedded=false; try{embedded=window.self!==window.top;}catch(e){embedded=true;}
+  const iOS=/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  const installed=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+  if(embedded)document.body.classList.add('embedded');
+  else if(iOS&&!installed)document.body.classList.add('can-install');
+  const link=$('popoutlink');
+  if(link)link.onclick=()=>{
+    let w=null;try{w=window.open(STANDALONE,'_blank','noopener');}catch(e){}
+    if(!w){try{window.top.location.href=STANDALONE;}catch(e){location.href=STANDALONE;}}
+  };
+  const px=$('popoutx');if(px)px.onclick=()=>{$('popout').style.display='none';};
+  const ix=$('installx');if(ix)ix.onclick=()=>{$('installhint').style.display='none';};
+})();
 renderSetup();
 </script>
 <!-- register the service worker so the app is installable + caches clips as you play -->
