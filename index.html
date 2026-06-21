@@ -31,6 +31,8 @@ body{
 .mark.mark-amber .g-bolt,.mark.mark-amber .g-x{fill:var(--amber)}
 .brand-tag{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding-left:12px;border-left:1px solid var(--hairline)}
 .eyebrow{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+.chooser .block>.eyebrow{display:flex;align-items:center;gap:8px;color:var(--trk-ink,var(--ink-80))}
+.chooser .eyebrow::before{content:"";width:16px;height:2px;border-radius:1px;background:var(--trk,var(--muted));flex:none}
 
 /* ───── setup layout (fits one screen) ───── */
 .screen{display:flex;flex-direction:column;flex:1;min-height:0}
@@ -50,9 +52,9 @@ body{
 .choose-link.back{align-self:flex-start;margin:0 0 2px;color:var(--muted);text-decoration:none}
 .choose-link.back:hover{color:var(--ink)}
 /* chooser hidden until the user opts into deciding */
-.chooser{display:none;flex:1;min-height:0;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
+.chooser{display:flex;flex:1;min-height:0;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
 #setup.choosing .entry{display:none}
-#setup.choosing .chooser{display:flex}
+#setup.choosing .chooser{display:flex;animation:riseIn .5s var(--ease)}
 
 /* practice tabs — quiet, only earns weight when stacking */
 .tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:none}
@@ -69,7 +71,7 @@ body{
 .tab.add{color:var(--muted);border-style:dashed;font-weight:500}
 .tab.add:hover{color:var(--ink);border-color:var(--ink-80)}
 .tab .x{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;margin-right:-4px;border-radius:50%;color:var(--muted);font-size:14px;line-height:1}
-.tab .x:hover{color:var(--ink);background:var(--bone-deep)}
+.tab .x:hover{color:var(--ink)}
 /* when there's a single practice, the lone "Your practice" tab is just a quiet label */
 .tabs[data-single] .tab.on{border-color:transparent;padding-left:0;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
 
@@ -81,9 +83,9 @@ body{
   display:flex;align-items:center;width:100%;text-align:left;
   font:inherit;color:inherit;cursor:pointer;
   background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);
-  padding:14px 18px;transition:border-color var(--ease) .2s,border-width var(--ease) .2s;
+  padding:14px 18px;transition:border-color var(--ease) .2s,border-width var(--ease) .2s,box-shadow var(--ease) .2s;
 }
-.opt:hover{border-color:var(--ink-80)}
+.opt:hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}
 .opt.on{border-width:2px;padding:13px 17px}
 .opt.on .t{font-weight:500;color:var(--ink)}
 .opt.track-sky.on{border-color:var(--sky)}
@@ -102,6 +104,10 @@ body{
 .chip:hover{border-color:var(--ink-80);color:var(--ink-80)}
 .chip.on{border-color:var(--ink);color:var(--ink);font-weight:500}
 .chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.chip.shuffle{border-style:dashed}
+.surprise-all{align-self:flex-start;white-space:nowrap;font:inherit;font-size:14px;cursor:pointer;background:transparent;color:var(--muted);border:1px dashed var(--hairline);border-radius:999px;padding:7px 16px;transition:border-color var(--ease) .2s,color var(--ease) .2s}
+.surprise-all:hover{border-color:var(--ink-80);color:var(--ink-80)}
+.surprise-all:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* ───── more options ───── */
 .adjust{margin:0}
@@ -118,16 +124,17 @@ body{
 .foot{margin-top:auto;display:flex;flex-direction:column;gap:14px;flex:none;padding-top:clamp(12px,2.4vh,22px)}
 .summary{font-size:15px;color:var(--ink-80);margin:0;min-height:1.4em;text-wrap:pretty}
 .summary b{font-weight:500;color:var(--ink)}
+.begin-help{font-size:13px;color:var(--muted);margin:0;text-align:left;text-wrap:pretty}
 .btn{
   font:inherit;font-weight:500;white-space:nowrap;cursor:pointer;
   background:var(--ink);color:var(--bone);border:1px solid var(--ink);
-  border-radius:var(--rbtn);padding:13px 30px;transition:background var(--ease) .2s,border-color var(--ease) .2s,color var(--ease) .2s;
+  border-radius:var(--rbtn);padding:13px 30px;transition:box-shadow var(--ease) .25s,transform var(--ease) .2s,border-color var(--ease) .2s,color var(--ease) .2s;
 }
-.btn:hover{background:var(--btn-hover);border-color:var(--btn-hover)}
+.btn:hover{box-shadow:0 0 0 2px var(--bone),0 0 0 3.5px var(--ink);transform:translateY(-1px)}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .btn.primary{width:100%;padding:16px 30px;font-size:16.5px;border-radius:12px}
 .btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
-.btn.quiet:hover{background:var(--bone-deep);border-color:var(--ink)}
+.btn.quiet:hover{box-shadow:inset 0 0 0 1px var(--ink);transform:translateY(-1px)}
 body.playing .brand{display:none}
 
 /* ───── player ───── */
@@ -135,56 +142,84 @@ body.playing .brand{display:none}
 .ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
 #ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
 .phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
-.caption{display:none;font-size:16px;line-height:1.55;color:var(--ink-80);max-width:30em;margin:0 auto 18px;text-align:center;text-wrap:pretty;padding:0 6px}
-#player.caps-on .caption{display:block}
-.captoggle{align-self:center;margin-top:2px;background:none;border:0;font:inherit;font-size:12.5px;letter-spacing:.04em;color:var(--muted);cursor:pointer}
-.captoggle.on{color:var(--ink);font-weight:500}
-.captoggle:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
-.controls{display:flex;flex-direction:column;gap:18px;align-items:center;width:100%;max-width:300px;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
+.caption{display:none;font-size:17px;line-height:1.65;color:var(--ink-80);max-width:30em;margin:0 auto;text-align:center;text-wrap:pretty;padding:0 6px}
+#player.caps-on .caption{display:flex;align-items:center;justify-content:center;height:5em;margin:0 auto 18px}
+.cap-text{display:inline-block;opacity:0;transform:translateY(7px);filter:blur(2px);transition:opacity .6s var(--ease),transform .6s var(--ease),filter .6s var(--ease);will-change:opacity,transform,filter}
+.cap-text.in{opacity:1;transform:none;filter:blur(0)}
+@media (prefers-reduced-motion:reduce){.cap-text{transform:none;filter:none;transition:opacity .4s var(--ease)}}
+.controls{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;max-width:330px;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
 #player.show-controls .controls{opacity:1;pointer-events:auto}
-/* tap hint: only while controls are hidden, fades on its own */
-.taphint{position:absolute;left:0;right:0;bottom:clamp(14px,3vh,26px);text-align:center;font-size:12px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted);margin:0;opacity:0;transition:opacity .8s var(--ease);pointer-events:none}
+/* the controls flow in softly, one tier after the next */
+#player.show-controls .controls>*{animation:riseIn .5s var(--ease) both}
+#player.show-controls .controls>*:nth-child(2){animation-delay:.06s}
+#player.show-controls .controls>*:nth-child(3){animation-delay:.12s}
 #player{position:relative}
-#player.hint-on .taphint{opacity:.5}
-#player.show-controls .taphint{opacity:0}
 
-/* round pause / play icon button */
-.iconrow{display:flex;gap:16px;align-items:center;justify-content:center}
-.iconbtn{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--ease) .2s}
-.controls .endbtn{width:100%}
-.iconbtn:hover{background:var(--bone-deep)}
+/* round icon button — used by the between-practices "continue" */
+.iconbtn{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s}
+.iconbtn:hover{box-shadow:0 0 0 1px var(--ink)}
 .iconbtn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .iconbtn .ico{width:25px;height:25px;display:block;fill:var(--ink);color:var(--ink)}
-.iconbtn .ico-play{display:none;margin-left:3px}
-.iconbtn.is-paused .ico-pause{display:none}
-.iconbtn.is-paused .ico-play{display:block}
 
-/* two clearly-tappable end actions */
-.actions{display:flex;flex-direction:column;gap:10px;width:100%}
-.actions .btn{width:100%;padding:13px 22px}
+/* ── primary transport: the one hero control ── */
+.transport{width:74px;height:74px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
+.transport:hover{box-shadow:0 0 0 1.5px var(--ink)}
+.transport:active{transform:scale(.96)}
+.transport:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.transport .ico{width:27px;height:27px;display:block;fill:var(--ink);color:var(--ink)}
+.transport .ico-play{display:none;margin-left:3px}
+.transport.is-paused .ico-pause{display:none}
+.transport.is-paused .ico-play{display:block}
 
-/* silence nudge: just − / + around a small readout */
-.silrow{display:flex;gap:14px;align-items:center;justify-content:center;margin-top:4px}
-.silbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--hairline);background:transparent;color:var(--ink-80);font:inherit;font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--ease) .2s,color var(--ease) .2s}
-.silbtn:hover{border-color:var(--ink-80);color:var(--ink)}
-.silbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.silnow{font-size:12.5px;color:var(--muted);min-width:6.5em;text-align:center;font-variant-numeric:tabular-nums;text-transform:lowercase;letter-spacing:.04em}
+/* ── adjustments: two quiet, equal setting pills ── */
+.adjustments{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;width:100%}
+.adj{display:inline-flex;align-items:center;height:40px;border:1px solid var(--hairline);border-radius:999px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
+.adj.silence{gap:3px;padding:0 6px 0 15px}
+.adj-label{color:var(--muted)}
+.adj-val{color:var(--ink-80);font-variant-numeric:tabular-nums;min-width:2.2em;text-align:center}
+.adj-step{width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease) .2s}
+.adj-step:hover{color:var(--ink)}
+.adj-step:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.captoggle{gap:9px;padding:0 17px;cursor:pointer}
+.captoggle .cc{font-weight:500;letter-spacing:.1em;color:var(--muted);transition:color var(--ease) .2s}
+.captoggle .cc-state{color:var(--muted);transition:color var(--ease) .2s}
+.captoggle:hover{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.captoggle:hover .cc,.captoggle:hover .cc-state{color:var(--ink-80)}
+.captoggle.on{border-color:var(--ink)}
+.captoggle.on .cc,.captoggle.on .cc-state{color:var(--ink)}
+.captoggle:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ── endings: encouraged graceful close + quiet escape ── */
+.endings{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.endings .endbtn{width:100%}
+.endnow{background:none;border:0;font:inherit;font-size:12.5px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted);cursor:pointer;padding:4px 10px;transition:color var(--ease) .2s}
+.endnow:hover{color:var(--ink)}
+.endnow:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
 
 /* gentle completion */
 .done{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%;max-width:300px}
 #player.finished .controls{display:none}
-#player.finished .done{display:flex}
+#player.finished .done{display:flex;animation:riseIn .55s var(--ease)}
 .done .btn{width:100%}
+/* terminal rest — just the settled ring and a quiet way back */
+.rest{display:none;flex-direction:column;align-items:center}
+#player.rested .done{display:none}
+#player.rested .rest{display:flex;animation:riseIn .7s var(--ease)}
 
 /* rest between stacked meditations */
 .brk{display:none;flex-direction:column;align-items:center;gap:18px}
 .brk-line{font-size:13px;text-transform:lowercase;letter-spacing:.1em;color:var(--muted);margin:0;text-align:center}
 #player.breaking .controls,#player.breaking .done{display:none}
-#player.breaking .brk{display:flex}
+#player.breaking .brk{display:flex;animation:riseIn .55s var(--ease)}
 .brk .iconbtn{width:80px;height:80px}
 .brk .iconbtn .ico{width:30px;height:30px;margin-left:3px}
 @media (prefers-reduced-motion:no-preference){.brk .iconbtn{animation:brkbreath 2.8s ease-in-out infinite}}
 @keyframes brkbreath{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  #player.finished .done,#player.breaking .brk,#setup.choosing .chooser,#player.show-controls .controls>*{animation:none}
+  .btn:hover,.btn.quiet:hover{transform:none}
+}
 
 /* connection trouble */
 .conn{position:absolute;left:0;right:0;bottom:clamp(40px,9vh,72px);text-align:center;font-size:13px;color:var(--muted);margin:0;letter-spacing:.04em;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
@@ -233,16 +268,8 @@ body.playing .brand{display:none}
   <!-- ───────────── SETUP ───────────── -->
   <main id="setup" class="screen">
 
-    <!-- zero-decision entry: the front door for someone with no capacity to choose -->
-    <div class="entry" id="entry">
-      <button class="btn primary lead" id="leadbtn">Simple mindfulness</button>
-      <button class="btn quiet lead" id="chooselink">Choose for myself</button>
-    </div>
-
-    <!-- the full chooser: the side door, for when there's capacity to decide -->
+    <!-- the customizer: choose a practice, shape it, begin -->
     <div class="chooser" id="chooser">
-      <button class="choose-link back" id="backlink">← back</button>
-      <div class="tabs" id="tabs"></div>
 
       <div class="block">
         <div class="choices" id="exps"></div>
@@ -279,6 +306,8 @@ body.playing .brand{display:none}
 
       <div class="foot">
         <p class="summary" id="summary"></p>
+        <p class="begin-help" id="beginhelp">not sure? this is the simplest place to start.</p>
+        <button class="surprise-all" id="surprise" type="button">surprise me</button>
         <button class="btn primary" id="begin">Begin</button>
       </div>
     </div>
@@ -287,24 +316,35 @@ body.playing .brand{display:none}
   <!-- ───────────── PLAYER ───────────── -->
   <main id="player" class="screen hidden">
     <div class="ringwrap"><canvas id="ring"></canvas></div>
-    <p class="caption" id="caption"></p>
+    <p class="caption" id="caption"><span class="cap-text" id="captext"></span></p>
     <div class="controls">
-      <div class="iconrow">
-        <button class="iconbtn" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
-        <button class="iconbtn" id="stopbtn" aria-label="Stop"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="3"></rect></svg></button>
+      <!-- primary transport: the one hero control -->
+      <button class="transport" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
+      <!-- adjustments: silence + captions, two equal quiet pills -->
+      <div class="adjustments">
+        <div class="adj silence">
+          <span class="adj-label">silence</span>
+          <button class="adj-step" id="lesssil" aria-label="less silence">−</button>
+          <span class="adj-val" id="silnow"></span>
+          <button class="adj-step" id="moresil" aria-label="more silence">+</button>
+        </div>
+        <button class="adj captoggle" id="captoggle" type="button" aria-pressed="false"><span class="cc">CC</span><span class="cc-state" id="capstate">off</span></button>
       </div>
-      <button class="btn quiet endbtn" id="endbtn">Begin gentle close</button>
-      <div class="silrow">
-        <button class="silbtn" id="lesssil" aria-label="less silence">−</button>
-        <span class="silnow" id="silnow"></span>
-        <button class="silbtn" id="moresil" aria-label="more silence">+</button>
+      <!-- endings: graceful close, and a quiet escape -->
+      <div class="endings">
+        <button class="btn quiet endbtn" id="endbtn">Begin gentle close</button>
+        <button class="endnow" id="stopbtn" aria-label="End now">end now</button>
       </div>
-      <button class="captoggle" id="captoggle" type="button" aria-pressed="false">captions off</button>
     </div>
     <!-- gentle completion state -->
     <div class="done" id="done">
-      <button class="btn quiet" id="againbtn">Again</button>
-      <button class="btn quiet" id="overbtn">Start over</button>
+      <button class="btn quiet" id="againbtn">Go again</button>
+      <button class="btn quiet" id="overbtn">Choose another</button>
+      <button class="endnow" id="restbtn">end</button>
+    </div>
+    <!-- terminal rest: ending is an honored, complete choice -->
+    <div class="rest" id="rest">
+      <button class="endnow" id="restagain">begin again</button>
     </div>
     <!-- a rest between stacked meditations: waits for play -->
     <div class="brk" id="brk">
@@ -313,7 +353,6 @@ body.playing .brand{display:none}
     </div>
     <!-- shown only if clips can't load -->
     <p class="conn" id="conn">having trouble connecting. hang on…</p>
-    <p class="taphint" id="taphint">tap anywhere for controls</p>
   </main>
 </div>
 
@@ -329,7 +368,7 @@ body.playing .brand{display:none}
      prefix will NOT work (Wix rewrites uploads to opaque hashed URLs). */
 const BASE="https://justinlmft.github.io/snb-guided-practice/clips/";
 
-/* CAPTIONS (always-on, no toggle): fetch the filename-keyed transcript once on load. */
+/* CAPTIONS: fetch the filename-keyed transcript once on load. On/off toggle, default OFF, nothing persisted. */
 let CAP={};
 fetch(BASE+'captions.json').then(r=>r.ok?r.json():{}).then(j=>{CAP=j||{};}).catch(()=>{});
 let capsOn=false,curFile='';
@@ -667,34 +706,12 @@ function estimate(o){let t=0;o.seq.forEach((b,i)=>{t+=(DUR[b]||4);if(i<o.seq.len
 /* ====== setup screen ====== */
 function renderSetup(){
   cfg=practices[active];
-  // tint the brand mark to the current practice's track — but only once the user is choosing; the entry starts all-ink
+  // tint the brand mark + section eyebrows to the current practice's track
   const mk=document.querySelector('.mark');
-  if(mk){mk.classList.remove('mark-sky','mark-amber');if($('setup').classList.contains('choosing'))mk.classList.add('mark-'+TRACK[cfg.key]);}
-  // practice tabs
-  const TABNAME=['Your practice','Second (optional)','Third (optional)'];
-  const tw=$('tabs');tw.innerHTML='';
-  if(practices.length<2)tw.setAttribute('data-single','');else tw.removeAttribute('data-single');
-  practices.forEach((p,i)=>{
-    const b=document.createElement('button');b.type='button';
-    b.className='tab'+(i===active?' on':'')+(i>0?' is-opt':'')+' track-'+TRACK[p.key];
-    b.setAttribute('aria-pressed',i===active?'true':'false');
-    const lab=document.createElement('span');lab.textContent=TABNAME[i];
-    b.appendChild(lab);
-    if(i>0){
-      const x=document.createElement('span');x.className='x';x.textContent='×';
-      x.setAttribute('role','button');x.setAttribute('aria-label','remove this optional practice');
-      x.onclick=e=>{e.stopPropagation();practices.splice(i,1);if(active>=practices.length)active=practices.length-1;renderSetup();};
-      b.appendChild(x);
-    }
-    b.onclick=()=>{active=i;renderSetup();};
-    tw.appendChild(b);
-  });
-  if(practices.length<3){
-    const a=document.createElement('button');a.type='button';a.className='tab add';
-    a.textContent='+ add another';
-    a.onclick=()=>{practices.push(fresh('mindfulness'));active=practices.length-1;renderSetup();};
-    tw.appendChild(a);
-  }
+  if(mk){mk.classList.remove('mark-sky','mark-amber');mk.classList.add('mark-'+TRACK[cfg.key]);}
+  $('chooser').style.setProperty('--trk','var(--'+TRACK[cfg.key]+')');
+  $('chooser').style.setProperty('--trk-ink',TRACK[cfg.key]==='amber'?'#8C5E1C':'#356291');
+  $('beginhelp').style.display=cfg.key==='mindfulness'?'block':'none';   // gentle reassurance on the default path
   // experience options
   const ew=$('exps');ew.innerHTML='';
   Object.values(EXP).forEach(e=>{
@@ -714,6 +731,7 @@ function renderSetup(){
   $('skillwrap').style.display=sk?'block':'none';
   if(sk){const kw=$('skills');kw.innerHTML='';
     sk.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.skill);p.onclick=()=>{cfg.skill=v;renderSetup();};kw.appendChild(p);});}
+  $('surprise').style.display=cfg.key==='most'?'inline-flex':'none';   // one shuffle for the whole self-regulation refinement
   // describe-the-defense toggle — only for invite-based defense skills
   const showDD=cfg.key==='most'&&['imagery','balancing','pendulation'].indexOf(cfg.skill)>=0;
   $('descdefwrap').style.display=showDD?'block':'none';
@@ -741,6 +759,12 @@ function chip(label,on){
 $('adjust').addEventListener('toggle',()=>{
   renderSetup();
 });
+/* one 'surprise me' shuffles the whole self-regulation refinement — anchor, skill, silence, description (never length) */
+$('surprise').onclick=()=>{
+  cfg.sense=rand(allSenses);cfg.skill=rand(SKILLS.most.map(x=>x[0]));cfg.silence=rand(SIL.map(x=>x[0]));
+  cfg.descDefense=['imagery','balancing','pendulation'].indexOf(cfg.skill)>=0?rand([true,false]):false;
+  renderSetup();
+};
 
 /* ====== player — advance on the audio's REAL end, not a duration table ======
    This removes the cutoffs (final clip was hard-paused at DUR) and the smudges
@@ -775,22 +799,22 @@ function updateTest(){
 
 $('begin').onclick=startPlayer;
 
-/* zero-decision entry: one tap begins the gentlest path (connect with safety), no choices */
-$('leadbtn').onclick=()=>{practices=[fresh('mindfulness')];active=0;renderSetup();startPlayer();};
-$('chooselink').onclick=()=>{$('setup').classList.add('choosing');};
-$('backlink').onclick=()=>{$('setup').classList.remove('choosing');};
+/* the player opens straight into the customizer — no zero-decision front door, no planned stack */
 
 /* keep the player as just breath; a tap brings controls back, then they fade again */
-let ctrlTimer=null,hintTimer=null;
+let ctrlTimer=null;
 function revealControls(){
-  const p=$('player');p.classList.add('show-controls');p.classList.remove('hint-on');
-  clearTimeout(ctrlTimer);clearTimeout(hintTimer);
+  const p=$('player');p.classList.add('show-controls');
+  clearTimeout(ctrlTimer);
   if(finished)return;                                   // at the end, leave controls up
-  ctrlTimer=setTimeout(()=>{p.classList.remove('show-controls');
-    hintTimer=setTimeout(()=>{if(playing&&!finished)p.classList.add('hint-on');},500);
-  },4500);
+  ctrlTimer=setTimeout(()=>{p.classList.remove('show-controls');},4500);
 }
 $('player').addEventListener('pointerdown',()=>{if(playing||finished)revealControls();});
+/* while the pointer rests on the controls, hold them open; resume the fade once it leaves */
+(()=>{const c=document.querySelector('.controls');if(!c)return;
+  c.addEventListener('pointerenter',()=>{clearTimeout(ctrlTimer);$('player').classList.add('show-controls');});
+  c.addEventListener('pointerleave',()=>{if(playing&&!finished)revealControls();});
+})();
 
 /* safeguard: if this page is hidden (another tab/frame is in front), pause so audio never plays in the background */
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing&&!paused){$('pause').click();}});
@@ -814,7 +838,7 @@ advance=function(){
     let seg=0;for(let i=1;i<=idx+1;i++){if(PH[i-1]==='closing'&&PH[i]!=='closing')seg++;}
     const nm=PNAME[(practices[seg]||{}).key]||'';
     $('brkline').textContent='practice '+(seg+1)+' of '+practices.length+(nm?' \u00b7 '+nm:'')+' next';
-    clearTimeout(ctrlTimer);$('player').classList.remove('show-controls','hint-on');$('player').classList.add('breaking');
+    clearTimeout(ctrlTimer);$('player').classList.remove('show-controls');$('player').classList.add('breaking');
     return;
   }
   return _advanceCore();
@@ -826,7 +850,7 @@ function startPlayer(){
   $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
   finished=false;paused=false;playing=true;inGap=false;idx=-1;
   showScreen('player');fitRing();renderTest();showSil();
-  inBreak=false;$('player').classList.remove('hint-on','finished','conn-trouble','breaking');revealControls();
+  inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested');revealControls();
   cancelAnimationFrame(rafId);ringLoop();
   advance();
 }
@@ -844,10 +868,53 @@ function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer)
    The player advances on each clip's real `ended`, so a per-clip line is enough for v1;
    upgrade to WebVTT cues later if timed highlighting is wanted.
    ───────────────────────────────────────────────────────────────────────────── */
+/* ---- progressive captions: one phrase at a time, paced by where we are in the clip ----
+   No per-word timestamps exist, so we split CAP[file] into phrases and reveal each across
+   the clip's playback, weighting by phrase length (a proxy for how long it takes to say).
+   Purely a renderer over CAP[file]; the sequencing/timing engine is untouched. */
+let CAP_CHUNKS=[],CAP_BOUNDS=[],capShown=-1,capFadeT=null;
+function splitCaption(txt){
+  txt=(txt||'').trim();if(!txt)return [];
+  let parts=(txt.match(/[^.!?]+[.!?]*/g)||[txt]).map(s=>s.trim()).filter(Boolean);
+  const MAX=82,out=[];                                   // ease very long sentences apart at natural breaths
+  parts.forEach(p=>{
+    if(p.length<=MAX){out.push(p);return;}
+    let buf='';
+    p.split(/(?<=[,;:\u2014])\s+/).forEach(seg=>{
+      if(buf&&(buf+' '+seg).trim().length>MAX){out.push(buf.trim());buf=seg;}
+      else buf=buf?buf+' '+seg:seg;
+    });
+    if(buf.trim())out.push(buf.trim());
+  });
+  return out;
+}
+function capStart(txt){
+  CAP_CHUNKS=splitCaption(txt);capShown=-1;
+  let total=CAP_CHUNKS.reduce((n,s)=>n+s.length,0)||1,acc=0;
+  CAP_BOUNDS=CAP_CHUNKS.map(s=>{acc+=s.length;return acc/total;});   // cumulative phrase-length fractions
+  if(CAP_CHUNKS.length){capTick();if(capShown<0)capShow(0);}else capRender('');
+}
+function capTick(){
+  if(!capsOn||paused||inGap||!CAP_CHUNKS.length)return;
+  const dur=(isFinite(au.duration)&&au.duration>0)?au.duration:(DUR[SEQ[idx]]||CAP_CHUNKS.length*3);
+  const prog=Math.min(1,au.currentTime/dur);
+  let i=0;while(i<CAP_BOUNDS.length-1&&prog>=CAP_BOUNDS[i])i++;
+  if(i!==capShown)capShow(i);
+}
+function capShow(i){capShown=i;capRender(CAP_CHUNKS[i]||'');}
+function capClear(){CAP_CHUNKS=[];CAP_BOUNDS=[];capShown=-1;capRender('');}
+function capRender(text){
+  const el=$('captext');if(!el||el.textContent===text)return;
+  el.classList.remove('in');                              // fade/blur the current phrase out
+  clearTimeout(capFadeT);
+  capFadeT=setTimeout(()=>{el.textContent=text;if(text){void el.offsetWidth;el.classList.add('in');}},260);
+}
+au.addEventListener('timeupdate',capTick);
+
 function playCurrent(){
   const b=SEQ[idx];
   const file=rand(MAN[b]);          // CAPTIONS: this is the chosen variant filename — caption key is CAP[file]
-  curFile=file;{const cc=$('caption');if(cc)cc.textContent=CAP[file]||'';}   // set caption (shown only when captions on)
+  curFile=file;capStart(CAP[file]||'');   // parse caption into phrases, reveal progressively (shown only when captions on)
   try{au.src=clipUrl(file);au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
 }
 function advance(){
@@ -860,7 +927,7 @@ function advance(){
 au.onended=()=>{                                      // a clip finished playing, in full
   if(!playing||paused)return;
   if(!LOOP&&idx>=SEQ.length-1)return finish();         // last clip plays to its natural end — no cut
-  {const cc=$('caption');if(cc)cc.textContent='';}    // clear caption during the silence gap
+  capClear();    // clear caption during the silence gap
   gapRemain=gapAfter(SEQ[idx])*1000;gapStart=performance.now();inGap=true;
   clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);
 };
@@ -871,9 +938,9 @@ au.onerror=()=>{                                      // a clip failed to load �
   clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},300);
 };
 function finish(){playing=false;finished=true;finishAt=performance.now();inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}
-  {const cc=$('caption');if(cc)cc.textContent='';}
+  capClear();
   $('pause').style.display='none';
-  clearTimeout(ctrlTimer);$('player').classList.add('finished');$('player').classList.remove('hint-on','conn-trouble');
+  clearTimeout(ctrlTimer);$('player').classList.add('finished');$('player').classList.remove('conn-trouble');
 }
 $('pause').onclick=()=>{
   if(!playing)return;
@@ -892,15 +959,17 @@ $('pause').onclick=()=>{
 /* live silence control — adjusts the current practice's gap length on the fly */
 const SILSTEPS=[2,4,6,8,10,12,16];
 const nearestSil=v=>SILSTEPS.reduce((b,s)=>Math.abs(s-v)<Math.abs(b-v)?s:b,SILSTEPS[0]);
-function showSil(){const e=$('silnow');if(e)e.textContent='silence: '+cfg.silence+'s';}
+function showSil(){const e=$('silnow');if(e)e.textContent=cfg.silence+'s';}
 function stepSil(d){let i=SILSTEPS.indexOf(nearestSil(cfg.silence));i=Math.max(0,Math.min(SILSTEPS.length-1,i+d));cfg.silence=SILSTEPS[i];showSil();}
 $('lesssil').onclick=()=>stepSil(-1);
 $('moresil').onclick=()=>stepSil(1);
-$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');t.textContent='captions '+(capsOn?'on':'off');t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);};
+$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capStart(CAP[curFile]||'');}else{capClear();}};
 
 $('stopbtn').onclick=()=>{stopAll();finished=false;showScreen('setup');};   // immediate exit, no close
 $('againbtn').onclick=()=>{startPlayer();};                                  // replay the same session from the top
-$('overbtn').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble');$('setup').classList.remove('choosing');showScreen('setup');};
+$('overbtn').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
+$('restbtn').onclick=()=>{$('player').classList.add('rested');};               // settle into a quiet close
+$('restagain').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
 $('endbtn').onclick=()=>{
   if(finished){stopAll();showScreen('setup');return;}
   clearTimeout(gapTimer);inGap=false;playing=true;paused=false;LOOP=false;
