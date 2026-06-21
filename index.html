@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A guided practice — Stuck Not Broken</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bone:#F4F1E8;--bone-deep:#E6E1D6;--hairline:#D8D2C2;--ink:#1A1F2A;--ink-80:#3A3F4A;--muted:#5E5A4E;--link:#0645AD;
+  --leaf:#5BA070;--amber:#D29A4A;--sky:#5891C5;
+  --btn-hover:#2A3040;--rbtn:10px;--rcard:14px;
+  --ease:cubic-bezier(.2,.6,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bone);color:var(--ink);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  height:100dvh;overflow-y:auto;
+}
+.page{width:100%;max-width:680px;margin:0 auto;min-height:100dvh;padding:clamp(16px,3vh,30px) 28px;display:flex;flex-direction:column}
+
+/* brand bar */
+.brand{display:flex;align-items:center;gap:11px;margin:0 0 clamp(18px,4.2vh,40px);flex:none}
+.brand img{height:22px;width:auto;display:block;opacity:.92}
+.brand .mark{height:22px;width:auto;display:block}
+.mark path{fill:var(--ink)}
+.mark.mark-sky .g-heart{fill:var(--sky)}
+.mark.mark-amber .g-bolt,.mark.mark-amber .g-x{fill:var(--amber)}
+.brand-url{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);padding-left:11px;border-left:1px solid var(--hairline)}
+.eyebrow{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+
+/* type */
+.head{display:flex;flex-direction:column;gap:10px}
+.head .eyebrow{margin:0}
+h1{font-weight:500;font-size:clamp(26px,4.2vw,36px);line-height:1.14;letter-spacing:-.01em;margin:0;text-wrap:pretty}
+.lede{font-size:clamp(16px,1.1vw+13px,19px);line-height:1.5;color:var(--ink-80);margin:0;max-width:34em;text-wrap:pretty}
+.screen{display:flex;flex-direction:column;flex:1;min-height:0}
+#setup{justify-content:flex-start;gap:clamp(12px,2.4vh,22px)}
+.hidden{display:none !important}
+
+/* practice tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-size:14px;cursor:pointer;background:transparent;color:var(--ink-80);border:1px solid var(--hairline);border-radius:8px;padding:8px 14px;display:inline-flex;align-items:center;gap:9px;transition:border-color var(--ease) .2s,color var(--ease) .2s,background var(--ease) .2s}
+.tab:hover{color:var(--ink)}
+/* track color rides on the tab whether or not it's the current one */
+.tab.track-sky{border-color:var(--sky)}
+.tab.track-amber{border-color:var(--amber)}
+/* inactive tabs keep the color but fade the outline */
+.tab:not(.on).track-sky{border-color:rgba(88,145,197,.4)}
+.tab:not(.on).track-amber{border-color:rgba(210,154,74,.45)}
+/* the current tab is signified by a thicker, full-strength outline + bold */
+.tab.on{border-width:2px;padding:7px 13px;color:var(--ink);font-weight:500}
+.tab.is-opt{color:var(--muted)}
+.tab.is-opt.on{color:var(--ink)}
+.tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tab.add{color:var(--muted);border-style:dashed;font-weight:500}
+.tab.add:hover{color:var(--ink);border-color:var(--ink-80)}
+.tab .x{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:-4px;border-radius:50%;color:var(--muted);font-size:15px;line-height:1}
+.tab .x:hover{color:var(--ink);background:var(--bone-deep)}
+
+/* how-far options */
+.block{margin:0}
+.block .eyebrow{display:block;margin-bottom:12px}
+.choices{display:flex;flex-direction:column;gap:9px}
+.opt{
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  font:inherit;color:inherit;cursor:pointer;
+  background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);
+  padding:15px 18px;transition:border-color var(--ease) .2s,background var(--ease) .2s;
+}
+.opt:hover{border-color:var(--ink-80)}
+.opt.on{border-color:var(--ink);border-width:1.5px;padding:14.5px 17.5px}
+.opt.track-sky.on{border-color:var(--sky)}
+.opt.track-amber.on{border-color:var(--amber)}
+.opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.opt .t{display:block;font-size:17px;font-weight:400;transition:font-weight var(--ease) .2s}
+.opt.on .t{font-weight:500}
+.opt .d{display:block;font-size:14.5px;color:var(--muted);line-height:1.45;margin-top:2px;text-wrap:pretty}
+
+/* summary + begin */
+.summary{font-size:16px;color:var(--ink-80);margin:0;min-height:1.5em;text-wrap:pretty}
+.summary b{font-weight:500;color:var(--ink)}
+.btn{
+  font:inherit;font-weight:500;white-space:nowrap;cursor:pointer;
+  background:var(--ink);color:var(--bone);border:1px solid var(--ink);
+  border-radius:var(--rbtn);padding:13px 30px;transition:background var(--ease) .2s,border-color var(--ease) .2s;
+}
+.btn:hover{background:var(--btn-hover);border-color:var(--btn-hover)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.btn.primary{width:100%;padding:17px 30px;font-size:17px;border-radius:12px}
+.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.quiet:hover{background:var(--bone-deep);border-color:var(--ink)}
+.hairline-removed{}
+body.playing .brand{display:none}
+
+
+/* adjust (progressive disclosure) — app-style settings row, not a link */
+.adjust{margin:0;border-top:1px solid var(--hairline);padding-top:clamp(12px,2vh,20px)}
+.adjust summary{font-size:15px;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:9px;width:auto;transition:color var(--ease) .2s}
+.adjust summary:hover{color:var(--ink)}
+.adjust summary::-webkit-details-marker{display:none}
+.adjust summary .tw{width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform var(--ease) .2s;margin-bottom:2px}
+.adjust[open] summary .tw{transform:rotate(-135deg);margin-bottom:-3px}
+.adjust[open] summary{margin-bottom:26px}
+.adjust summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+.adjust-body{display:flex;flex-direction:column;gap:26px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{
+  font:inherit;font-size:15px;cursor:pointer;text-transform:capitalize;white-space:nowrap;
+  background:transparent;color:var(--muted);border:1px solid var(--hairline);
+  border-radius:999px;padding:8px 16px;transition:all var(--ease) .2s;
+}
+.chip:hover{border-color:var(--ink-80);color:var(--ink-80)}
+.chip.on{border-color:var(--ink);color:var(--ink);font-weight:500}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.queued{font-size:15px;color:var(--muted);margin:12px 0 0}
+.queued a{color:var(--link);cursor:pointer}
+
+/* ───── player ───── */
+#player{align-items:center;justify-content:center;text-align:center}
+.player-top{width:100%;display:flex;justify-content:flex-start}
+.backlink{font:inherit;font-size:15px;color:var(--muted);background:none;border:0;cursor:pointer;padding:0}
+.backlink:hover{color:var(--ink)}
+.ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
+#ring{width:min(80vw,340px);height:min(80vw,340px);max-height:46vh;display:block}
+.status{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);min-height:1.4em;transition:opacity .6s var(--ease);margin:0 0 6px}
+.cue{font-size:15px;color:var(--muted);margin:0 0 20px;max-width:30em}
+.cue:empty{display:none}
+.gate{
+  max-width:32em;margin:0 auto 20px;padding:14px 18px 14px 16px;
+  border-left:2px solid var(--amber);font-size:15px;line-height:1.55;color:var(--ink-80);
+  text-align:left;display:none;text-wrap:pretty;
+}
+.controls{display:flex;gap:12px;justify-content:center;margin-bottom:14px}
+.subcontrols{display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:18px}
+.btn.sm{padding:7px 14px;font-size:14px;border-radius:8px}
+.silnow{font-size:13px;color:var(--muted);min-width:7.5em;text-align:center;font-variant-numeric:tabular-nums}
+#progwrap{width:min(80vw,340px)}
+#ptrack{height:3px;background:var(--hairline);border-radius:3px;overflow:hidden}
+#pfill{height:100%;width:0;background:var(--ink);opacity:.5;transition:width .2s linear}
+
+/* TEST-ONLY: sequence preview panel */
+.testlist{margin-top:18px;width:min(92vw,440px);max-height:30vh;overflow-y:auto;text-align:left;
+  font-size:12px;line-height:1.45;border:1px solid var(--hairline);border-radius:10px;padding:8px 10px;background:rgba(26,31,42,.025)}
+.testlist .hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:6px}
+.testlist .plan{font-size:12px;color:var(--ink-80);margin-bottom:8px;padding-bottom:7px;border-bottom:1px dashed var(--hairline)}
+.testlist .row{display:flex;gap:8px;padding:2px 6px;border-radius:5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.testlist .row .n{opacity:.5;min-width:1.7em;text-align:right}
+.testlist .row .ph{margin-left:auto;opacity:.65;font-style:italic;padding-left:10px}
+.testlist .row.done{opacity:.4}
+.testlist .row.cur{background:var(--ink);color:var(--bone);font-weight:600}
+.testlist .row.cur .n,.testlist .row.cur .ph{opacity:.85}
+
+@media (max-width:520px){
+  .page{padding:20px 20px}
+  .begin-row{gap:12px}
+}
+/* short viewports (landscape laptops): compress so the setup fits one screen */
+@media (max-height:680px){
+  #setup{gap:clamp(9px,1.7vh,16px)}
+  .opt{padding:11px 16px}
+  .opt.on{padding:10.5px 15.5px}
+  .opt .d{font-size:13.5px;line-height:1.4}
+}
+@media (max-height:560px){
+  .page{padding:12px 28px}
+  .brand{margin-bottom:8px}
+  h1{font-size:clamp(22px,3.4vw,28px)}
+  .lede,.opt .d{display:none}
+  .block .eyebrow{margin-bottom:6px}
+  #setup{gap:10px}
+  .opt{padding:9px 16px}
+  .opt.on{padding:8.5px 15.5px}
+  .choices{gap:6px}
+  .btn{padding:10px 26px}
+  .credit{margin-top:10px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="brand">
+    <svg class="mark" viewBox="0 0 1288 446.31" role="img" aria-label="Stuck Not Broken">
+<path class="g-heart" d="M 228.6626430999995,414.99967965948633 C 193.0931878499996,414.99967965948633 159.69623824999962,401.15528090948635
+134.56332974999987,376.0223724094866 L 42.977307250000194,284.43634990948647 C 17.844398749999527,259.30344140948625
+4.0,225.86389365948654 4.0,190.3370365594864 C 4.0,154.76758130948647 17.844398750000437,121.3706317094865
+42.977307250000194,96.23772320948629 C 68.11021574999995,71.10481470948653 101.54976350000015,57.26041595948655
+137.07662059999984,57.260415959486096 C 171.45332764999966,57.260415959486096 203.82792165000046,70.21025355948623
+228.6626430999995,93.76703050948609 C 280.7175823999996,44.35317650948619 363.2727970999995,45.20513950948626
+414.34797894999974,96.23772320948629 C 466.23252564999984,148.1222699094864 466.23252564999984,232.5518032094864
+414.34797894999974,284.47894805948624 L 322.76195644999916,376.06497055948637 C 297.6290479499994,401.1978790594861
+264.1895001999992,415.0422778094861 228.6626430999995,415.0422778094861 L 228.6626430999995,414.99967965948633
+M 137.11921875000007,109.86913120948648 C 115.60715299999993,109.86913120948648 95.41562990000057,118.21836860948625
+80.20809035000002,133.42590815948634 C 48.813253799999075,164.82074470948638 48.813253799999075,215.8533284094864
+80.20809035000002,247.24816495948645 L 171.7941128499997,338.83418745948654 C 187.00165239999933,354.0417270094862
+207.1931754999996,362.3909644094864 228.70524124999974,362.3909644094864 C 250.2173069999999,362.3909644094864
+270.40883009999925,354.0417270094862 285.6163696499989,338.83418745948654 L 377.20239214999947,247.24816495948645
+C 408.5546305500002,215.89592655948618 408.5546305500002,164.82074470948638 377.20239214999947,133.42590815948634
+C 345.80755560000034,102.0310716094863 294.7749719000003,102.0310716094863 263.3801353500003,133.42590815948634
+L 228.70524124999974,168.10080225948641 L 194.03034714999922,133.42590815948634 C 178.82280759999958,118.21836860948625
+158.6312844999993,109.86913120948648 137.11921875000007,109.86913120948648"></path>
+<path class="g-bolt" d="M 673.9837031999996,442.30509380948604 C 665.0806898499995,442.30509380948604 656.092480199999,440.5585696594861
+647.4876538999997,437.02292320948607 C 621.5879787000003,426.2881894094861 604.8469057499997,401.24047720948636
+604.8469057499997,373.2108945094859 L 604.8469057499997,282.43423685948653 L 544.8687105499994,282.43423685948653
+C 516.8391278499994,282.43423685948653 491.7914156499992,265.6931639094863 481.05668185000013,239.79348870948652
+C 470.3219480500002,213.89381350948625 476.2004927499993,184.3306974094866 496.0512306499995,164.4799595094859
+L 636.2417422999997,24.28944785948616 C 656.092480199999,4.438709959486374 685.6129981499989,-1.439834740514101
+711.5552714999994,9.294899059486312 C 737.4549466999997,20.02963285948627 754.1960196499995,45.07734505948602
+754.1960196499995,73.10692775948601 L 754.1960196499995,163.8835854094863 L 814.1742148499998,163.8835854094863
+C 842.2037975499998,163.8835854094863 867.25150975,180.62465835948652 877.9862435499999,206.52433355948634
+C 888.7209773499999,232.4240087594866 882.842432649999,261.98712485948624 862.9916947499996,281.8378627594865
+L 722.8011830999994,422.0283744094862 C 709.5531584499995,435.27639905948615 691.9601224999997,442.30509380948604
+674.0263013499998,442.30509380948604 L 673.9837031999996,442.30509380948604 M 684.6758388499993,56.57884555948604
+C 681.2679868499999,56.57884555948604 677.1785644499996,57.68639745948613 673.3873291,61.47763280948621
+L 533.1968174499998,201.6681444594864 C 526.168122699999,208.69683920948628 528.3832264999992,216.53489880948646
+529.6185728500004,219.60196560948626 C 530.8965173500001,222.6690324094865 534.9007434500008,229.7829234594864
+544.8261124,229.7829234594864 L 657.4556210000001,229.7829234594864 L 657.4556210000001,373.16829635948613
+C 657.4556210000001,383.09366530948625 664.5695120499995,387.0978914094861 667.6365788499998,388.3758359094862
+C 670.70364565,389.6537804094859 678.5417052499997,391.8262860594858 685.5703999999996,384.7975913094864
+L 825.7609116499998,244.60707965948623 C 832.7896063999988,237.57838490948635 830.5745025999995,229.74032530948617
+829.3391562500001,226.67325850948637 C 828.0612117500004,223.60619170948613 824.0569856499997,216.49230065948623
+814.1316166999995,216.49230065948623 L 701.5021080999995,216.49230065948623 L 701.5021080999995,73.10692775948601
+C 701.5021080999995,63.18155880948589 694.3882170499992,59.17733270948602 691.3211502499989,57.899388209486375
+C 689.9154112999995,57.30301410948633 687.5299148999993,56.536247409486265 684.6758388499993,56.536247409486265
+L 684.6758388499993,56.57884555948604"></path>
+<path class="g-x" d="M 988.3580501999995,417.42777420948585 C 963.5233287499996,417.42777420948585 940.1795425499995,407.75799415948575
+922.6291047499999,390.20755635948615 C 905.0786669499994,372.6571185594861 895.4088868999997,349.313332359486
+895.4088868999997,324.4786109094865 C 895.4088868999997,299.64388945948656 905.0786669499994,276.3001032594865
+922.6291047499999,258.749665459486 L 958.2837562999994,223.09501390948608 L 922.6291047499999,187.44036235948616
+C 905.0786669499994,169.8899245594861 895.4088868999997,146.5461383594865 895.4088868999997,121.71141690948608
+C 895.4088868999997,96.87669545948611 905.0786669499994,73.53290925948605 922.6291047499999,55.98247145948645
+C 940.1795425499995,38.43203365948639 963.5233287499996,28.762253609486294 988.3580501999995,28.762253609486294
+C 1013.1927716500004,28.762253609486294 1036.5365578500005,38.43203365948639 1054.0869956499992,55.98247145948645
+L 1089.7416472000004,91.63712300948637 L 1125.39629875,55.98247145948645 C 1161.6473244,19.731445809486473
+1220.6031639999992,19.731445809486473 1256.811591499999,55.98247145948645 C 1293.062617149999,92.23349710948642
+1293.062617149999,151.18933670948664 1256.811591499999,187.39776420948593 L 1221.1569399499995,223.0524157594863
+L 1256.811591499999,258.7070673094862 C 1293.062617149999,294.9580929594862 1293.062617149999,353.9139325594864
+1256.811591499999,390.12236005948614 C 1220.560565849999,426.3733857094861 1161.6047262499997,426.3733857094861
+1125.39629875,390.12236005948614 L 1089.7416472000004,354.4677085094862 L 1054.0869956499992,390.12236005948614
+C 1036.5365578499996,407.6727978594862 1013.1927716499995,417.3425779094863 988.3580501999995,417.3425779094863
+L 988.3580501999995,417.4277742094863 M 988.3580501999995,81.49876330948646 C 977.5807182499993,81.49876330948646
+967.4849567000001,85.67338200948635 959.8598878499997,93.29845085948628 C 952.2348189999993,100.92351970948621
+948.0602002999985,111.01928125948635 948.0602002999995,121.79661320948608 C 948.0602002999995,132.57394515948582
+952.2348189999993,142.66970670948595 959.8598878499997,150.29477555948634 L 1032.7027243499997,223.13761205948586
+L 959.8598878499997,295.98044855948626 C 952.2348189999993,303.60551740948665 948.0602002999985,313.7012789594868
+948.0602002999995,324.4786109094865 C 948.0602002999995,335.25594285948625 952.2348189999993,345.3517044094864
+959.8598878499997,352.97677325948587 C 967.4849566999992,360.60184210948626 977.5807182499993,364.7764608094857
+988.3580501999995,364.77646080948614 C 999.1353821499997,364.77646080948614 1009.2311436999998,360.6018421094867
+1016.8562125499993,352.97677325948587 L 1089.6990490499993,280.13393675948635 L 1162.5418855500002,352.97677325948587
+C 1178.2606029000008,368.695490609486 1203.8194929000001,368.695490609486 1219.5382102499989,352.97677325948587
+C 1235.2569275999995,337.2580559094862 1235.2569275999995,311.69916590948594 1219.5382102499989,295.98044855948626
+L 1146.6953737499998,223.13761205948586 L 1219.5382102499989,150.29477555948634 C 1235.2569275999995,134.5760582094862
+1235.2569275999995,109.01716820948596 1219.5382102499989,93.29845085948628 C 1203.8194928999992,77.57973350948615
+1178.2606028999999,77.57973350948615 1162.5418855500002,93.29845085948628 L 1089.6990490499993,166.14128735948626
+L 1016.8562125499993,93.29845085948628 C 1009.2311436999998,85.67338200948635 999.1353821499988,81.49876330948646
+988.3580501999995,81.49876330948646"></path></svg>
+  </header>
+
+  <!-- ───────────── SETUP ───────────── -->
+  <main id="setup" class="screen">
+    <div class="tabs" id="tabs"></div>
+    <div class="block">
+      <div class="choices" id="exps"></div>
+    </div>
+    <div class="block" id="sensewrap">
+      <span class="eyebrow">anchor your attention with</span>
+      <div class="chips" id="senses"></div>
+    </div>
+    <div class="block" id="skillwrap">
+      <span class="eyebrow">the skill to practice</span>
+      <div class="chips" id="skills"></div>
+    </div>
+
+    <details class="adjust" id="adjust">
+      <summary><span class="tw" aria-hidden="true"></span> more options</summary>
+      <div class="adjust-body">
+        <div class="block">
+          <span class="eyebrow">how much silence should I leave you?</span>
+          <div class="chips" id="sils"></div>
+        </div>
+        <div class="block" id="descdefwrap">
+          <span class="eyebrow">describe the defense?</span>
+          <div class="chips" id="descdefs"></div>
+        </div>
+        <div class="block" id="lenwrap">
+          <span class="eyebrow">length</span>
+          <div class="chips" id="lens"></div>
+        </div>
+      </div>
+    </details>
+
+    <p class="summary" id="summary"></p>
+    <button class="btn primary" id="begin">Begin</button>
+  </main>
+
+  <!-- ───────────── PLAYER ───────────── -->
+  <main id="player" class="screen hidden">
+    <div class="ringwrap"><canvas id="ring"></canvas></div>
+    <div class="controls">
+      <button class="btn quiet" id="pause">Pause</button>
+      <button class="btn quiet" id="endbtn">Start outro</button>
+      <button class="btn quiet" id="stopbtn">Stop and return</button>
+    </div>
+    <div class="subcontrols">
+      <button class="btn quiet sm" id="lesssil">− silence</button>
+      <button class="btn quiet sm" id="moresil">+ silence</button>
+    </div>
+    <!-- TEST-ONLY: sequence preview. Remove this block + its CSS/JS for production. -->
+    <div id="testlist" class="testlist"></div>
+  </main>
+</div>
+
+<audio id="au" crossorigin="anonymous"></audio>
+
+<script>
+/* ====== audio location ======
+   Where the clips live, relative to this HTML file.
+   - Local testing: "weaver-slicing/clips/"
+   - Clips sitting next to this file: ""
+   - Production CDN (recommended): the prefix that keeps the real filenames,
+     e.g. "https://cdn.jsdelivr.net/gh/USER/REPO/clips/". A bare Wix-media
+     prefix will NOT work (Wix rewrites uploads to opaque hashed URLs). */
+const BASE="clips/";
+
+/* ====== content data (manifest, order, rules, durations) ====== */
+const MAN={"INTRO-01":["INTRO-01-a.mp3","INTRO-01-b.mp3"],
+"PINTRO-ANCHORING":["PINTRO-ANCHORING-a.mp3","PINTRO-ANCHORING-b.mp3"],
+"PINTRO-IMAGERY":["PINTRO-IMAGERY-a.mp3","PINTRO-IMAGERY-b.mp3"],
+"PINTRO-OBSTACLES":["PINTRO-OBSTACLES-a.mp3","PINTRO-OBSTACLES-b.mp3"],
+"PINTRO-BALANCING":["PINTRO-BALANCING-a.mp3","PINTRO-BALANCING-b.mp3"],
+"PINTRO-PENDULATING":["PINTRO-PENDULATING-a.mp3","PINTRO-PENDULATING-b.mp3"],
+"MIND-01":["MIND-01-a.mp3","MIND-01-b.mp3"],
+"MIND-02":["MIND-02-a.mp3","MIND-02-b.mp3"],
+"MIND-03":["MIND-03-a.mp3"],
+"MIND-04":["MIND-04-a.mp3","MIND-04-b.mp3"],
+"MIND-05":["MIND-05-a.mp3"],
+"MIND-06":["MIND-06-a.mp3","MIND-06-b.mp3"],
+"MIND-07":["MIND-07-a.mp3","MIND-07-b.mp3"],
+"MIND-08":["MIND-08-a.mp3","MIND-08-b.mp3","MIND-08-c.mp3","MIND-08-d.mp3"],
+"MIND-09-CAPCHECK":["MIND-09-CAPCHECK-a.mp3","MIND-09-CAPCHECK-b.mp3"],
+"LADDER-TOUCH-01":["LADDER-TOUCH-01-a.mp3","LADDER-TOUCH-01-b.mp3"],
+"LADDER-TOUCH-02":["LADDER-TOUCH-02-a.mp3","LADDER-TOUCH-02-b.mp3","LADDER-TOUCH-02-c.mp3","LADDER-TOUCH-02-d.mp3"],
+"LADDER-TOUCH-03":["LADDER-TOUCH-03-a.mp3","LADDER-TOUCH-03-b.mp3"],
+"LADDER-TOUCH-04":["LADDER-TOUCH-04-a.mp3","LADDER-TOUCH-04-b.mp3"],
+"LADDER-TOUCH-05":["LADDER-TOUCH-05-a.mp3","LADDER-TOUCH-05-b.mp3"],
+"TAIL-01-BREATH":["TAIL-01-BREATH-a.mp3","TAIL-01-BREATH-b.mp3"],
+"TAIL-02-POSTURE":["TAIL-02-POSTURE-a.mp3","TAIL-02-POSTURE-b.mp3"],
+"TAIL-03-SMILE":["TAIL-03-SMILE-a.mp3","TAIL-03-SMILE-b.mp3"],
+"TAIL-04-CONNECT":["TAIL-04-CONNECT-a.mp3","TAIL-04-CONNECT-b.mp3"],
+"SAFETY-01-NAME":["SAFETY-01-NAME-a.mp3","SAFETY-01-NAME-b.mp3"],
+"SAFETY-02-GENERAL":["SAFETY-02-GENERAL-a.mp3","SAFETY-02-GENERAL-b.mp3"],
+"SAFETY-03-SPECIFIC":["SAFETY-03-SPECIFIC-a.mp3","SAFETY-03-SPECIFIC-b.mp3"],
+"LADDER-SIGHT-01":["LADDER-SIGHT-01-a.mp3","LADDER-SIGHT-01-b.mp3"],
+"LADDER-SIGHT-02":["LADDER-SIGHT-02-a.mp3","LADDER-SIGHT-02-b.mp3"],
+"LADDER-SIGHT-03":["LADDER-SIGHT-03-a.mp3","LADDER-SIGHT-03-b.mp3"],
+"LADDER-SOUND-01":["LADDER-SOUND-01-a.mp3","LADDER-SOUND-01-b.mp3"],
+"LADDER-SOUND-02":["LADDER-SOUND-02-a.mp3","LADDER-SOUND-02-b.mp3"],
+"LADDER-SOUND-03":["LADDER-SOUND-03-a.mp3","LADDER-SOUND-03-b.mp3"],
+"LADDER-SOUND-04":["LADDER-SOUND-04-a.mp3","LADDER-SOUND-04-b.mp3"],
+"LADDER-SOUND-05":["LADDER-SOUND-05-a.mp3","LADDER-SOUND-05-b.mp3"],
+"LADDER-SOUND-06":["LADDER-SOUND-06-a.mp3","LADDER-SOUND-06-b.mp3"],
+"LADDER-MOVEMENT-01":["LADDER-MOVEMENT-01-a.mp3","LADDER-MOVEMENT-01-b.mp3"],
+"LADDER-MOVEMENT-02":["LADDER-MOVEMENT-02-a.mp3","LADDER-MOVEMENT-02-b.mp3"],
+"LADDER-MOVEMENT-03":["LADDER-MOVEMENT-03-a.mp3","LADDER-MOVEMENT-03-b.mp3"],
+"LADDER-MOVEMENT-04":["LADDER-MOVEMENT-04-a.mp3","LADDER-MOVEMENT-04-b.mp3"],
+"LADDER-MOVEMENT-05":["LADDER-MOVEMENT-05-a.mp3","LADDER-MOVEMENT-05-b.mp3"],
+"LADDER-MOVEMENT-06":["LADDER-MOVEMENT-06-a.mp3","LADDER-MOVEMENT-06-b.mp3"],
+"LADDER-MOVEMENT-07":["LADDER-MOVEMENT-07-a.mp3","LADDER-MOVEMENT-07-b.mp3"],
+"LADDER-MOVEMENT-08":["LADDER-MOVEMENT-08-a.mp3","LADDER-MOVEMENT-08-b.mp3"],
+"LADDER-MOVEMENT-09":["LADDER-MOVEMENT-09-a.mp3","LADDER-MOVEMENT-09-b.mp3"],
+"LADDER-IMAGINATION-01":["LADDER-IMAGINATION-01-a.mp3","LADDER-IMAGINATION-01-b.mp3"],
+"LADDER-IMAGINATION-02":["LADDER-IMAGINATION-02-a.mp3","LADDER-IMAGINATION-02-b.mp3"],
+"LADDER-IMAGINATION-03":["LADDER-IMAGINATION-03-a.mp3","LADDER-IMAGINATION-03-b.mp3"],
+"LADDER-IMAGINATION-04":["LADDER-IMAGINATION-04-a.mp3","LADDER-IMAGINATION-04-b.mp3"],
+"LADDER-IMAGINATION-05":["LADDER-IMAGINATION-05-a.mp3","LADDER-IMAGINATION-05-b.mp3"],
+"LADDER-IMAGINATION-06":["LADDER-IMAGINATION-06-a.mp3","LADDER-IMAGINATION-06-b.mp3"],
+"LADDER-IMAGINATION-07":["LADDER-IMAGINATION-07-a.mp3","LADDER-IMAGINATION-07-b.mp3"],
+"LADDER-IMAGINATION-08":["LADDER-IMAGINATION-08-a.mp3","LADDER-IMAGINATION-08-b.mp3"],
+"CURIOSITY-01":["CURIOSITY-01-a.mp3","CURIOSITY-01-b.mp3","CURIOSITY-01-c.mp3","CURIOSITY-01-d.mp3"],
+"INTENT-SET":["INTENT-SET-a.mp3","INTENT-SET-b.mp3"],
+"INVITE-01":["INVITE-01-a.mp3","INVITE-01-b.mp3","INVITE-01-c.mp3"],
+"INVITE-02":["INVITE-02-a.mp3","INVITE-02-b.mp3"],
+"INVITE-03":["INVITE-03-a.mp3","INVITE-03-b.mp3"],
+"INVITE-04":["INVITE-04-a.mp3","INVITE-04-b.mp3"],
+"INVITE-05":["INVITE-05-a.mp3","INVITE-05-b.mp3"],
+"INVITE-06":["INVITE-06-a.mp3","INVITE-06-b.mp3"],
+"PEND-SAFETY":["PEND-SAFETY-a.mp3","PEND-SAFETY-b.mp3"],
+"PEND-SAFETY-Q":["PEND-SAFETY-Q-a.mp3","PEND-SAFETY-Q-b.mp3"],
+"PEND-DEFENSE":["PEND-DEFENSE-a.mp3","PEND-DEFENSE-b.mp3"],
+"PEND-DEFENSE-Q":["PEND-DEFENSE-Q-a.mp3","PEND-DEFENSE-Q-b.mp3"],
+"PEND-SAFE-REMIND":["PEND-SAFE-REMIND-a.mp3","PEND-SAFE-REMIND-b.mp3"],
+"PEND-TO-DEFENSE-BRIEF":["PEND-TO-DEFENSE-BRIEF-a.mp3","PEND-TO-DEFENSE-BRIEF-b.mp3"],
+"PEND-TO-SAFETY-BRIEF":["PEND-TO-SAFETY-BRIEF-a.mp3","PEND-TO-SAFETY-BRIEF-b.mp3"],
+"HOLD-WATCH":["HOLD-WATCH-a.mp3","HOLD-WATCH-b.mp3","HOLD-WATCH-c.mp3"],
+"IMG-01":["IMG-01-a.mp3","IMG-01-b.mp3"],
+"IMG-02":["IMG-02-a.mp3","IMG-02-b.mp3"],
+"IMG-03":["IMG-03-a.mp3","IMG-03-b.mp3"],
+"IMG-04":["IMG-04-a.mp3","IMG-04-b.mp3"],
+"IMG-05":["IMG-05-a.mp3","IMG-05-b.mp3"],
+"IMG-06":["IMG-06-a.mp3","IMG-06-b.mp3"],
+"OBST-01":["OBST-01-a.mp3","OBST-01-b.mp3"],
+"OBST-02":["OBST-02-a.mp3","OBST-02-b.mp3"],
+"OBST-03":["OBST-03-a.mp3","OBST-03-b.mp3"],
+"OBST-04":["OBST-04-a.mp3","OBST-04-b.mp3"],
+"OBST-05":["OBST-05-a.mp3","OBST-05-b.mp3"],
+"OBSTACLE-STATEMENTS":["OBSTACLE-STATEMENTS-a.mp3","OBSTACLE-STATEMENTS-b.mp3","OBSTACLE-STATEMENTS-c.mp3","OBSTACLE-STATEMENTS-d.mp3","OBSTACLE-STATEMENTS-e.mp3","OBSTACLE-STATEMENTS-f.mp3","OBSTACLE-STATEMENTS-g.mp3","OBSTACLE-STATEMENTS-h.mp3","OBSTACLE-STATEMENTS-i.mp3","OBSTACLE-STATEMENTS-j.mp3","OBSTACLE-STATEMENTS-k.mp3","OBSTACLE-STATEMENTS-l.mp3","OBSTACLE-STATEMENTS-m.mp3","OBSTACLE-STATEMENTS-n.mp3","OBSTACLE-STATEMENTS-o.mp3","OBSTACLE-STATEMENTS-p.mp3"],
+"CLOSE-01":["CLOSE-01-a.mp3","CLOSE-01-b.mp3"],
+"CLOSE-02":["CLOSE-02-a.mp3","CLOSE-02-b.mp3"],
+"CLOSE-03":["CLOSE-03-a.mp3","CLOSE-03-b.mp3"],
+"CLOSE-04":["CLOSE-04-a.mp3","CLOSE-04-b.mp3"],
+"CLOSE-05":["CLOSE-05-a.mp3","CLOSE-05-b.mp3"],
+"OUTRO":["OUTRO-a.mp3","OUTRO-b.mp3"],
+"ENDING-OPEN":["ENDING-OPEN-a.mp3","ENDING-OPEN-b.mp3"],
+"LOOP-GATE":["LOOP-GATE-a.mp3","LOOP-GATE-b.mp3"],
+"SLOW-MOVE":["SLOW-MOVE-a.mp3","SLOW-MOVE-b.mp3"],
+"STOP-OK":["STOP-OK-a.mp3","STOP-OK-b.mp3"],
+"NUMB-OK":["NUMB-OK-a.mp3","NUMB-OK-b.mp3"],
+"CAP-GATE":["CAP-GATE-a.mp3","CAP-GATE-b.mp3"],
+"DESC-OBJ-TOUCH":["DESC-OBJ-TOUCH-a.mp3"],
+"DESC-OBJ-SIGHT":["DESC-OBJ-SIGHT-a.mp3"],
+"DESC-OBJ-SOUND":["DESC-OBJ-SOUND-a.mp3"],
+"DESC-OBJ-MOVEMENT":["DESC-OBJ-MOVEMENT-a.mp3"],
+"DESC-OBJ-IMAGINATION":["DESC-OBJ-IMAGINATION-a.mp3","DESC-OBJ-IMAGINATION-b.mp3"],
+"DESC-SAFETY":["DESC-SAFETY-a.mp3","DESC-SAFETY-b.mp3"],
+"DESC-DEFENSE":["DESC-DEFENSE-a.mp3","DESC-DEFENSE-b.mp3"]},
+ORDER=["INTRO-01","PINTRO-ANCHORING","PINTRO-IMAGERY","PINTRO-OBSTACLES","PINTRO-BALANCING","PINTRO-PENDULATING","MIND-01","MIND-02","MIND-03","MIND-04","MIND-05","MIND-06","MIND-07","MIND-08","MIND-09-CAPCHECK","LADDER-TOUCH-01","LADDER-TOUCH-02","LADDER-TOUCH-03","LADDER-TOUCH-04","LADDER-TOUCH-05","TAIL-01-BREATH","TAIL-02-POSTURE","TAIL-03-SMILE","TAIL-04-CONNECT","SAFETY-01-NAME","SAFETY-02-GENERAL","SAFETY-03-SPECIFIC","LADDER-SIGHT-01","LADDER-SIGHT-02","LADDER-SIGHT-03","LADDER-SOUND-01","LADDER-SOUND-02","LADDER-SOUND-03","LADDER-SOUND-04","LADDER-SOUND-05","LADDER-SOUND-06","LADDER-MOVEMENT-01","LADDER-MOVEMENT-02","LADDER-MOVEMENT-03","LADDER-MOVEMENT-04","LADDER-MOVEMENT-05","LADDER-MOVEMENT-06","LADDER-MOVEMENT-07","LADDER-MOVEMENT-08","LADDER-MOVEMENT-09","LADDER-IMAGINATION-01","LADDER-IMAGINATION-02","LADDER-IMAGINATION-03","LADDER-IMAGINATION-04","LADDER-IMAGINATION-05","LADDER-IMAGINATION-06","LADDER-IMAGINATION-07","LADDER-IMAGINATION-08","CURIOSITY-01","INTENT-SET","INVITE-01","INVITE-02","INVITE-03","INVITE-04","INVITE-05","INVITE-06","PEND-SAFETY","PEND-SAFETY-Q","PEND-DEFENSE","PEND-DEFENSE-Q","PEND-SAFE-REMIND","PEND-TO-DEFENSE-BRIEF","PEND-TO-SAFETY-BRIEF","HOLD-WATCH","IMG-01","IMG-02","IMG-03","IMG-04","IMG-05","IMG-06","OBST-01","OBST-02","OBST-03","OBST-04","OBST-05","OBSTACLE-STATEMENTS","CLOSE-01","CLOSE-02","CLOSE-03","CLOSE-04","CLOSE-05","OUTRO","ENDING-OPEN","LOOP-GATE","SLOW-MOVE","STOP-OK","NUMB-OK","CAP-GATE","DESC-OBJ-TOUCH","DESC-OBJ-SIGHT","DESC-OBJ-SOUND","DESC-OBJ-MOVEMENT","DESC-OBJ-IMAGINATION","DESC-SAFETY","DESC-DEFENSE"],
+RULES={"exclusions":[{"drop":"INVITE-01","when_present":"LADDER-TOUCH-02","reason":"INVITE-01 and LADDER-TOUCH-02 do the same job; LADDER-TOUCH-02 preferred."}],"gaps":{"short_seconds":1.5,"short_prefixes":["PINTRO-","INVITE-","INTENT-","PEND-TO-"],"short_bases":["INTRO-01","CAP-GATE"]}},
+DUR={"INTRO-01":11.1,
+"PINTRO-ANCHORING":11.5,
+"PINTRO-IMAGERY":16.0,
+"PINTRO-OBSTACLES":16.8,
+"PINTRO-BALANCING":13.8,
+"PINTRO-PENDULATING":14.5,
+"MIND-01":6.4,
+"MIND-02":25.4,
+"MIND-03":38.0,
+"MIND-04":15.2,
+"MIND-05":65.1,
+"MIND-06":52.3,
+"MIND-07":4.2,
+"MIND-08":9.1,
+"MIND-09-CAPCHECK":9.1,
+"LADDER-TOUCH-01":6.1,
+"LADDER-TOUCH-02":10.4,
+"LADDER-TOUCH-03":3.5,
+"LADDER-TOUCH-04":7.4,
+"LADDER-TOUCH-05":27.1,
+"TAIL-01-BREATH":38.0,
+"TAIL-02-POSTURE":11.7,
+"TAIL-03-SMILE":9.2,
+"TAIL-04-CONNECT":15.4,
+"SAFETY-01-NAME":17.4,
+"SAFETY-02-GENERAL":17.6,
+"SAFETY-03-SPECIFIC":17.9,
+"LADDER-SIGHT-01":11.1,
+"LADDER-SIGHT-02":17.5,
+"LADDER-SIGHT-03":14.8,
+"LADDER-SOUND-01":9.7,
+"LADDER-SOUND-02":7.4,
+"LADDER-SOUND-03":5.7,
+"LADDER-SOUND-04":8.8,
+"LADDER-SOUND-05":8.6,
+"LADDER-SOUND-06":11.3,
+"LADDER-MOVEMENT-01":14.3,
+"LADDER-MOVEMENT-02":9.4,
+"LADDER-MOVEMENT-03":6.7,
+"LADDER-MOVEMENT-04":9.3,
+"LADDER-MOVEMENT-05":6.6,
+"LADDER-MOVEMENT-06":14.4,
+"LADDER-MOVEMENT-07":12.1,
+"LADDER-MOVEMENT-08":10.7,
+"LADDER-MOVEMENT-09":17.1,
+"LADDER-IMAGINATION-01":11.4,
+"LADDER-IMAGINATION-02":5.3,
+"LADDER-IMAGINATION-03":10.8,
+"LADDER-IMAGINATION-04":24.2,
+"LADDER-IMAGINATION-05":5.5,
+"LADDER-IMAGINATION-06":8.2,
+"LADDER-IMAGINATION-07":11.0,
+"LADDER-IMAGINATION-08":9.5,
+"CURIOSITY-01":9.9,
+"INTENT-SET":26.5,
+"INVITE-01":7.9,
+"INVITE-02":6.4,
+"INVITE-03":6.9,
+"INVITE-04":8.2,
+"INVITE-05":9.5,
+"INVITE-06":15.8,
+"PEND-SAFETY":5.4,
+"PEND-SAFETY-Q":4.8,
+"PEND-DEFENSE":4.1,
+"PEND-DEFENSE-Q":8.0,
+"PEND-SAFE-REMIND":3.7,
+"PEND-TO-DEFENSE-BRIEF":4.5,
+"PEND-TO-SAFETY-BRIEF":2.5,
+"HOLD-WATCH":15.1,
+"IMG-01":16.3,
+"IMG-02":7.3,
+"IMG-03":7.3,
+"IMG-04":10.1,
+"IMG-05":3.3,
+"IMG-06":5.6,
+"OBST-01":14.6,
+"OBST-02":5.6,
+"OBST-03":11.1,
+"OBST-04":6.8,
+"OBST-05":6.1,
+"OBSTACLE-STATEMENTS":2.8,
+"CLOSE-01":12.1,
+"CLOSE-02":12.1,
+"CLOSE-03":15.4,
+"CLOSE-04":3.6,
+"CLOSE-05":11.5,
+"OUTRO":22.2,
+"ENDING-OPEN":16.3,
+"LOOP-GATE":24.4,
+"SLOW-MOVE":25.6,
+"STOP-OK":13.0,
+"NUMB-OK":13.9,
+"CAP-GATE":22.3,
+"DESC-OBJ-TOUCH":19.1,
+"DESC-OBJ-SIGHT":16.7,
+"DESC-OBJ-SOUND":36.3,
+"DESC-OBJ-MOVEMENT":34.8,
+"DESC-OBJ-IMAGINATION":23.9,
+"DESC-SAFETY":23.3,
+"DESC-DEFENSE":42.9};
+
+/* ====== helpers ====== */
+const $=id=>document.getElementById(id);
+const au=$('au');
+const rand=a=>a[Math.floor(Math.random()*a.length)];
+const has=b=>MAN[b]&&MAN[b].length;
+const clipUrl=f=>BASE+f;            // resolve a clip filename to its full src
+const SIL=[[4,'a little'],[8,'some'],[12,'a lot']];
+const GAPS=RULES.gaps;
+/* gap = the silence the weaver holds AFTER a clip, before the next one.
+   Default is the listener's chosen FULL silence — every witnessing / DESC beat needs it.
+   Only procedural/transition clips get the short hold; CURIOSITY is capped at 4s. */
+const SHORT_PREFIX=['PINTRO-','INTENT-','PEND-TO-'];
+const SHORT_BASE={'INTRO-01':1,'CAP-GATE':1};
+function gapAfter(b){
+  if(b==='CURIOSITY-01')return Math.min(cfg.silence,4);                          // never a long hold
+  if(SHORT_BASE[b]||SHORT_PREFIX.some(p=>b.indexOf(p)===0))return GAPS.short_seconds;
+  return cfg.silence;                                                            // full silence (incl. INVITE-05/06, safety general/specific, all DESC)
+}
+/* The anchor ladder = a sense-specific FRONT + a sense-agnostic shared TAIL.
+   The tail (breath, posture, smile, connect → safety name/general/specific) was only
+   recorded under Touch, so its IDs are TAIL-01-BREATH..12 — reused for EVERY sense.
+   (Renaming these to clearer TAIL / SAFETY ids is a separate synced pass incl. Descript.) */
+const TAIL_BODY=['TAIL-01-BREATH','TAIL-02-POSTURE','TAIL-03-SMILE','TAIL-04-CONNECT']; // breath, posture, smile, connect
+const TAIL_SAFETY=['SAFETY-01-NAME','SAFETY-02-GENERAL','SAFETY-03-SPECIFIC'];                 // name, general, specific
+const senseFront=s=>s==='touch'
+  ? ['LADDER-TOUCH-01','LADDER-TOUCH-02','LADDER-TOUCH-03','LADDER-TOUCH-04','LADDER-TOUCH-05'].filter(has)
+  : ORDER.filter(b=>b.startsWith('LADDER-'+s.toUpperCase()+'-')&&has(b));
+const ladder=senseFront;
+const allSenses=['touch','sound','sight','movement','imagination'].filter(s=>senseFront(s).length);
+
+/* the four practices, gentlest first. Copy in Justin's voice. */
+const TRACK={mindfulness:'sky',anchoring:'sky',most:'amber'};
+/* skills offered within self-regulation (like the anchor menu) */
+const SKILLS={
+  most:[['imagery','imagery & invitation'],['obstacles','obstacles'],['balancing','balancing'],['pendulation','pendulation']]
+};
+const EXP={
+ mindfulness:{key:'mindfulness',t:'I want to practice simple mindfulness',d:"",sense:'touch',silence:8,gentle:true,mind:true,tier:0,
+   sum:"We'll arrive, follow the breath, and move gently through your senses."},
+ anchoring:{key:'anchoring',t:'I want to connect with safety',d:'',sense:'touch',silence:8,gentle:true,mind:false,tier:1,
+   sum:"We'll settle into safety through your {sense}, and stay there a while."},
+ most:{key:'most',t:'I want to practice self-regulation',d:"",sense:'touch',skill:'imagery',descDefense:false,silence:4,gentle:false,mind:false,tier:3,
+   sum:"We'll hold safety and not-safety, and let them take turns. This one goes deepest."}
+};
+let practices=[fresh('mindfulness')];
+let active=0;
+let cfg=practices[active];
+function fresh(k){return {...EXP[k],open:false};}
+
+/* ====== sequence building — canonical flow (see meditation-weaver-FLOW-SPEC.md) ====== */
+function anchorBlock(c,add){
+  let first=null;
+  senseFront(c.sense).forEach((b,i)=>{add(b,'anchoring');if(i===0)first=b;});   // sense-specific front (the anchor)
+  add('DESC-OBJ-'+c.sense.toUpperCase(),'noticing the object');                   // describe the object — right after the anchor
+  TAIL_BODY.forEach(b=>add(b,'settling in the body'));                            // breath, posture, smile, connect
+  add('MIND-09-CAPCHECK','a capacity check');                                     // CAP-CHECK after connect
+  TAIL_SAFETY.forEach(b=>add(b,'finding safety'));                                // name -> general -> specific
+  add('DESC-SAFETY','describing safety');                                         // describe safety
+  return first;
+}
+function build(c){
+  const raw=[],ph=[]; const add=(b,p)=>{if(has(b)){raw.push(b);ph.push(p);}};
+  let loopBase=null;
+  add('INTRO-01','opening');
+  if(c.mind){
+    add('MIND-01','arriving');add('MIND-02','the breath');loopBase='MIND-02';
+    add('MIND-03','sound');add('MIND-04','the breath');add('MIND-05','touch');
+    add('MIND-06','sight');add('MIND-07','an emotion');add('MIND-08','an invitation');
+  }else{
+    const defense=(c.key==='most'), skill=c.skill;
+    const usesInvite=defense&&skill!=='obstacles';     // obstacles & anchoring skip intent-set / invite
+    if(usesInvite)add('INTENT-SET','setting an intention');
+    add(defense?({imagery:'PINTRO-IMAGERY',obstacles:'PINTRO-OBSTACLES',balancing:'PINTRO-BALANCING'}[skill]||'PINTRO-PENDULATING'):'PINTRO-ANCHORING','settling in');
+    add('MIND-01','arriving');
+    loopBase=anchorBlock(c,add);                        // anchor into safety (all non-mind practices)
+    if(defense){
+      add('CURIOSITY-01','staying curious');             // interest gate
+      add('CAP-GATE','going further');                   // capacity gate — AFTER safety, BEFORE any defense
+      if(usesInvite){
+        loopBase='INVITE-01';                            // open-ended loop returns here
+        add('INVITE-01','inviting what is hard');add('INVITE-02','it makes sense');add('INVITE-03','letting it be');
+        add('INVITE-04','its intensity');add('INVITE-05','where it lives');add('INVITE-06','more specifically');
+        add('NUMB-OK','permission');
+        if(c.descDefense)add('DESC-DEFENSE','describing the defense');   // optional, under 'more options'
+      }
+      if(skill==='balancing'){
+        add('PEND-SAFETY','back to safety');add('PEND-SAFETY-Q','noticing safety');
+        add('HOLD-WATCH','holding both');add('PEND-SAFETY','back to safety');
+      }else if(skill==='imagery'){
+        ['IMG-01','IMG-02','IMG-03','IMG-04','IMG-05','IMG-06'].forEach(b=>add(b,'giving it an image'));
+        add('PEND-SAFETY','back to safety');
+      }else if(skill==='obstacles'){
+        loopBase='OBST-01';
+        add('OBST-01','what gets in the way');add('MIND-09-CAPCHECK','a capacity check');
+        add('OBSTACLE-STATEMENTS','steadying words');
+        add('OBST-02','validate it');add('OBST-03','normalize it');add('OBST-04','give it an image');add('OBST-05','invite it');
+        add('PEND-SAFETY','back to safety');
+      }else{ // pendulation
+        add('PEND-SAFETY','back to safety');add('PEND-SAFETY-Q','noticing safety');
+        add('PEND-DEFENSE','toward the harder side');add('PEND-DEFENSE-Q','noticing it');add('PEND-SAFE-REMIND','you are safe');
+        add('PEND-TO-SAFETY-BRIEF','letting it come and go');add('PEND-TO-DEFENSE-BRIEF','letting it come and go');add('PEND-TO-SAFETY-BRIEF','letting it come and go');
+        add('PEND-SAFETY','back to safety');
+      }
+      if(c.open)add('LOOP-GATE','staying or closing');    // open-ended: loops back to loopBase (INVITE-01 / OBST-01)
+    }
+  }
+  ['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05'].forEach(b=>add(b,'closing'));
+  add('OUTRO','closing');
+  return {seq:raw,phase:ph,loopBase};
+}
+const CLOSES=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05','OUTRO'];
+function buildPlan(){
+  const all=practices.filter(Boolean); let seq=[],phase=[],loop=false,loopFrom=0;
+  all.forEach((c,ci)=>{let b=build(c),s=b.seq.slice(),p=b.phase.slice();
+    const isLast=ci===all.length-1;
+    const rm=x=>{const k=s.indexOf(x);if(k>=0){s.splice(k,1);p.splice(k,1);}};
+    if(ci>0)rm('INTRO-01');                                  // only the first practice opens with the welcome
+    if(isLast&&c.open){CLOSES.forEach(rm);}                  // open-ended: drop close+outro, loop instead
+    else if(!isLast){rm('OUTRO');}                           // stacked: keep the close, drop the sign-off until the end
+    if(isLast&&c.open&&b.loopBase){const li=s.indexOf(b.loopBase);loop=true;loopFrom=seq.length+(li>=0?li:0);}
+    s.forEach((b2,i)=>{seq.push(b2);phase.push(p[i]);});
+  });
+  return {seq,phase,loop,loopFrom};
+}
+function estimate(o){let t=0;o.seq.forEach((b,i)=>{t+=(DUR[b]||4);if(i<o.seq.length-1)t+=gapAfter(b);});return Math.max(1,Math.round(t/60));}
+
+/* ====== setup screen ====== */
+function renderSetup(){
+  cfg=practices[active];
+  // tint the brand mark to the current tab's track
+  const mk=document.querySelector('.mark');
+  if(mk){mk.classList.remove('mark-sky','mark-amber');mk.classList.add('mark-'+TRACK[cfg.key]);}
+  // practice tabs
+  const TABNAME=['Your practice','Second (optional)','Third (optional)'];
+  const tw=$('tabs');tw.innerHTML='';
+  practices.forEach((p,i)=>{
+    const b=document.createElement('button');b.type='button';
+    b.className='tab'+(i===active?' on':'')+(i>0?' is-opt':'')+' track-'+TRACK[p.key];
+    b.setAttribute('aria-pressed',i===active?'true':'false');
+    const lab=document.createElement('span');lab.textContent=TABNAME[i];
+    b.appendChild(lab);
+    if(i>0){
+      const x=document.createElement('span');x.className='x';x.textContent='×';
+      x.setAttribute('role','button');x.setAttribute('aria-label','remove this optional practice');
+      x.onclick=e=>{e.stopPropagation();practices.splice(i,1);if(active>=practices.length)active=practices.length-1;renderSetup();};
+      b.appendChild(x);
+    }
+    b.onclick=()=>{active=i;renderSetup();};
+    tw.appendChild(b);
+  });
+  if(practices.length<3){
+    const a=document.createElement('button');a.type='button';a.className='tab add';
+    a.textContent='+ add another';
+    a.onclick=()=>{practices.push(fresh('mindfulness'));active=practices.length-1;renderSetup();};
+    tw.appendChild(a);
+  }
+  // experience options
+  const ew=$('exps');ew.innerHTML='';
+  Object.values(EXP).forEach(e=>{
+    const b=document.createElement('button');b.type='button';
+    b.className='opt'+(e.key===cfg.key?' on':'')+' track-'+TRACK[e.key];
+    b.setAttribute('role','radio');b.setAttribute('aria-checked',e.key===cfg.key?'true':'false');
+    b.innerHTML='<span class="t">'+e.t+'</span>';
+    b.onclick=()=>{practices[active]=fresh(e.key);renderSetup();};
+    ew.appendChild(b);
+  });
+  // anchor sense (only when the practice uses a chosen sense)
+  $('sensewrap').style.display=cfg.mind?'none':'block';
+  if(!cfg.mind){const sw=$('senses');sw.innerHTML='';
+    allSenses.forEach(s=>{const p=chip(s,s===cfg.sense);p.onclick=()=>{cfg.sense=s;renderSetup();};sw.appendChild(p);});}
+  // skill menu (the deeper practices)
+  const sk=SKILLS[cfg.key];
+  $('skillwrap').style.display=sk?'block':'none';
+  if(sk){const kw=$('skills');kw.innerHTML='';
+    sk.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.skill);p.onclick=()=>{cfg.skill=v;renderSetup();};kw.appendChild(p);});}
+  // describe-the-defense toggle — only for invite-based defense skills
+  const showDD=cfg.key==='most'&&['imagery','balancing','pendulation'].indexOf(cfg.skill)>=0;
+  $('descdefwrap').style.display=showDD?'block':'none';
+  if(showDD){const dw=$('descdefs');dw.innerHTML='';
+    [[true,'describe it'],[false,'skip it']].forEach(([v,lbl])=>{const p=chip(lbl,v===!!cfg.descDefense);p.onclick=()=>{cfg.descDefense=v;renderSetup();};dw.appendChild(p);});}
+  // silence
+  const sv=$('sils');sv.innerHTML='';
+  SIL.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.silence);p.onclick=()=>{cfg.silence=v;renderSetup();};sv.appendChild(p);});
+  // length — only meaningful for the final practice
+  const isLast=active===practices.length-1;
+  $('lenwrap').style.display=isLast?'block':'none';
+  if(isLast){const lw=$('lens');lw.innerHTML='';
+    [[false,'a complete practice'],[true,'open-ended']].forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.open);p.onclick=()=>{cfg.open=v;renderSetup();};lw.appendChild(p);});}
+  // summary
+  const o=buildPlan();
+  const time = o.loop ? '<b>Open-ended.</b> It stays open until you end it.' : '<b>About '+estimate(o)+' min.</b>';
+  const pre = practices.length>1 ? (['','','Two','Three'][practices.length]+' practices, back to back. ') : '';
+  $('summary').innerHTML = pre + time;
+}
+function chip(label,on){
+  const b=document.createElement('button');b.type='button';
+  b.className='chip'+(on?' on':'');b.setAttribute('aria-pressed',on?'true':'false');
+  b.textContent=label;return b;
+}
+$('adjust').addEventListener('toggle',()=>{
+  renderSetup();
+});
+
+/* ====== player — advance on the audio's REAL end, not a duration table ======
+   This removes the cutoffs (final clip was hard-paused at DUR) and the smudges
+   (a clip whose take ran longer than DUR bled into the silence). DUR is no longer
+   used to advance; we wait for `ended`, then hold the silence gap, then play next. */
+let SEQ=[],PH=[],idx=-1,LOOP=false,LOOPFROM=0;
+let playing=false,paused=false,finished=false;
+let gapTimer=null,inGap=false,gapRemain=0,gapStart=0;
+
+function showScreen(id){['setup','player'].forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('playing',id==='player');}
+
+/* TEST-ONLY: live sequence preview so you can see what's coming. Remove for production. */
+function renderTest(){
+  const tl=$('testlist');if(!tl)return;
+  const plan=practices.map((p,i)=>{
+    let s=({mindfulness:'mindfulness',anchoring:'connect w/ safety',most:'self-regulation'})[p.key]||p.key;
+    if(p.key==='most'&&p.skill)s+=' · '+p.skill;
+    if(!p.mind)s+=' · '+p.sense;
+    if(i===practices.length-1&&p.open)s+=' · open-ended';
+    return (practices.length>1?(i+1)+'. ':'')+s;
+  }).join('    ');
+  let rows='';
+  for(let i=0;i<SEQ.length;i++)
+    rows+='<div class="row" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="b">'+SEQ[i]+'</span><span class="ph">'+(PH[i]||'')+'</span></div>';
+  tl.innerHTML='<div class="hd"><span>test view · sequence</span><span>'+SEQ.length+' clips'+(LOOP?' · loops':'')+'</span></div><div class="plan">'+plan+'</div>'+rows;
+}
+function updateTest(){
+  const tl=$('testlist');if(!tl)return;
+  tl.querySelectorAll('.row').forEach(r=>{const i=+r.dataset.i;r.classList.toggle('cur',i===idx);r.classList.toggle('done',i<idx);});
+  const cur=tl.querySelector('.row.cur');if(cur)cur.scrollIntoView({block:'nearest'});
+}
+
+$('begin').onclick=startPlayer;
+
+function startPlayer(){
+  const o=buildPlan();SEQ=o.seq;PH=o.phase;LOOP=o.loop;LOOPFROM=o.loopFrom;
+  $('pause').textContent='Pause';$('pause').style.display='';
+  finished=false;paused=false;playing=true;inGap=false;idx=-1;
+  showScreen('player');fitRing();renderTest();showSil();
+  cancelAnimationFrame(rafId);ringLoop();
+  advance();
+}
+function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}cancelAnimationFrame(rafId);}
+
+function playCurrent(){
+  const b=SEQ[idx];
+  try{au.src=clipUrl(rand(MAN[b]));au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
+}
+function advance(){
+  if(!playing)return;
+  idx++;
+  if(idx>=SEQ.length){if(LOOP){idx=LOOPFROM;}else{return finish();}}
+  inGap=false;
+  playCurrent();updateTest();
+}
+au.onended=()=>{                                      // a clip finished playing, in full
+  if(!playing||paused)return;
+  if(!LOOP&&idx>=SEQ.length-1)return finish();         // last clip plays to its natural end — no cut
+  gapRemain=gapAfter(SEQ[idx])*1000;gapStart=performance.now();inGap=true;
+  clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);
+};
+au.onerror=()=>{                                      // a clip failed to load — skip on, don't freeze
+  if(!playing||paused)return;
+  if(!LOOP&&idx>=SEQ.length-1)return finish();
+  inGap=true;gapRemain=300;gapStart=performance.now();
+  clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},300);
+};
+function finish(){playing=false;finished=true;inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}
+  $('pause').style.display='none';
+}
+$('pause').onclick=()=>{
+  if(!playing)return;
+  if(paused){ // resume
+    paused=false;
+    if(inGap){gapStart=performance.now();clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);}
+    else{try{au.play();}catch(e){}}
+    $('pause').textContent='Pause';
+  }else{ // pause
+    paused=true;
+    if(inGap){clearTimeout(gapTimer);gapRemain=Math.max(0,gapRemain-(performance.now()-gapStart));}
+    else{try{au.pause();}catch(e){}}
+    $('pause').textContent='Resume';
+  }
+};
+/* live silence control — adjusts the current practice's gap length on the fly */
+const SILSTEPS=[2,4,6,8,10,12,16];
+const nearestSil=v=>SILSTEPS.reduce((b,s)=>Math.abs(s-v)<Math.abs(b-v)?s:b,SILSTEPS[0]);
+function showSil(){const e=$('silnow');if(e)e.textContent='silence: '+cfg.silence+'s';}
+function stepSil(d){let i=SILSTEPS.indexOf(nearestSil(cfg.silence));i=Math.max(0,Math.min(SILSTEPS.length-1,i+d));cfg.silence=SILSTEPS[i];showSil();}
+$('lesssil').onclick=()=>stepSil(-1);
+$('moresil').onclick=()=>stepSil(1);
+
+$('stopbtn').onclick=()=>{stopAll();finished=false;showScreen('setup');};   // immediate exit, no close
+$('endbtn').onclick=()=>{
+  if(finished){stopAll();showScreen('setup');return;}
+  clearTimeout(gapTimer);inGap=false;playing=true;paused=false;LOOP=false;
+  $('pause').textContent='Pause';
+  const tail=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05','OUTRO'].filter(has);
+  const played=SEQ.slice(0,Math.max(idx+1,0));
+  SEQ=played.concat(tail);PH=PH.slice(0,played.length).concat(tail.map(()=>'closing'));
+  idx=played.length-1;renderTest();
+  try{au.pause();}catch(e){}
+  advance();
+};
+
+/* ====== breathing ring (calm, brand-toned, reduced-motion aware) ====== */
+const cv=$('ring'),g=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let rafId=null;
+function fitRing(){const dpr=devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',()=>{if(!$('player').classList.contains('hidden'))fitRing();});
+function ringLoop(){
+  rafId=requestAnimationFrame(ringLoop);
+  const W=cv.clientWidth,H=cv.clientHeight,cx=W/2,cy=H/2;g.clearRect(0,0,W,H);
+  const unit=Math.min(W,H);
+  const t=performance.now()/1000;
+  // ~9.6s breath cycle; frozen if reduced motion or paused
+  const phase=(playing&&!paused&&!reduce)?(Math.sin(t*0.65)*0.5+0.5):0.5;
+  const rSteady=unit*0.30;
+  const rBreath=unit*0.17+phase*unit*0.16;
+  // steady outer hairline ring
+  g.strokeStyle='#D8D2C2';g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,rSteady,0,Math.PI*2);g.stroke();
+  // breathing ink ring
+  g.strokeStyle='#1A1F2A';g.globalAlpha=0.55;g.lineWidth=2;g.beginPath();g.arc(cx,cy,rBreath,0,Math.PI*2);g.stroke();g.globalAlpha=1;
+  // center mark
+  g.fillStyle='#5E5A4E';g.beginPath();g.arc(cx,cy,2.5,0,Math.PI*2);g.fill();
+}
+
+renderSetup();
+</script>
+</body>
+</html>
