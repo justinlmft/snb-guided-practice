@@ -21,163 +21,202 @@ body{
   font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
   height:100dvh;overflow-y:auto;
 }
-.page{width:100%;max-width:680px;margin:0 auto;min-height:100dvh;padding:clamp(16px,3vh,30px) 28px;display:flex;flex-direction:column}
+.page{width:100%;max-width:600px;margin:0 auto;min-height:100dvh;height:100dvh;padding:clamp(15px,3vh,30px) 28px clamp(16px,3vh,28px);display:flex;flex-direction:column}
 
-/* brand bar */
-.brand{display:flex;align-items:center;gap:11px;margin:0 0 clamp(18px,4.2vh,40px);flex:none}
-.brand img{height:22px;width:auto;display:block;opacity:.92}
-.brand .mark{height:22px;width:auto;display:block}
-.mark path{fill:var(--ink)}
+/* ───── brand bar ───── */
+.brand{display:flex;align-items:center;gap:12px;margin:0 0 clamp(16px,3.6vh,30px);flex:none}
+.brand .mark{height:21px;width:auto;display:block}
+.mark path{fill:var(--ink);transition:fill .4s var(--ease)}
 .mark.mark-sky .g-heart{fill:var(--sky)}
 .mark.mark-amber .g-bolt,.mark.mark-amber .g-x{fill:var(--amber)}
-.brand-url{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);padding-left:11px;border-left:1px solid var(--hairline)}
-.eyebrow{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+.brand-tag{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding-left:12px;border-left:1px solid var(--hairline)}
+.eyebrow{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
 
-/* type */
-.head{display:flex;flex-direction:column;gap:10px}
-.head .eyebrow{margin:0}
-h1{font-weight:500;font-size:clamp(26px,4.2vw,36px);line-height:1.14;letter-spacing:-.01em;margin:0;text-wrap:pretty}
-.lede{font-size:clamp(16px,1.1vw+13px,19px);line-height:1.5;color:var(--ink-80);margin:0;max-width:34em;text-wrap:pretty}
+/* ───── setup layout (fits one screen) ───── */
 .screen{display:flex;flex-direction:column;flex:1;min-height:0}
-#setup{justify-content:flex-start;gap:clamp(12px,2.4vh,22px)}
+#setup{justify-content:flex-start;gap:clamp(14px,2.6vh,24px)}
 .hidden{display:none !important}
 
-/* practice tabs */
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tab{font:inherit;font-size:14px;cursor:pointer;background:transparent;color:var(--ink-80);border:1px solid var(--hairline);border-radius:8px;padding:8px 14px;display:inline-flex;align-items:center;gap:9px;transition:border-color var(--ease) .2s,color var(--ease) .2s,background var(--ease) .2s}
+/* zero-decision entry */
+.entry{flex:1;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:10px;align-content:center}
+.btn.lead{flex:1 1 0;min-width:150px;padding:14px 20px;font-size:16px;border-radius:12px}
+@media (max-width:440px){
+  .entry{flex-direction:column;align-items:stretch;justify-content:center}
+  .btn.lead{flex:none;width:100%}
+}
+.choose-link{background:none;border:0;font:inherit;font-size:14px;color:var(--link);cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;text-decoration-color:rgba(6,69,173,.45);padding:6px;margin-top:8px;transition:text-decoration-color var(--ease) .2s}
+.choose-link:hover{text-decoration-color:var(--link)}
+.choose-link:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.choose-link.back{align-self:flex-start;margin:0 0 2px;color:var(--muted);text-decoration:none}
+.choose-link.back:hover{color:var(--ink)}
+/* chooser hidden until the user opts into deciding */
+.chooser{display:none;flex:1;min-height:0;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
+#setup.choosing .entry{display:none}
+#setup.choosing .chooser{display:flex}
+
+/* practice tabs — quiet, only earns weight when stacking */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:none}
+.tab{font:inherit;font-size:13px;cursor:pointer;white-space:nowrap;background:transparent;color:var(--ink-80);border:1px solid var(--hairline);border-radius:8px;padding:6px 13px;display:inline-flex;align-items:center;gap:8px;transition:border-color var(--ease) .2s,color var(--ease) .2s,background var(--ease) .2s}
 .tab:hover{color:var(--ink)}
-/* track color rides on the tab whether or not it's the current one */
-.tab.track-sky{border-color:var(--sky)}
-.tab.track-amber{border-color:var(--amber)}
-/* inactive tabs keep the color but fade the outline */
-.tab:not(.on).track-sky{border-color:rgba(88,145,197,.4)}
-.tab:not(.on).track-amber{border-color:rgba(210,154,74,.45)}
-/* the current tab is signified by a thicker, full-strength outline + bold */
-.tab.on{border-width:2px;padding:7px 13px;color:var(--ink);font-weight:500}
+.tab.track-sky{border-color:rgba(88,145,197,.5)}
+.tab.track-amber{border-color:rgba(210,154,74,.55)}
+.tab.on{border-width:1.5px;padding:5.5px 12.5px;color:var(--ink);font-weight:500}
+.tab.on.track-sky{border-color:var(--sky)}
+.tab.on.track-amber{border-color:var(--amber)}
 .tab.is-opt{color:var(--muted)}
 .tab.is-opt.on{color:var(--ink)}
 .tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .tab.add{color:var(--muted);border-style:dashed;font-weight:500}
 .tab.add:hover{color:var(--ink);border-color:var(--ink-80)}
-.tab .x{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:-4px;border-radius:50%;color:var(--muted);font-size:15px;line-height:1}
+.tab .x{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;margin-right:-4px;border-radius:50%;color:var(--muted);font-size:14px;line-height:1}
 .tab .x:hover{color:var(--ink);background:var(--bone-deep)}
+/* when there's a single practice, the lone "Your practice" tab is just a quiet label */
+.tabs[data-single] .tab.on{border-color:transparent;padding-left:0;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
 
-/* how-far options */
+/* ───── primary choices: radio rows ───── */
 .block{margin:0}
-.block .eyebrow{display:block;margin-bottom:12px}
-.choices{display:flex;flex-direction:column;gap:9px}
+.block>.eyebrow{display:block;margin-bottom:11px}
+.choices{display:flex;flex-direction:column;gap:8px}
 .opt{
-  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  display:flex;align-items:center;width:100%;text-align:left;
   font:inherit;color:inherit;cursor:pointer;
   background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);
-  padding:15px 18px;transition:border-color var(--ease) .2s,background var(--ease) .2s;
+  padding:14px 18px;transition:border-color var(--ease) .2s,border-width var(--ease) .2s;
 }
 .opt:hover{border-color:var(--ink-80)}
-.opt.on{border-color:var(--ink);border-width:1.5px;padding:14.5px 17.5px}
+.opt.on{border-width:2px;padding:13px 17px}
+.opt.on .t{font-weight:500;color:var(--ink)}
 .opt.track-sky.on{border-color:var(--sky)}
 .opt.track-amber.on{border-color:var(--amber)}
 .opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.opt .t{display:block;font-size:17px;font-weight:400;transition:font-weight var(--ease) .2s}
-.opt.on .t{font-weight:500}
-.opt .d{display:block;font-size:14.5px;color:var(--muted);line-height:1.45;margin-top:2px;text-wrap:pretty}
+.opt .t{display:block;flex:1 1 auto;min-width:0;font-size:15.5px;line-height:1.3;font-weight:400;transition:font-weight var(--ease) .2s}
 
-/* summary + begin */
-.summary{font-size:16px;color:var(--ink-80);margin:0;min-height:1.5em;text-wrap:pretty}
-.summary b{font-weight:500;color:var(--ink)}
-.btn{
-  font:inherit;font-weight:500;white-space:nowrap;cursor:pointer;
-  background:var(--ink);color:var(--bone);border:1px solid var(--ink);
-  border-radius:var(--rbtn);padding:13px 30px;transition:background var(--ease) .2s,border-color var(--ease) .2s;
-}
-.btn:hover{background:var(--btn-hover);border-color:var(--btn-hover)}
-.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-.btn.primary{width:100%;padding:17px 30px;font-size:17px;border-radius:12px}
-.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
-.btn.quiet:hover{background:var(--bone-deep);border-color:var(--ink)}
-.hairline-removed{}
-body.playing .brand{display:none}
-
-
-/* adjust (progressive disclosure) — app-style settings row, not a link */
-.adjust{margin:0;border-top:1px solid var(--hairline);padding-top:clamp(12px,2vh,20px)}
-.adjust summary{font-size:15px;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:9px;width:auto;transition:color var(--ease) .2s}
-.adjust summary:hover{color:var(--ink)}
-.adjust summary::-webkit-details-marker{display:none}
-.adjust summary .tw{width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform var(--ease) .2s;margin-bottom:2px}
-.adjust[open] summary .tw{transform:rotate(-135deg);margin-bottom:-3px}
-.adjust[open] summary{margin-bottom:26px}
-.adjust summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
-.adjust-body{display:flex;flex-direction:column;gap:26px}
-.chips{display:flex;flex-wrap:wrap;gap:9px}
+/* ───── contextual refinements ───── */
+.refine{display:flex;flex-direction:column;gap:clamp(11px,2vh,18px);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{
-  font:inherit;font-size:15px;cursor:pointer;text-transform:capitalize;white-space:nowrap;
+  font:inherit;font-size:14px;cursor:pointer;text-transform:capitalize;white-space:nowrap;
   background:transparent;color:var(--muted);border:1px solid var(--hairline);
-  border-radius:999px;padding:8px 16px;transition:all var(--ease) .2s;
+  border-radius:999px;padding:7px 15px;transition:border-color var(--ease) .2s,color var(--ease) .2s,font-weight var(--ease) .2s;
 }
 .chip:hover{border-color:var(--ink-80);color:var(--ink-80)}
 .chip.on{border-color:var(--ink);color:var(--ink);font-weight:500}
 .chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.queued{font-size:15px;color:var(--muted);margin:12px 0 0}
-.queued a{color:var(--link);cursor:pointer}
+
+/* ───── more options ───── */
+.adjust{margin:0}
+.adjust summary{font-size:14px;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:9px;width:auto;transition:color var(--ease) .2s}
+.adjust summary:hover{color:var(--ink)}
+.adjust summary::-webkit-details-marker{display:none}
+.adjust summary .tw{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform var(--ease) .2s;margin-bottom:2px}
+.adjust[open] summary .tw{transform:rotate(-135deg);margin-bottom:-3px}
+.adjust[open] summary{margin-bottom:20px}
+.adjust summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+.adjust-body{display:flex;flex-direction:column;gap:22px}
+
+/* ───── summary + begin (pinned low) ───── */
+.foot{margin-top:auto;display:flex;flex-direction:column;gap:14px;flex:none;padding-top:clamp(12px,2.4vh,22px)}
+.summary{font-size:15px;color:var(--ink-80);margin:0;min-height:1.4em;text-wrap:pretty}
+.summary b{font-weight:500;color:var(--ink)}
+.btn{
+  font:inherit;font-weight:500;white-space:nowrap;cursor:pointer;
+  background:var(--ink);color:var(--bone);border:1px solid var(--ink);
+  border-radius:var(--rbtn);padding:13px 30px;transition:background var(--ease) .2s,border-color var(--ease) .2s,color var(--ease) .2s;
+}
+.btn:hover{background:var(--btn-hover);border-color:var(--btn-hover)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.btn.primary{width:100%;padding:16px 30px;font-size:16.5px;border-radius:12px}
+.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.quiet:hover{background:var(--bone-deep);border-color:var(--ink)}
+body.playing .brand{display:none}
 
 /* ───── player ───── */
-#player{align-items:center;justify-content:center;text-align:center}
-.player-top{width:100%;display:flex;justify-content:flex-start}
-.backlink{font:inherit;font-size:15px;color:var(--muted);background:none;border:0;cursor:pointer;padding:0}
-.backlink:hover{color:var(--ink)}
+#player{align-items:center;justify-content:center;text-align:center;gap:0}
 .ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
-#ring{width:min(80vw,340px);height:min(80vw,340px);max-height:46vh;display:block}
-.status{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);min-height:1.4em;transition:opacity .6s var(--ease);margin:0 0 6px}
-.cue{font-size:15px;color:var(--muted);margin:0 0 20px;max-width:30em}
-.cue:empty{display:none}
-.gate{
-  max-width:32em;margin:0 auto 20px;padding:14px 18px 14px 16px;
-  border-left:2px solid var(--amber);font-size:15px;line-height:1.55;color:var(--ink-80);
-  text-align:left;display:none;text-wrap:pretty;
-}
-.controls{display:flex;gap:12px;justify-content:center;margin-bottom:14px}
-.subcontrols{display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:18px}
-.btn.sm{padding:7px 14px;font-size:14px;border-radius:8px}
-.silnow{font-size:13px;color:var(--muted);min-width:7.5em;text-align:center;font-variant-numeric:tabular-nums}
-#progwrap{width:min(80vw,340px)}
-#ptrack{height:3px;background:var(--hairline);border-radius:3px;overflow:hidden}
-#pfill{height:100%;width:0;background:var(--ink);opacity:.5;transition:width .2s linear}
+#ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
+.phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
+.caption{display:none;font-size:16px;line-height:1.55;color:var(--ink-80);max-width:30em;margin:0 auto 18px;text-align:center;text-wrap:pretty;padding:0 6px}
+#player.caps-on .caption{display:block}
+.captoggle{align-self:center;margin-top:2px;background:none;border:0;font:inherit;font-size:12.5px;letter-spacing:.04em;color:var(--muted);cursor:pointer}
+.captoggle.on{color:var(--ink);font-weight:500}
+.captoggle:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.controls{display:flex;flex-direction:column;gap:18px;align-items:center;width:100%;max-width:300px;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
+#player.show-controls .controls{opacity:1;pointer-events:auto}
+/* tap hint: only while controls are hidden, fades on its own */
+.taphint{position:absolute;left:0;right:0;bottom:clamp(14px,3vh,26px);text-align:center;font-size:12px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted);margin:0;opacity:0;transition:opacity .8s var(--ease);pointer-events:none}
+#player{position:relative}
+#player.hint-on .taphint{opacity:.5}
+#player.show-controls .taphint{opacity:0}
 
-/* TEST-ONLY: sequence preview panel */
-.testlist{margin-top:18px;width:min(92vw,440px);max-height:30vh;overflow-y:auto;text-align:left;
-  font-size:12px;line-height:1.45;border:1px solid var(--hairline);border-radius:10px;padding:8px 10px;background:rgba(26,31,42,.025)}
-.testlist .hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:6px}
-.testlist .plan{font-size:12px;color:var(--ink-80);margin-bottom:8px;padding-bottom:7px;border-bottom:1px dashed var(--hairline)}
-.testlist .row{display:flex;gap:8px;padding:2px 6px;border-radius:5px;color:var(--muted);font-variant-numeric:tabular-nums}
-.testlist .row .n{opacity:.5;min-width:1.7em;text-align:right}
-.testlist .row .ph{margin-left:auto;opacity:.65;font-style:italic;padding-left:10px}
-.testlist .row.done{opacity:.4}
-.testlist .row.cur{background:var(--ink);color:var(--bone);font-weight:600}
-.testlist .row.cur .n,.testlist .row.cur .ph{opacity:.85}
+/* round pause / play icon button */
+.iconrow{display:flex;gap:16px;align-items:center;justify-content:center}
+.iconbtn{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--ease) .2s}
+.controls .endbtn{width:100%}
+.iconbtn:hover{background:var(--bone-deep)}
+.iconbtn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.iconbtn .ico{width:25px;height:25px;display:block;fill:var(--ink);color:var(--ink)}
+.iconbtn .ico-play{display:none;margin-left:3px}
+.iconbtn.is-paused .ico-pause{display:none}
+.iconbtn.is-paused .ico-play{display:block}
 
-@media (max-width:520px){
-  .page{padding:20px 20px}
-  .begin-row{gap:12px}
-}
-/* short viewports (landscape laptops): compress so the setup fits one screen */
+/* two clearly-tappable end actions */
+.actions{display:flex;flex-direction:column;gap:10px;width:100%}
+.actions .btn{width:100%;padding:13px 22px}
+
+/* silence nudge: just − / + around a small readout */
+.silrow{display:flex;gap:14px;align-items:center;justify-content:center;margin-top:4px}
+.silbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--hairline);background:transparent;color:var(--ink-80);font:inherit;font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--ease) .2s,color var(--ease) .2s}
+.silbtn:hover{border-color:var(--ink-80);color:var(--ink)}
+.silbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.silnow{font-size:12.5px;color:var(--muted);min-width:6.5em;text-align:center;font-variant-numeric:tabular-nums;text-transform:lowercase;letter-spacing:.04em}
+
+/* gentle completion */
+.done{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%;max-width:300px}
+#player.finished .controls{display:none}
+#player.finished .done{display:flex}
+.done .btn{width:100%}
+
+/* rest between stacked meditations */
+.brk{display:none;flex-direction:column;align-items:center;gap:18px}
+.brk-line{font-size:13px;text-transform:lowercase;letter-spacing:.1em;color:var(--muted);margin:0;text-align:center}
+#player.breaking .controls,#player.breaking .done{display:none}
+#player.breaking .brk{display:flex}
+.brk .iconbtn{width:80px;height:80px}
+.brk .iconbtn .ico{width:30px;height:30px;margin-left:3px}
+@media (prefers-reduced-motion:no-preference){.brk .iconbtn{animation:brkbreath 2.8s ease-in-out infinite}}
+@keyframes brkbreath{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* connection trouble */
+.conn{position:absolute;left:0;right:0;bottom:clamp(40px,9vh,72px);text-align:center;font-size:13px;color:var(--muted);margin:0;letter-spacing:.04em;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+#player.conn-trouble .conn{opacity:.75}
+
+@media (max-width:520px){.page{padding:18px 20px}}
+/* short viewports: compress so setup still fits one screen */
 @media (max-height:680px){
-  #setup{gap:clamp(9px,1.7vh,16px)}
+  #setup{gap:clamp(10px,1.8vh,16px)}
   .opt{padding:11px 16px}
   .opt.on{padding:10.5px 15.5px}
-  .opt .d{font-size:13.5px;line-height:1.4}
 }
 @media (max-height:560px){
-  .page{padding:12px 28px}
+  .page{padding:12px 22px}
   .brand{margin-bottom:8px}
-  h1{font-size:clamp(22px,3.4vw,28px)}
-  .lede,.opt .d{display:none}
-  .block .eyebrow{margin-bottom:6px}
-  #setup{gap:10px}
-  .opt{padding:9px 16px}
-  .opt.on{padding:8.5px 15.5px}
+  #setup{gap:9px}
+  .opt{padding:9px 15px}
+  .opt.on{padding:8.5px 14.5px}
   .choices{gap:6px}
-  .btn{padding:10px 26px}
-  .credit{margin-top:10px;font-size:12px}
+  .refine{gap:9px}
+  .btn.primary{padding:12px 30px}
+}
+/* very short (landscape phones): tighten everything */
+@media (max-height:560px){
+  .brand{margin-bottom:6px}
+  #setup{gap:7px}
+  .refine{gap:7px}
+  .block>.eyebrow{margin-bottom:5px}
+  .adjust[open] summary{margin-bottom:12px}
+  .adjust-body{gap:14px}
+  .foot{padding-top:8px;gap:9px}
+  .chip{padding:6px 13px}
 }
 </style>
 </head>
@@ -185,136 +224,100 @@ body.playing .brand{display:none}
 <div class="page">
   <header class="brand">
     <svg class="mark" viewBox="0 0 1288 446.31" role="img" aria-label="Stuck Not Broken">
-<path class="g-heart" d="M 228.6626430999995,414.99967965948633 C 193.0931878499996,414.99967965948633 159.69623824999962,401.15528090948635
-134.56332974999987,376.0223724094866 L 42.977307250000194,284.43634990948647 C 17.844398749999527,259.30344140948625
-4.0,225.86389365948654 4.0,190.3370365594864 C 4.0,154.76758130948647 17.844398750000437,121.3706317094865
-42.977307250000194,96.23772320948629 C 68.11021574999995,71.10481470948653 101.54976350000015,57.26041595948655
-137.07662059999984,57.260415959486096 C 171.45332764999966,57.260415959486096 203.82792165000046,70.21025355948623
-228.6626430999995,93.76703050948609 C 280.7175823999996,44.35317650948619 363.2727970999995,45.20513950948626
-414.34797894999974,96.23772320948629 C 466.23252564999984,148.1222699094864 466.23252564999984,232.5518032094864
-414.34797894999974,284.47894805948624 L 322.76195644999916,376.06497055948637 C 297.6290479499994,401.1978790594861
-264.1895001999992,415.0422778094861 228.6626430999995,415.0422778094861 L 228.6626430999995,414.99967965948633
-M 137.11921875000007,109.86913120948648 C 115.60715299999993,109.86913120948648 95.41562990000057,118.21836860948625
-80.20809035000002,133.42590815948634 C 48.813253799999075,164.82074470948638 48.813253799999075,215.8533284094864
-80.20809035000002,247.24816495948645 L 171.7941128499997,338.83418745948654 C 187.00165239999933,354.0417270094862
-207.1931754999996,362.3909644094864 228.70524124999974,362.3909644094864 C 250.2173069999999,362.3909644094864
-270.40883009999925,354.0417270094862 285.6163696499989,338.83418745948654 L 377.20239214999947,247.24816495948645
-C 408.5546305500002,215.89592655948618 408.5546305500002,164.82074470948638 377.20239214999947,133.42590815948634
-C 345.80755560000034,102.0310716094863 294.7749719000003,102.0310716094863 263.3801353500003,133.42590815948634
-L 228.70524124999974,168.10080225948641 L 194.03034714999922,133.42590815948634 C 178.82280759999958,118.21836860948625
-158.6312844999993,109.86913120948648 137.11921875000007,109.86913120948648"></path>
-<path class="g-bolt" d="M 673.9837031999996,442.30509380948604 C 665.0806898499995,442.30509380948604 656.092480199999,440.5585696594861
-647.4876538999997,437.02292320948607 C 621.5879787000003,426.2881894094861 604.8469057499997,401.24047720948636
-604.8469057499997,373.2108945094859 L 604.8469057499997,282.43423685948653 L 544.8687105499994,282.43423685948653
-C 516.8391278499994,282.43423685948653 491.7914156499992,265.6931639094863 481.05668185000013,239.79348870948652
-C 470.3219480500002,213.89381350948625 476.2004927499993,184.3306974094866 496.0512306499995,164.4799595094859
-L 636.2417422999997,24.28944785948616 C 656.092480199999,4.438709959486374 685.6129981499989,-1.439834740514101
-711.5552714999994,9.294899059486312 C 737.4549466999997,20.02963285948627 754.1960196499995,45.07734505948602
-754.1960196499995,73.10692775948601 L 754.1960196499995,163.8835854094863 L 814.1742148499998,163.8835854094863
-C 842.2037975499998,163.8835854094863 867.25150975,180.62465835948652 877.9862435499999,206.52433355948634
-C 888.7209773499999,232.4240087594866 882.842432649999,261.98712485948624 862.9916947499996,281.8378627594865
-L 722.8011830999994,422.0283744094862 C 709.5531584499995,435.27639905948615 691.9601224999997,442.30509380948604
-674.0263013499998,442.30509380948604 L 673.9837031999996,442.30509380948604 M 684.6758388499993,56.57884555948604
-C 681.2679868499999,56.57884555948604 677.1785644499996,57.68639745948613 673.3873291,61.47763280948621
-L 533.1968174499998,201.6681444594864 C 526.168122699999,208.69683920948628 528.3832264999992,216.53489880948646
-529.6185728500004,219.60196560948626 C 530.8965173500001,222.6690324094865 534.9007434500008,229.7829234594864
-544.8261124,229.7829234594864 L 657.4556210000001,229.7829234594864 L 657.4556210000001,373.16829635948613
-C 657.4556210000001,383.09366530948625 664.5695120499995,387.0978914094861 667.6365788499998,388.3758359094862
-C 670.70364565,389.6537804094859 678.5417052499997,391.8262860594858 685.5703999999996,384.7975913094864
-L 825.7609116499998,244.60707965948623 C 832.7896063999988,237.57838490948635 830.5745025999995,229.74032530948617
-829.3391562500001,226.67325850948637 C 828.0612117500004,223.60619170948613 824.0569856499997,216.49230065948623
-814.1316166999995,216.49230065948623 L 701.5021080999995,216.49230065948623 L 701.5021080999995,73.10692775948601
-C 701.5021080999995,63.18155880948589 694.3882170499992,59.17733270948602 691.3211502499989,57.899388209486375
-C 689.9154112999995,57.30301410948633 687.5299148999993,56.536247409486265 684.6758388499993,56.536247409486265
-L 684.6758388499993,56.57884555948604"></path>
-<path class="g-x" d="M 988.3580501999995,417.42777420948585 C 963.5233287499996,417.42777420948585 940.1795425499995,407.75799415948575
-922.6291047499999,390.20755635948615 C 905.0786669499994,372.6571185594861 895.4088868999997,349.313332359486
-895.4088868999997,324.4786109094865 C 895.4088868999997,299.64388945948656 905.0786669499994,276.3001032594865
-922.6291047499999,258.749665459486 L 958.2837562999994,223.09501390948608 L 922.6291047499999,187.44036235948616
-C 905.0786669499994,169.8899245594861 895.4088868999997,146.5461383594865 895.4088868999997,121.71141690948608
-C 895.4088868999997,96.87669545948611 905.0786669499994,73.53290925948605 922.6291047499999,55.98247145948645
-C 940.1795425499995,38.43203365948639 963.5233287499996,28.762253609486294 988.3580501999995,28.762253609486294
-C 1013.1927716500004,28.762253609486294 1036.5365578500005,38.43203365948639 1054.0869956499992,55.98247145948645
-L 1089.7416472000004,91.63712300948637 L 1125.39629875,55.98247145948645 C 1161.6473244,19.731445809486473
-1220.6031639999992,19.731445809486473 1256.811591499999,55.98247145948645 C 1293.062617149999,92.23349710948642
-1293.062617149999,151.18933670948664 1256.811591499999,187.39776420948593 L 1221.1569399499995,223.0524157594863
-L 1256.811591499999,258.7070673094862 C 1293.062617149999,294.9580929594862 1293.062617149999,353.9139325594864
-1256.811591499999,390.12236005948614 C 1220.560565849999,426.3733857094861 1161.6047262499997,426.3733857094861
-1125.39629875,390.12236005948614 L 1089.7416472000004,354.4677085094862 L 1054.0869956499992,390.12236005948614
-C 1036.5365578499996,407.6727978594862 1013.1927716499995,417.3425779094863 988.3580501999995,417.3425779094863
-L 988.3580501999995,417.4277742094863 M 988.3580501999995,81.49876330948646 C 977.5807182499993,81.49876330948646
-967.4849567000001,85.67338200948635 959.8598878499997,93.29845085948628 C 952.2348189999993,100.92351970948621
-948.0602002999985,111.01928125948635 948.0602002999995,121.79661320948608 C 948.0602002999995,132.57394515948582
-952.2348189999993,142.66970670948595 959.8598878499997,150.29477555948634 L 1032.7027243499997,223.13761205948586
-L 959.8598878499997,295.98044855948626 C 952.2348189999993,303.60551740948665 948.0602002999985,313.7012789594868
-948.0602002999995,324.4786109094865 C 948.0602002999995,335.25594285948625 952.2348189999993,345.3517044094864
-959.8598878499997,352.97677325948587 C 967.4849566999992,360.60184210948626 977.5807182499993,364.7764608094857
-988.3580501999995,364.77646080948614 C 999.1353821499997,364.77646080948614 1009.2311436999998,360.6018421094867
-1016.8562125499993,352.97677325948587 L 1089.6990490499993,280.13393675948635 L 1162.5418855500002,352.97677325948587
-C 1178.2606029000008,368.695490609486 1203.8194929000001,368.695490609486 1219.5382102499989,352.97677325948587
-C 1235.2569275999995,337.2580559094862 1235.2569275999995,311.69916590948594 1219.5382102499989,295.98044855948626
-L 1146.6953737499998,223.13761205948586 L 1219.5382102499989,150.29477555948634 C 1235.2569275999995,134.5760582094862
-1235.2569275999995,109.01716820948596 1219.5382102499989,93.29845085948628 C 1203.8194928999992,77.57973350948615
-1178.2606028999999,77.57973350948615 1162.5418855500002,93.29845085948628 L 1089.6990490499993,166.14128735948626
-L 1016.8562125499993,93.29845085948628 C 1009.2311436999998,85.67338200948635 999.1353821499988,81.49876330948646
-988.3580501999995,81.49876330948646"></path></svg>
+<path class="g-heart" d="M 228.6626430999995,414.99967965948633 C 193.0931878499996,414.99967965948633 159.69623824999962,401.15528090948635 134.56332974999987,376.0223724094866 L 42.977307250000194,284.43634990948647 C 17.844398749999527,259.30344140948625 4.0,225.86389365948654 4.0,190.3370365594864 C 4.0,154.76758130948647 17.844398750000437,121.3706317094865 42.977307250000194,96.23772320948629 C 68.11021574999995,71.10481470948653 101.54976350000015,57.26041595948655 137.07662059999984,57.260415959486096 C 171.45332764999966,57.260415959486096 203.82792165000046,70.21025355948623 228.6626430999995,93.76703050948609 C 280.7175823999996,44.35317650948619 363.2727970999995,45.20513950948626 414.34797894999974,96.23772320948629 C 466.23252564999984,148.1222699094864 466.23252564999984,232.5518032094864 414.34797894999974,284.47894805948624 L 322.76195644999916,376.06497055948637 C 297.6290479499994,401.1978790594861 264.1895001999992,415.0422778094861 228.6626430999995,415.0422778094861 L 228.6626430999995,414.99967965948633 M 137.11921875000007,109.86913120948648 C 115.60715299999993,109.86913120948648 95.41562990000057,118.21836860948625 80.20809035000002,133.42590815948634 C 48.813253799999075,164.82074470948638 48.813253799999075,215.8533284094864 80.20809035000002,247.24816495948645 L 171.7941128499997,338.83418745948654 C 187.00165239999933,354.0417270094862 207.1931754999996,362.3909644094864 228.70524124999974,362.3909644094864 C 250.2173069999999,362.3909644094864 270.40883009999925,354.0417270094862 285.6163696499989,338.83418745948654 L 377.20239214999947,247.24816495948645 C 408.5546305500002,215.89592655948618 408.5546305500002,164.82074470948638 377.20239214999947,133.42590815948634 C 345.80755560000034,102.0310716094863 294.7749719000003,102.0310716094863 263.3801353500003,133.42590815948634 L 228.70524124999974,168.10080225948641 L 194.03034714999922,133.42590815948634 C 178.82280759999958,118.21836860948625 158.6312844999993,109.86913120948648 137.11921875000007,109.86913120948648"></path>
+<path class="g-bolt" d="M 673.9837031999996,442.30509380948604 C 665.0806898499995,442.30509380948604 656.092480199999,440.5585696594861 647.4876538999997,437.02292320948607 C 621.5879787000003,426.2881894094861 604.8469057499997,401.24047720948636 604.8469057499997,373.2108945094859 L 604.8469057499997,282.43423685948653 L 544.8687105499994,282.43423685948653 C 516.8391278499994,282.43423685948653 491.7914156499992,265.6931639094863 481.05668185000013,239.79348870948652 C 470.3219480500002,213.89381350948625 476.2004927499993,184.3306974094866 496.0512306499995,164.4799595094859 L 636.2417422999997,24.28944785948616 C 656.092480199999,4.438709959486374 685.6129981499989,-1.439834740514101 711.5552714999994,9.294899059486312 C 737.4549466999997,20.02963285948627 754.1960196499995,45.07734505948602 754.1960196499995,73.10692775948601 L 754.1960196499995,163.8835854094863 L 814.1742148499998,163.8835854094863 C 842.2037975499998,163.8835854094863 867.25150975,180.62465835948652 877.9862435499999,206.52433355948634 C 888.7209773499999,232.4240087594866 882.842432649999,261.98712485948624 862.9916947499996,281.8378627594865 L 722.8011830999994,422.0283744094862 C 709.5531584499995,435.27639905948615 691.9601224999997,442.30509380948604 674.0263013499998,442.30509380948604 L 673.9837031999996,442.30509380948604 M 684.6758388499993,56.57884555948604 C 681.2679868499999,56.57884555948604 677.1785644499996,57.68639745948613 673.3873291,61.47763280948621 L 533.1968174499998,201.6681444594864 C 526.168122699999,208.69683920948628 528.3832264999992,216.53489880948646 529.6185728500004,219.60196560948626 C 530.8965173500001,222.6690324094865 534.9007434500008,229.7829234594864 544.8261124,229.7829234594864 L 657.4556210000001,229.7829234594864 L 657.4556210000001,373.16829635948613 C 657.4556210000001,383.09366530948625 664.5695120499995,387.0978914094861 667.6365788499998,388.3758359094862 C 670.70364565,389.6537804094859 678.5417052499997,391.8262860594858 685.5703999999996,384.7975913094864 L 825.7609116499998,244.60707965948623 C 832.7896063999988,237.57838490948635 830.5745025999995,229.74032530948617 829.3391562500001,226.67325850948637 C 828.0612117500004,223.60619170948613 824.0569856499997,216.49230065948623 814.1316166999995,216.49230065948623 L 701.5021080999995,216.49230065948623 L 701.5021080999995,73.10692775948601 C 701.5021080999995,63.18155880948589 694.3882170499992,59.17733270948602 691.3211502499989,57.899388209486375 C 689.9154112999995,57.30301410948633 687.5299148999993,56.536247409486265 684.6758388499993,56.536247409486265 L 684.6758388499993,56.57884555948604"></path>
+<path class="g-x" d="M 988.3580501999995,417.42777420948585 C 963.5233287499996,417.42777420948585 940.1795425499995,407.75799415948575 922.6291047499999,390.20755635948615 C 905.0786669499994,372.6571185594861 895.4088868999997,349.313332359486 895.4088868999997,324.4786109094865 C 895.4088868999997,299.64388945948656 905.0786669499994,276.3001032594865 922.6291047499999,258.749665459486 L 958.2837562999994,223.09501390948608 L 922.6291047499999,187.44036235948616 C 905.0786669499994,169.8899245594861 895.4088868999997,146.5461383594865 895.4088868999997,121.71141690948608 C 895.4088868999997,96.87669545948611 905.0786669499994,73.53290925948605 922.6291047499999,55.98247145948645 C 940.1795425499995,38.43203365948639 963.5233287499996,28.762253609486294 988.3580501999995,28.762253609486294 C 1013.1927716500004,28.762253609486294 1036.5365578500005,38.43203365948639 1054.0869956499992,55.98247145948645 L 1089.7416472000004,91.63712300948637 L 1125.39629875,55.98247145948645 C 1161.6473244,19.731445809486473 1220.6031639999992,19.731445809486473 1256.811591499999,55.98247145948645 C 1293.062617149999,92.23349710948642 1293.062617149999,151.18933670948664 1256.811591499999,187.39776420948593 L 1221.1569399499995,223.0524157594863 L 1256.811591499999,258.7070673094862 C 1293.062617149999,294.9580929594862 1293.062617149999,353.9139325594864 1256.811591499999,390.12236005948614 C 1220.560565849999,426.3733857094861 1161.6047262499997,426.3733857094861 1125.39629875,390.12236005948614 L 1089.7416472000004,354.4677085094862 L 1054.0869956499992,390.12236005948614 C 1036.5365578499996,407.6727978594862 1013.1927716499995,417.3425779094863 988.3580501999995,417.3425779094863 L 988.3580501999995,417.4277742094863 M 988.3580501999995,81.49876330948646 C 977.5807182499993,81.49876330948646 967.4849567000001,85.67338200948635 959.8598878499997,93.29845085948628 C 952.2348189999993,100.92351970948621 948.0602002999985,111.01928125948635 948.0602002999995,121.79661320948608 C 948.0602002999995,132.57394515948582 952.2348189999993,142.66970670948595 959.8598878499997,150.29477555948634 L 1032.7027243499997,223.13761205948586 L 959.8598878499997,295.98044855948626 C 952.2348189999993,303.60551740948665 948.0602002999985,313.7012789594868 948.0602002999995,324.4786109094865 C 948.0602002999995,335.25594285948625 952.2348189999993,345.3517044094864 959.8598878499997,352.97677325948587 C 967.4849566999992,360.60184210948626 977.5807182499993,364.7764608094857 988.3580501999995,364.77646080948614 C 999.1353821499997,364.77646080948614 1009.2311436999998,360.6018421094867 1016.8562125499993,352.97677325948587 L 1089.6990490499993,280.13393675948635 L 1162.5418855500002,352.97677325948587 C 1178.2606029000008,368.695490609486 1203.8194929000001,368.695490609486 1219.5382102499989,352.97677325948587 C 1235.2569275999995,337.2580559094862 1235.2569275999995,311.69916590948594 1219.5382102499989,295.98044855948626 L 1146.6953737499998,223.13761205948586 L 1219.5382102499989,150.29477555948634 C 1235.2569275999995,134.5760582094862 1235.2569275999995,109.01716820948596 1219.5382102499989,93.29845085948628 C 1203.8194928999992,77.57973350948615 1178.2606028999999,77.57973350948615 1162.5418855500002,93.29845085948628 L 1089.6990490499993,166.14128735948626 L 1016.8562125499993,93.29845085948628 C 1009.2311436999998,85.67338200948635 999.1353821499988,81.49876330948646 988.3580501999995,81.49876330948646"></path></svg>
+    <span class="brand-tag" hidden></span>
   </header>
 
   <!-- ───────────── SETUP ───────────── -->
   <main id="setup" class="screen">
-    <div class="tabs" id="tabs"></div>
-    <div class="block">
-      <div class="choices" id="exps"></div>
-    </div>
-    <div class="block" id="sensewrap">
-      <span class="eyebrow">anchor your attention with</span>
-      <div class="chips" id="senses"></div>
-    </div>
-    <div class="block" id="skillwrap">
-      <span class="eyebrow">the skill to practice</span>
-      <div class="chips" id="skills"></div>
+
+    <!-- zero-decision entry: the front door for someone with no capacity to choose -->
+    <div class="entry" id="entry">
+      <button class="btn primary lead" id="leadbtn">Simple mindfulness</button>
+      <button class="btn quiet lead" id="chooselink">Choose for myself</button>
     </div>
 
-    <details class="adjust" id="adjust">
-      <summary><span class="tw" aria-hidden="true"></span> more options</summary>
-      <div class="adjust-body">
-        <div class="block">
-          <span class="eyebrow">how much silence should I leave you?</span>
-          <div class="chips" id="sils"></div>
+    <!-- the full chooser: the side door, for when there's capacity to decide -->
+    <div class="chooser" id="chooser">
+      <button class="choose-link back" id="backlink">← back</button>
+      <div class="tabs" id="tabs"></div>
+
+      <div class="block">
+        <div class="choices" id="exps"></div>
+      </div>
+
+      <div class="refine">
+        <div class="block" id="sensewrap">
+          <span class="eyebrow">anchor your attention with</span>
+          <div class="chips" id="senses"></div>
         </div>
-        <div class="block" id="descdefwrap">
-          <span class="eyebrow">describe the defense?</span>
-          <div class="chips" id="descdefs"></div>
-        </div>
-        <div class="block" id="lenwrap">
-          <span class="eyebrow">length</span>
-          <div class="chips" id="lens"></div>
+        <div class="block" id="skillwrap">
+          <span class="eyebrow">the skill to practice</span>
+          <div class="chips" id="skills"></div>
         </div>
       </div>
-    </details>
 
-    <p class="summary" id="summary"></p>
-    <button class="btn primary" id="begin">Begin</button>
+      <details class="adjust" id="adjust">
+        <summary><span class="tw" aria-hidden="true"></span> more options</summary>
+        <div class="adjust-body">
+          <div class="block">
+            <span class="eyebrow">How much silence?</span>
+            <div class="chips" id="sils"></div>
+          </div>
+          <div class="block" id="descdefwrap">
+            <span class="eyebrow">describe the defense?</span>
+            <div class="chips" id="descdefs"></div>
+          </div>
+          <div class="block" id="lenwrap">
+            <span class="eyebrow">length</span>
+            <div class="chips" id="lens"></div>
+          </div>
+        </div>
+      </details>
+
+      <div class="foot">
+        <p class="summary" id="summary"></p>
+        <button class="btn primary" id="begin">Begin</button>
+      </div>
+    </div>
   </main>
 
   <!-- ───────────── PLAYER ───────────── -->
   <main id="player" class="screen hidden">
     <div class="ringwrap"><canvas id="ring"></canvas></div>
+    <p class="caption" id="caption"></p>
     <div class="controls">
-      <button class="btn quiet" id="pause">Pause</button>
-      <button class="btn quiet" id="endbtn">Start outro</button>
-      <button class="btn quiet" id="stopbtn">Stop and return</button>
+      <div class="iconrow">
+        <button class="iconbtn" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
+        <button class="iconbtn" id="stopbtn" aria-label="Stop"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="3"></rect></svg></button>
+      </div>
+      <button class="btn quiet endbtn" id="endbtn">Begin gentle close</button>
+      <div class="silrow">
+        <button class="silbtn" id="lesssil" aria-label="less silence">−</button>
+        <span class="silnow" id="silnow"></span>
+        <button class="silbtn" id="moresil" aria-label="more silence">+</button>
+      </div>
+      <button class="captoggle" id="captoggle" type="button" aria-pressed="false">captions off</button>
     </div>
-    <div class="subcontrols">
-      <button class="btn quiet sm" id="lesssil">− silence</button>
-      <button class="btn quiet sm" id="moresil">+ silence</button>
+    <!-- gentle completion state -->
+    <div class="done" id="done">
+      <button class="btn quiet" id="againbtn">Again</button>
+      <button class="btn quiet" id="overbtn">Start over</button>
     </div>
-    <!-- TEST-ONLY: sequence preview. Remove this block + its CSS/JS for production. -->
-    <div id="testlist" class="testlist"></div>
+    <!-- a rest between stacked meditations: waits for play -->
+    <div class="brk" id="brk">
+      <p class="brk-line" id="brkline"></p>
+      <button class="iconbtn" id="contbtn" aria-label="Continue"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
+    </div>
+    <!-- shown only if clips can't load -->
+    <p class="conn" id="conn">having trouble connecting. hang on…</p>
+    <p class="taphint" id="taphint">tap anywhere for controls</p>
   </main>
 </div>
 
-<audio id="au" crossorigin="anonymous"></audio>
+<audio id="au"></audio>
 
 <script>
 /* ====== audio location ======
@@ -324,7 +327,12 @@ L 1016.8562125499993,93.29845085948628 C 1009.2311436999998,85.67338200948635 99
    - Production CDN (recommended): the prefix that keeps the real filenames,
      e.g. "https://cdn.jsdelivr.net/gh/USER/REPO/clips/". A bare Wix-media
      prefix will NOT work (Wix rewrites uploads to opaque hashed URLs). */
-const BASE="clips/";
+const BASE="https://justinlmft.github.io/snb-guided-practice/clips/";
+
+/* CAPTIONS (always-on, no toggle): fetch the filename-keyed transcript once on load. */
+let CAP={};
+fetch(BASE+'captions.json').then(r=>r.ok?r.json():{}).then(j=>{CAP=j||{};}).catch(()=>{});
+let capsOn=false,curFile='';
 
 /* ====== content data (manifest, order, rules, durations) ====== */
 const MAN={"INTRO-01":["INTRO-01-a.mp3","INTRO-01-b.mp3"],
@@ -659,12 +667,13 @@ function estimate(o){let t=0;o.seq.forEach((b,i)=>{t+=(DUR[b]||4);if(i<o.seq.len
 /* ====== setup screen ====== */
 function renderSetup(){
   cfg=practices[active];
-  // tint the brand mark to the current tab's track
+  // tint the brand mark to the current practice's track — but only once the user is choosing; the entry starts all-ink
   const mk=document.querySelector('.mark');
-  if(mk){mk.classList.remove('mark-sky','mark-amber');mk.classList.add('mark-'+TRACK[cfg.key]);}
+  if(mk){mk.classList.remove('mark-sky','mark-amber');if($('setup').classList.contains('choosing'))mk.classList.add('mark-'+TRACK[cfg.key]);}
   // practice tabs
   const TABNAME=['Your practice','Second (optional)','Third (optional)'];
   const tw=$('tabs');tw.innerHTML='';
+  if(practices.length<2)tw.setAttribute('data-single','');else tw.removeAttribute('data-single');
   practices.forEach((p,i)=>{
     const b=document.createElement('button');b.type='button';
     b.className='tab'+(i===active?' on':'')+(i>0?' is-opt':'')+' track-'+TRACK[p.key];
@@ -720,7 +729,7 @@ function renderSetup(){
     [[false,'a complete practice'],[true,'open-ended']].forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.open);p.onclick=()=>{cfg.open=v;renderSetup();};lw.appendChild(p);});}
   // summary
   const o=buildPlan();
-  const time = o.loop ? '<b>Open-ended.</b> It stays open until you end it.' : '<b>About '+estimate(o)+' min.</b>';
+  const time = o.loop ? '<b>The practice continues until you choose to stop.</b>' : '<b>About '+estimate(o)+' min.</b>';
   const pre = practices.length>1 ? (['','','Two','Three'][practices.length]+' practices, back to back. ') : '';
   $('summary').innerHTML = pre + time;
 }
@@ -766,19 +775,80 @@ function updateTest(){
 
 $('begin').onclick=startPlayer;
 
+/* zero-decision entry: one tap begins the gentlest path (connect with safety), no choices */
+$('leadbtn').onclick=()=>{practices=[fresh('mindfulness')];active=0;renderSetup();startPlayer();};
+$('chooselink').onclick=()=>{$('setup').classList.add('choosing');};
+$('backlink').onclick=()=>{$('setup').classList.remove('choosing');};
+
+/* keep the player as just breath; a tap brings controls back, then they fade again */
+let ctrlTimer=null,hintTimer=null;
+function revealControls(){
+  const p=$('player');p.classList.add('show-controls');p.classList.remove('hint-on');
+  clearTimeout(ctrlTimer);clearTimeout(hintTimer);
+  if(finished)return;                                   // at the end, leave controls up
+  ctrlTimer=setTimeout(()=>{p.classList.remove('show-controls');
+    hintTimer=setTimeout(()=>{if(playing&&!finished)p.classList.add('hint-on');},500);
+  },4500);
+}
+$('player').addEventListener('pointerdown',()=>{if(playing||finished)revealControls();});
+
+/* safeguard: if this page is hidden (another tab/frame is in front), pause so audio never plays in the background */
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing&&!paused){$('pause').click();}});
+
+/* connection trouble: additive listeners (do not touch the timing engine). If clips keep failing,
+   say so gently instead of leaving the listener in unexplained silence. Clears on the next clip that plays. */
+let _errCount=0,_errTimer=null;
+au.addEventListener('error',()=>{if(!playing)return;_errCount++;clearTimeout(_errTimer);if(_errCount>=2)$('player').classList.add('conn-trouble');_errTimer=setTimeout(()=>{_errCount=0;},6000);});
+au.addEventListener('playing',()=>{_errCount=0;$('player').classList.remove('conn-trouble');});
+
+/* a deliberate rest between stacked meditations: the next one waits for the user to press play.
+   A thin wrapper around advance() pauses at a practice boundary — a 'closing'-phase clip followed by
+   a non-'closing' one. Clip order and within-practice timing are untouched; only a user-gated pause is inserted. */
+let inBreak=false;
+const PNAME={mindfulness:'simple mindfulness',anchoring:'connecting with safety',most:'self-regulation'};
+const _advanceCore=advance;
+advance=function(){
+  if(playing&&!inBreak&&idx>=0&&idx+1<SEQ.length&&PH[idx]==='closing'&&PH[idx+1]&&PH[idx+1]!=='closing'){
+    inBreak=true;try{au.pause();}catch(e){}clearTimeout(gapTimer);inGap=false;
+    // which meditation is coming up next?
+    let seg=0;for(let i=1;i<=idx+1;i++){if(PH[i-1]==='closing'&&PH[i]!=='closing')seg++;}
+    const nm=PNAME[(practices[seg]||{}).key]||'';
+    $('brkline').textContent='practice '+(seg+1)+' of '+practices.length+(nm?' \u00b7 '+nm:'')+' next';
+    clearTimeout(ctrlTimer);$('player').classList.remove('show-controls','hint-on');$('player').classList.add('breaking');
+    return;
+  }
+  return _advanceCore();
+};
+$('contbtn').onclick=()=>{inBreak=false;$('player').classList.remove('breaking');revealControls();_advanceCore();};
+
 function startPlayer(){
-  const o=buildPlan();SEQ=o.seq;PH=o.phase;LOOP=o.loop;LOOPFROM=o.loopFrom;
-  $('pause').textContent='Pause';$('pause').style.display='';
+  const o=buildPlan();SEQ=o.seq;PH=o.phase;LOOP=o.loop;LOOPFROM=o.loopFrom;buildTrackSeq();
+  $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
   finished=false;paused=false;playing=true;inGap=false;idx=-1;
   showScreen('player');fitRing();renderTest();showSil();
+  inBreak=false;$('player').classList.remove('hint-on','finished','conn-trouble','breaking');revealControls();
   cancelAnimationFrame(rafId);ringLoop();
   advance();
 }
 function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}cancelAnimationFrame(rafId);}
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   CAPTIONS HOOK (not yet wired — needs transcripts from engineering).
+   When transcripts exist, host a `captions.json` next to the clips keyed BY FILENAME,
+   e.g. { "INTRO-01-a.mp3": "Welcome…", "INTRO-01-b.mp3": "Hi…", … }, fetch it once on load
+   (const CAP = await (await fetch(BASE+'captions.json')).json()), then:
+     1. In playCurrent() capture the chosen filename (see note there) and, if captions are on,
+        set a caption element's text to CAP[file] || ''.
+     2. Clear the caption on au.onended / during silence gaps (mirror the old phase-label logic).
+     3. Add a captions on/off toggle in the controls (persist nothing — no localStorage).
+   The player advances on each clip's real `ended`, so a per-clip line is enough for v1;
+   upgrade to WebVTT cues later if timed highlighting is wanted.
+   ───────────────────────────────────────────────────────────────────────────── */
 function playCurrent(){
   const b=SEQ[idx];
-  try{au.src=clipUrl(rand(MAN[b]));au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
+  const file=rand(MAN[b]);          // CAPTIONS: this is the chosen variant filename — caption key is CAP[file]
+  curFile=file;{const cc=$('caption');if(cc)cc.textContent=CAP[file]||'';}   // set caption (shown only when captions on)
+  try{au.src=clipUrl(file);au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
 }
 function advance(){
   if(!playing)return;
@@ -790,6 +860,7 @@ function advance(){
 au.onended=()=>{                                      // a clip finished playing, in full
   if(!playing||paused)return;
   if(!LOOP&&idx>=SEQ.length-1)return finish();         // last clip plays to its natural end — no cut
+  {const cc=$('caption');if(cc)cc.textContent='';}    // clear caption during the silence gap
   gapRemain=gapAfter(SEQ[idx])*1000;gapStart=performance.now();inGap=true;
   clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);
 };
@@ -799,8 +870,10 @@ au.onerror=()=>{                                      // a clip failed to load �
   inGap=true;gapRemain=300;gapStart=performance.now();
   clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},300);
 };
-function finish(){playing=false;finished=true;inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}
+function finish(){playing=false;finished=true;finishAt=performance.now();inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}
+  {const cc=$('caption');if(cc)cc.textContent='';}
   $('pause').style.display='none';
+  clearTimeout(ctrlTimer);$('player').classList.add('finished');$('player').classList.remove('hint-on','conn-trouble');
 }
 $('pause').onclick=()=>{
   if(!playing)return;
@@ -808,12 +881,12 @@ $('pause').onclick=()=>{
     paused=false;
     if(inGap){gapStart=performance.now();clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);}
     else{try{au.play();}catch(e){}}
-    $('pause').textContent='Pause';
+    $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');
   }else{ // pause
     paused=true;
     if(inGap){clearTimeout(gapTimer);gapRemain=Math.max(0,gapRemain-(performance.now()-gapStart));}
     else{try{au.pause();}catch(e){}}
-    $('pause').textContent='Resume';
+    $('pause').classList.add('is-paused');$('pause').setAttribute('aria-label','Resume');
   }
 };
 /* live silence control — adjusts the current practice's gap length on the fly */
@@ -823,24 +896,48 @@ function showSil(){const e=$('silnow');if(e)e.textContent='silence: '+cfg.silenc
 function stepSil(d){let i=SILSTEPS.indexOf(nearestSil(cfg.silence));i=Math.max(0,Math.min(SILSTEPS.length-1,i+d));cfg.silence=SILSTEPS[i];showSil();}
 $('lesssil').onclick=()=>stepSil(-1);
 $('moresil').onclick=()=>stepSil(1);
+$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');t.textContent='captions '+(capsOn?'on':'off');t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);};
 
 $('stopbtn').onclick=()=>{stopAll();finished=false;showScreen('setup');};   // immediate exit, no close
+$('againbtn').onclick=()=>{startPlayer();};                                  // replay the same session from the top
+$('overbtn').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble');$('setup').classList.remove('choosing');showScreen('setup');};
 $('endbtn').onclick=()=>{
   if(finished){stopAll();showScreen('setup');return;}
   clearTimeout(gapTimer);inGap=false;playing=true;paused=false;LOOP=false;
-  $('pause').textContent='Pause';
-  const tail=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05','OUTRO'].filter(has);
+  $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');
+  // is there another meditation queued after this point? (a practice boundary further along)
+  let nextStart=-1;for(let i=idx+1;i<PH.length;i++){if(PH[i-1]==='closing'&&PH[i]!=='closing'){nextStart=i;break;}}
+  const closes=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05'].filter(has);
   const played=SEQ.slice(0,Math.max(idx+1,0));
-  SEQ=played.concat(tail);PH=PH.slice(0,played.length).concat(tail.map(()=>'closing'));
+  const playedPH=PH.slice(0,Math.max(idx+1,0));
+  if(nextStart>0){
+    // gently close THIS meditation, then break into the next one
+    SEQ=played.concat(closes,SEQ.slice(nextStart));
+    PH=playedPH.concat(closes.map(()=>'closing'),PH.slice(nextStart));
+  }else{
+    // last (or only) meditation: close, sign off, then finish
+    const tail=closes.concat(['OUTRO'].filter(has));
+    SEQ=played.concat(tail);
+    PH=playedPH.concat(tail.map(()=>'closing'));
+  }
+  buildTrackSeq();
   idx=played.length-1;renderTest();
   try{au.pause();}catch(e){}
   advance();
 };
 
-/* ====== breathing ring (calm, brand-toned, reduced-motion aware) ====== */
+/* ====== breathing ring — soft, brand-toned glow, track-tinted, reduced-motion aware ======
+   The one bit of "decoration" in the app, and intentionally so: it is the practice's
+   living focal point. Two soft radial layers (a wide halo + a denser core) breathe on a
+   ~9.6s cycle in the chosen practice's track colour (sky for mindfulness / safety,
+   amber for self-regulation), with a faint steady guide ring as a sense of "home". */
 const cv=$('ring'),g=cv.getContext('2d');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let rafId=null;
+let rafId=null,_phaseShown='',finishAt=0,TRACKSEQ=[];
+const TRACK_RGB={sky:[88,145,197],amber:[210,154,74],leaf:[91,160,112]};
+/* which practice's track colour each clip belongs to, so a stacked session recolours per meditation */
+function buildTrackSeq(){TRACKSEQ=[];let seg=0;for(let i=0;i<SEQ.length;i++){if(i>0&&PH[i-1]==='closing'&&PH[i]!=='closing')seg++;const p=practices[seg]||practices[practices.length-1]||{key:'mindfulness'};TRACKSEQ.push(TRACK[p.key]);}}
+function ringRGB(){return TRACK_RGB[TRACKSEQ[idx]||TRACK[cfg.key]]||TRACK_RGB.sky;}
 function fitRing(){const dpr=devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
 addEventListener('resize',()=>{if(!$('player').classList.contains('hidden'))fitRing();});
 function ringLoop(){
@@ -850,14 +947,18 @@ function ringLoop(){
   const t=performance.now()/1000;
   // ~9.6s breath cycle; frozen if reduced motion or paused
   const phase=(playing&&!paused&&!reduce)?(Math.sin(t*0.65)*0.5+0.5):0.5;
-  const rSteady=unit*0.30;
-  const rBreath=unit*0.17+phase*unit*0.16;
-  // steady outer hairline ring
-  g.strokeStyle='#D8D2C2';g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,rSteady,0,Math.PI*2);g.stroke();
-  // breathing ink ring
-  g.strokeStyle='#1A1F2A';g.globalAlpha=0.55;g.lineWidth=2;g.beginPath();g.arc(cx,cy,rBreath,0,Math.PI*2);g.stroke();g.globalAlpha=1;
-  // center mark
-  g.fillStyle='#5E5A4E';g.beginPath();g.arc(cx,cy,2.5,0,Math.PI*2);g.fill();
+  const [r,gr,bl]=ringRGB();
+  const rgba=(a)=>'rgba('+r+','+gr+','+bl+','+a+')';
+  g.lineCap='round';
+  // at the end, the ring closes inward and fades, settling into the centre dot
+  let e=0;
+  if(finished){const ct=Math.min(1,(performance.now()-finishAt)/2200);e=1-Math.pow(1-ct,3);}
+  const dotR=Math.max(2.5,unit*0.02);
+  // the breathing ring — a single solid stroke in the practice's colour
+  const breathR=(unit*(0.16+0.16*phase))*(1-e)+dotR*e;
+  g.strokeStyle=rgba(0.9*(1-e));g.lineWidth=2.5;g.beginPath();g.arc(cx,cy,breathR,0,Math.PI*2);g.stroke();
+  // solid centre dot
+  g.fillStyle=rgba(1);g.beginPath();g.arc(cx,cy,dotR,0,Math.PI*2);g.fill();
 }
 
 renderSetup();
