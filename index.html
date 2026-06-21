@@ -371,6 +371,8 @@ const BASE="https://justinlmft.github.io/snb-guided-practice/clips/";
 /* CAPTIONS: fetch the filename-keyed transcript once on load. On/off toggle, default OFF, nothing persisted. */
 let CAP={};
 fetch(BASE+'captions.json').then(r=>r.ok?r.json():{}).then(j=>{CAP=j||{};}).catch(()=>{});
+let CAPT={};
+fetch(BASE+'captions-timed.json').then(r=>r.ok?r.json():{}).then(j=>{CAPT=j||{};}).catch(()=>{});
 let capsOn=false,curFile='';
 
 /* ====== content data (manifest, order, rules, durations) ====== */
@@ -872,7 +874,7 @@ function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer)
    No per-word timestamps exist, so we split CAP[file] into phrases and reveal each across
    the clip's playback, weighting by phrase length (a proxy for how long it takes to say).
    Purely a renderer over CAP[file]; the sequencing/timing engine is untouched. */
-let CAP_CHUNKS=[],CAP_BOUNDS=[],capShown=-1,capFadeT=null;
+let CAP_CHUNKS=[],CAP_BOUNDS=[],CAP_TIMES=null,capShown=-1,capFadeT=null;
 function splitCaption(txt){
   txt=(txt||'').trim();if(!txt)return [];
   let parts=(txt.match(/[^.!?]+[.!?]*/g)||[txt]).map(s=>s.trim()).filter(Boolean);
@@ -888,21 +890,25 @@ function splitCaption(txt){
   });
   return out;
 }
+function capStartTimed(cues){CAP_CHUNKS=cues.map(c=>c[1]);CAP_TIMES=cues.map(c=>c[0]);capShown=-1;if(CAP_CHUNKS.length)capShow(0);else capRender('');}
+function capFor(file){const t=CAPT[file];if(t&&t.length){capStartTimed(t);}else{CAP_TIMES=null;capStart(CAP[file]||'');}}
 function capStart(txt){
-  CAP_CHUNKS=splitCaption(txt);capShown=-1;
+  CAP_TIMES=null;CAP_CHUNKS=splitCaption(txt);capShown=-1;
   let total=CAP_CHUNKS.reduce((n,s)=>n+s.length,0)||1,acc=0;
   CAP_BOUNDS=CAP_CHUNKS.map(s=>{acc+=s.length;return acc/total;});   // cumulative phrase-length fractions
   if(CAP_CHUNKS.length){capTick();if(capShown<0)capShow(0);}else capRender('');
 }
 function capTick(){
   if(!capsOn||paused||inGap||!CAP_CHUNKS.length)return;
-  const dur=(isFinite(au.duration)&&au.duration>0)?au.duration:(DUR[SEQ[idx]]||CAP_CHUNKS.length*3);
-  const prog=Math.min(1,au.currentTime/dur);
-  let i=0;while(i<CAP_BOUNDS.length-1&&prog>=CAP_BOUNDS[i])i++;
+  let i=0;
+  if(CAP_TIMES){while(i<CAP_TIMES.length-1&&au.currentTime>=CAP_TIMES[i+1])i++;}
+  else{const dur=(isFinite(au.duration)&&au.duration>0)?au.duration:(DUR[SEQ[idx]]||CAP_CHUNKS.length*3);
+    const prog=Math.min(1,au.currentTime/dur);
+    while(i<CAP_BOUNDS.length-1&&prog>=CAP_BOUNDS[i])i++;}
   if(i!==capShown)capShow(i);
 }
 function capShow(i){capShown=i;capRender(CAP_CHUNKS[i]||'');}
-function capClear(){CAP_CHUNKS=[];CAP_BOUNDS=[];capShown=-1;capRender('');}
+function capClear(){CAP_CHUNKS=[];CAP_BOUNDS=[];CAP_TIMES=null;capShown=-1;capRender('');}
 function capRender(text){
   const el=$('captext');if(!el||el.textContent===text)return;
   el.classList.remove('in');                              // fade/blur the current phrase out
@@ -914,7 +920,7 @@ au.addEventListener('timeupdate',capTick);
 function playCurrent(){
   const b=SEQ[idx];
   const file=rand(MAN[b]);          // CAPTIONS: this is the chosen variant filename — caption key is CAP[file]
-  curFile=file;capStart(CAP[file]||'');   // parse caption into phrases, reveal progressively (shown only when captions on)
+  curFile=file;capFor(file);   // timed reveal if available, else estimate (shown only when captions on)
   try{au.src=clipUrl(file);au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
 }
 function advance(){
@@ -963,7 +969,7 @@ function showSil(){const e=$('silnow');if(e)e.textContent=cfg.silence+'s';}
 function stepSil(d){let i=SILSTEPS.indexOf(nearestSil(cfg.silence));i=Math.max(0,Math.min(SILSTEPS.length-1,i+d));cfg.silence=SILSTEPS[i];showSil();}
 $('lesssil').onclick=()=>stepSil(-1);
 $('moresil').onclick=()=>stepSil(1);
-$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capStart(CAP[curFile]||'');}else{capClear();}};
+$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capFor(curFile);}else{capClear();}};
 
 $('stopbtn').onclick=()=>{stopAll();finished=false;showScreen('setup');};   // immediate exit, no close
 $('againbtn').onclick=()=>{startPlayer();};                                  // replay the same session from the top
