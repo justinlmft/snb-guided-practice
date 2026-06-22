@@ -375,6 +375,10 @@ body.playing .popout,body.playing .installhint{display:none}
           <span class="eyebrow">the skill to practice</span>
           <div class="chips" id="skills"></div>
         </div>
+        <div class="block" id="medwrap" style="display:none">
+          <span class="eyebrow">choose a session</span>
+          <div class="chips" id="meds"></div>
+        </div>
       </div>
 
       <details class="adjust" id="adjust">
@@ -686,6 +690,12 @@ const GAPS=RULES.gaps;
 const SHORT_PREFIX=['PINTRO-','INTENT-','PEND-TO-'];
 const SHORT_BASE={'INTRO-01':1,'CAP-GATE':1};
 function gapAfter(b){
+  if(activePack){                                                                // standalone: tier declared per segment
+    const t=GAPTIER[b]||'full';
+    if(t==='short')return GAPS.short_seconds;                                    // procedural / transitional
+    if(t==='hold')return Math.max(cfg.silence,activePack.holdFloor||8);          // true "sit with it" beats — floored
+    return cfg.silence;                                                          // full witnessing silence
+  }
   if(b==='CURIOSITY-01')return Math.min(cfg.silence,4);                          // never a long hold
   if(SHORT_BASE[b]||SHORT_PREFIX.some(p=>b.indexOf(p)===0))return GAPS.short_seconds;
   return cfg.silence;                                                            // full silence (incl. INVITE-05/06, safety general/specific, all DESC)
@@ -703,7 +713,18 @@ const ladder=senseFront;
 const allSenses=['touch','sound','sight','movement','imagination'].filter(s=>senseFront(s).length);
 
 /* the four practices, gentlest first. Copy in Justin's voice. */
-const TRACK={mindfulness:'ink',anchoring:'sky',most:'amber'};
+const TRACK={mindfulness:'ink',anchoring:'sky',most:'amber',more:'ink'};
+/* standalone guided sessions (the "More meditations" path) — fixed recordings, sliced into
+   prompts, played through the same engine but bypassing build(). Pack JSON + clips live in
+   the repo (packs/ + clips/). 'track' reuses the woven colour (anchoring=sky/heart, most=amber). */
+const PACKS_BASE=BASE.replace(/clips\/?$/,'packs/');
+const MEDS={
+ 'uye':{title:'Use Your Ears',cue:'grounding through sound',track:'anchoring',est:'~10 min',file:'uye.pack.json'},
+ 'eye':{title:'Use Your Eyes',cue:'grounding through sight',track:'anchoring',est:'~9 min',file:'eye.pack.json'},
+ 'daily-dysregulation':{title:'Daily Dysregulation',cue:'meeting a recent activation',track:'most',est:'~16 min',file:'daily-dysregulation.pack.json'},
+ 'outside-the-cave':{title:'Outside the Cave',cue:'a deeper imagery journey',track:'most',est:'~32 min',file:'outside-the-cave.pack.json'}
+};
+const MEDS_ORDER=['uye','eye','daily-dysregulation','outside-the-cave'];   // gentlest first
 /* skills offered within self-regulation (like the anchor menu) */
 const SKILLS={
   most:[['imagery','imagery & invitation'],['obstacles','obstacles'],['balancing','balancing'],['pendulation','pendulation']]
@@ -714,13 +735,15 @@ const EXP={
  anchoring:{key:'anchoring',t:'Connect with safety',cue:'a step in — settling into safety',d:'',sense:'touch',silence:8,gentle:true,mind:false,tier:1,
    sum:"We'll settle into safety through your {sense}, and stay there a while."},
  most:{key:'most',t:'Practice self-regulation',cue:'the deepest — meeting what is hard',d:"",sense:'touch',skill:'imagery',descDefense:false,silence:4,gentle:false,mind:false,tier:3,
-   sum:"We'll hold safety and not-safety, and let them take turns. This one goes deepest."}
+   sum:"We'll hold safety and not-safety, and let them take turns. This one goes deepest."},
+ more:{key:'more',t:'More meditations',cue:'standalone guided sessions',d:"",standalone:true,silence:8,mind:false,tier:9,
+   sum:"Full guided practices — pick one and begin."}
 };
 let practices=[fresh('mindfulness')];
 let active=0;
 let picked=false;   // has the user actively chosen a practice this visit? (drives the collapse + reveal)
 let cfg=practices[active];
-function fresh(k){return {...EXP[k],open:false};}
+function fresh(k){return {...EXP[k],open:false,pack:null};}
 
 /* ====== sequence building — canonical flow (see meditation-weaver-FLOW-SPEC.md) ====== */
 function anchorBlock(c,add){
@@ -804,10 +827,12 @@ function renderSetup(){
   cfg=practices[active];
   $('chooser').classList.toggle('picked',picked);
   // tint the brand mark + section eyebrows to the current practice's track
+  // (standalone: neutral until a session is picked, then follow that session's track — e.g. amber for defense)
+  const _trk = cfg.standalone ? (cfg.pack?TRACK[MEDS[cfg.pack].track]:'ink') : TRACK[cfg.key];
   const mk=document.querySelector('.mark');
-  if(mk){mk.classList.remove('mark-sky','mark-amber','mark-ink');mk.classList.add('mark-'+TRACK[cfg.key]);}
-  $('chooser').style.setProperty('--trk','var(--'+TRACK[cfg.key]+')');
-  $('chooser').style.setProperty('--trk-ink',TRACK[cfg.key]==='amber'?'#8C5E1C':TRACK[cfg.key]==='ink'?'#3A3F4A':'#356291');
+  if(mk){mk.classList.remove('mark-sky','mark-amber','mark-ink');mk.classList.add('mark-'+_trk);}
+  $('chooser').style.setProperty('--trk','var(--'+_trk+')');
+  $('chooser').style.setProperty('--trk-ink',_trk==='amber'?'#8C5E1C':_trk==='ink'?'#3A3F4A':'#356291');
   $('beginhelp').style.display='none';   // orientation now lives in the welcome line + per-option subtitles
   // experience options
   const ew=$('exps');ew.innerHTML='';
@@ -822,6 +847,23 @@ function renderSetup(){
     };
     ew.appendChild(b);
   });
+  // ── standalone "more meditations" path: swap the refine area for a session picker ──
+  if(cfg.standalone){
+    ['sensewrap','skillwrap','descdefwrap','lenwrap'].forEach(id=>$(id).style.display='none');
+    $('surprise').style.display='none';
+    $('medwrap').style.display='block';
+    const mw=$('meds');mw.innerHTML='';
+    MEDS_ORDER.forEach(id=>{const m=MEDS[id];
+      const p=chip(m.title+' · '+m.est,id===cfg.pack);
+      p.onclick=()=>{cfg.pack=id;renderSetup();};
+      mw.appendChild(p);});
+    const sv=$('sils');sv.innerHTML='';                                  // silence still applies to a standalone
+    SIL.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.silence);p.onclick=()=>{cfg.silence=v;renderSetup();};sv.appendChild(p);});
+    $('summary').innerHTML = cfg.pack ? ('<b>'+MEDS[cfg.pack].cue+' · '+MEDS[cfg.pack].est+'.</b>') : 'Choose a session to begin.';
+    const rv0=$('reveal'); if(rv0) rv0.style.maxHeight = picked ? rv0.scrollHeight+'px' : '0px';
+    return;
+  }
+  $('medwrap').style.display='none';
   // anchor sense (only when the practice uses a chosen sense)
   $('sensewrap').style.display=cfg.mind?'none':'block';
   if(!cfg.mind){const sw=$('senses');sw.innerHTML='';
@@ -873,6 +915,8 @@ $('surprise').onclick=()=>{
    (a clip whose take ran longer than DUR bled into the silence). DUR is no longer
    used to advance; we wait for `ended`, then hold the silence gap, then play next. */
 let SEQ=[],PH=[],idx=-1,LOOP=false,LOOPFROM=0;
+let activePack=null;                 // loaded standalone pack, or null in woven mode
+const SEGSTATE={},GAPTIER={},PACKCACHE={};   // standalone: id→ring state / silence tier; fetched-pack cache
 let playing=false,paused=false,finished=false,started=false,closingNow=false;
 let gapTimer=null,inGap=false,gapRemain=0,gapStart=0;
 
@@ -948,6 +992,8 @@ advance=function(){
 $('contbtn').onclick=()=>{inBreak=false;$('player').classList.remove('breaking');revealControls();_advanceCore();};
 
 function startPlayer(){
+  if(cfg.standalone)return startStandalone();          // the "more meditations" path bypasses build()
+  activePack=null;                                      // woven mode — clear any standalone state
   const o=buildPlan();SEQ=o.seq;PH=o.phase;LOOP=o.loop;LOOPFROM=o.loopFrom;buildTrackSeq();
   $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
   finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
@@ -958,6 +1004,32 @@ function startPlayer(){
   advance();
 }
 function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}cancelAnimationFrame(rafId);}
+
+/* ── standalone playback: drive the same engine from a fixed pack (no build/weave) ── */
+function applyPack(pack){
+  activePack=pack;
+  pack.segments.forEach(s=>{MAN[s.id]=[s.file];CAP[s.file]=s.cap||'';SEGSTATE[s.id]=s.state;GAPTIER[s.id]=s.gap;});
+  SEQ=pack.segments.map(s=>s.id);
+  PH=pack.segments.map(s=>s.state==='closing'?'closing':(s.cap||s.state));   // 'closing' phase eases the ring to black at the end
+  LOOP=false;LOOPFROM=0;
+  if(pack.silenceDefault&&(cfg.silence==null))cfg.silence=pack.silenceDefault;
+}
+function startStandalone(){
+  const id=cfg.pack;if(!id)return;                                           // Begin with no session chosen → no-op
+  const begin=pack=>{
+    applyPack(pack);buildTrackSeq();
+    $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
+    finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
+    showScreen('player');fitRing();renderTest();showSil();
+    started=false;const _st=$('starting');if(_st){_st.textContent='beginning';_st.classList.add('show');}
+    inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested','paused');revealControls();
+    cancelAnimationFrame(rafId);ringLoop();
+    advance();
+  };
+  if(PACKCACHE[id])return begin(PACKCACHE[id]);
+  fetch(PACKS_BASE+MEDS[id].file).then(r=>r.json()).then(p=>{PACKCACHE[id]=p;begin(p);})
+   .catch(()=>{$('summary').innerHTML='<b>Could not load that session — check your connection.</b>';});
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CAPTIONS HOOK (not yet wired — needs transcripts from engineering).
@@ -1118,13 +1190,23 @@ const RING_BLUE=[88,145,197], RING_ORANGE=[210,154,74], RING_INK=[26,31,42];
 /* classify the current clip into one of three moments by its id (works the same in any practice & when stacked) */
 function clipState(b){
   if(!b)return 'mind';
-  if(/^(INVITE|IMG-|OBST|HOLD-WATCH|DESC-DEFENSE|NUMB-OK|PEND-DEFENSE|PEND-TO-DEFENSE)/.test(b))return 'defense';  // the harder edge
+  if(activePack&&SEGSTATE[b])return SEGSTATE[b];                                  // standalone: state declared per segment
+  if(/^(HOLD-WATCH|PEND-HOLD)/.test(b))return 'both';                                                            // holding both at once — blue outside, orange inside
+  if(/^(INVITE|IMG-|OBST|DESC-DEFENSE|NUMB-OK|PEND-DEFENSE|PEND-TO-DEFENSE)/.test(b))return 'defense';  // the harder edge
   if(/^(CLOSE-|OUTRO)/.test(b))return 'closing';                                                                 // easing out — the circle returns to black
   if(/^(INTRO-01|MIND-0[1-8])$/.test(b))return 'mind';                                                            // gentle noticing prompts
   return 'safety';                                                                                                 // anchoring / resting in safety
 }
-const RING_STATE={mind:{col:RING_INK,outer:1,inner:0},safety:{col:RING_BLUE,outer:0,inner:0},defense:{col:RING_ORANGE,outer:0,inner:1},closing:{col:RING_INK,outer:0,inner:0}};
-let _rc=RING_INK.slice(), _ro=1, _ri=0, _lastState='mind', _breath=0.5, _breath2=0.5;   // eased current colour / outer-ring / inner-ring opacity; held breath values
+/* 'both' = holding safety and defense at once: ink centre + ink breathing circle, with the
+   blue (safety) ring OUTSIDE and the orange (defense) ring INSIDE, both present. outerCol/innerCol
+   default to col for every other state, so the single-colour states are unchanged. */
+const RING_STATE={
+  mind:{col:RING_INK,outer:1,inner:0},
+  safety:{col:RING_BLUE,outer:0,inner:0},
+  defense:{col:RING_ORANGE,outer:0,inner:1},
+  both:{col:RING_INK,outer:1,inner:1,outerCol:RING_BLUE,innerCol:RING_ORANGE},
+  closing:{col:RING_INK,outer:0,inner:0}};
+let _rc=RING_INK.slice(), _roc=RING_INK.slice(), _ric=RING_INK.slice(), _ro=1, _ri=0, _lastState='mind', _breath=0.5, _breath2=0.5;   // eased main / outer-ring / inner-ring colours + outer/inner opacity; held breath values
 function buildTrackSeq(){}                                     // (legacy no-op — colour now follows each clip's state, computed live)
 function fitRing(){const dpr=devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
 addEventListener('resize',()=>{if(!$('player').classList.contains('hidden'))fitRing();});
@@ -1138,18 +1220,22 @@ function ringLoop(){
   const breath=_breath, breath2=_breath2;
   // ease toward the current clip's state (a quick, deliberate shift)
   const s=RING_STATE[finished?_lastState:(closingNow?(_lastState='closing'):(_lastState=clipState(SEQ[idx])))];
-  for(let i=0;i<3;i++)_rc[i]+=(s.col[i]-_rc[i])*0.10;
+  const soc=s.outerCol||s.col, sic=s.innerCol||s.col;
+  for(let i=0;i<3;i++){_rc[i]+=(s.col[i]-_rc[i])*0.10;_roc[i]+=(soc[i]-_roc[i])*0.10;_ric[i]+=(sic[i]-_ric[i])*0.10;}
   _ro+=(s.outer-_ro)*0.08; _ri+=(s.inner-_ri)*0.08;
   // at the end, the ring closes inward and fades, settling into the centre dot
   let e=0;
   if(finished){const ct=Math.min(1,(performance.now()-finishAt)/2200);e=1-Math.pow(1-ct,3);}
   const [r,gr,bl]=_rc.map(Math.round);
   const rgba=(a)=>'rgba('+r+','+gr+','+bl+','+a+')';
+  const oc=_roc.map(Math.round), ic=_ric.map(Math.round);                       // outer-ring (safety) + inner-ring (defense) colours, eased independently
+  const rgbaO=(a)=>'rgba('+oc[0]+','+oc[1]+','+oc[2]+','+a+')';
+  const rgbaI=(a)=>'rgba('+ic[0]+','+ic[1]+','+ic[2]+','+a+')';
   g.lineCap='round';
   const dotR=Math.max(2.5,unit*0.02);
-  // the migrating second ring — faint thread, outside for mindfulness / inside for defense (fades out as the session closes)
-  if(_ro>0.01){g.strokeStyle=rgba(0.5*_ro*(1-e));g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,unit*(0.30+0.13*breath2),0,Math.PI*2);g.stroke();}
-  if(_ri>0.01){g.strokeStyle=rgba(0.6*_ri*(1-e));g.lineWidth=1.6;g.beginPath();g.arc(cx,cy,unit*(0.115+0.055*breath2),0,Math.PI*2);g.stroke();}
+  // the migrating second ring — faint thread, outside for mindfulness/safety / inside for defense (both at once when holding)
+  if(_ro>0.01){g.strokeStyle=rgbaO(0.5*_ro*(1-e));g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,unit*(0.30+0.13*breath2),0,Math.PI*2);g.stroke();}
+  if(_ri>0.01){g.strokeStyle=rgbaI(0.6*_ri*(1-e));g.lineWidth=1.6;g.beginPath();g.arc(cx,cy,unit*(0.115+0.055*breath2),0,Math.PI*2);g.stroke();}
   // the whole breathing circle — collapsing into the dot at the very end
   const breathR=(unit*(0.20+0.12*breath))*(1-e)+dotR*e;
   g.strokeStyle=rgba(0.9*(1-e));g.lineWidth=2.5;g.beginPath();g.arc(cx,cy,breathR,0,Math.PI*2);g.stroke();

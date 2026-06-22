@@ -5,7 +5,7 @@
      <audio> can seek/stream from cache → repeated sessions become offline-capable, no big
      upfront download.
    Bump SHELL_VERSION whenever index.html / sw.js change to roll the shell cache. */
-const SHELL_VERSION = 'v3-pwa-7';
+const SHELL_VERSION = 'v3-pwa-8';
 const SHELL = 'snb-shell-' + SHELL_VERSION;
 const AUDIO = 'snb-audio-v1';
 const FONTS = 'snb-fonts-v1';
@@ -19,7 +19,11 @@ const SHELL_ASSETS = [
   'icon-maskable-512.png',
   'icon-180.png',
   'clips/captions.json',
-  'clips/captions-timed.json'
+  'clips/captions-timed.json',
+  'packs/daily-dysregulation.pack.json',
+  'packs/uye.pack.json',
+  'packs/eye.pack.json',
+  'packs/outside-the-cave.pack.json'
 ];
 
 self.addEventListener('install', e => {
