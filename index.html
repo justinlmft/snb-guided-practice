@@ -237,8 +237,9 @@ body.playing .brand{display:none}
 .iconbtn .ico{width:25px;height:25px;display:block;fill:var(--ink);color:var(--ink)}
 
 /* ── primary transport: the one hero control ── */
-/* pause/play — a calm rounded square (not a circle), so it never echoes the breathing ring */
-.transport{flex:none;width:54px;height:54px;border-radius:15px;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
+/* pause/play — a wide rounded button (not a circle, so it never echoes the breathing ring) that
+   grows to fill the row from the captions pill out to the right edge — no empty gutter. */
+.transport{flex:1 1 auto;min-width:54px;height:54px;border-radius:15px;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
 .transport:hover{box-shadow:0 0 0 1.5px var(--ink)}
 .transport:active{transform:scale(.96)}
 .transport:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
@@ -252,8 +253,8 @@ body.playing .brand{display:none}
 /* the controls live on one compact, centred bar — no full-width pills, no wasted space */
 /* control bar spans the page columns: silence + captions at the LEFT edge, pause/play at the
    RIGHT edge (easy thumb reach) — both aligned to the same grid as the cards, caption and buttons. */
-.controlbar{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;flex-wrap:nowrap}
-.adjgroup{display:flex;align-items:center;gap:10px}
+.controlbar{display:flex;align-items:center;gap:10px;width:100%;flex-wrap:nowrap}
+.adjgroup{display:flex;align-items:center;gap:10px;flex:none}
 .endbtn{width:100%}
 .adj{display:flex;align-items:center;justify-content:center;gap:2px;width:auto;height:54px;border:1px solid var(--hairline);border-radius:14px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
 .adj.silence{padding:0 4px 0 14px}
