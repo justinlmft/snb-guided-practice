@@ -207,7 +207,7 @@ body.playing .brand{display:none}
    animation (see _msz in ringLoop) so it stays perfectly smooth against the 60fps breathing. */
 #player.show-controls .stage{transform:translateY(-12vh)}
 @media (prefers-reduced-motion:reduce){.stage{transition:none}}
-#ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block;transform:translateZ(0)}
+#ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
 .phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
 /* a quiet "it's beginning" cue so the opening silence never reads as broken */
 .starting{font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);margin:0;min-height:1.4em;text-align:center;opacity:0;transition:opacity .6s var(--ease)}
@@ -874,19 +874,23 @@ function renderSetup(){
   $('chooser').style.setProperty('--trk','var(--'+_trk+')');
   $('chooser').style.setProperty('--trk-ink',_trk==='amber'?'#8C5E1C':_trk==='ink'?'#3A3F4A':'#356291');
   $('beginhelp').style.display='none';   // orientation now lives in the welcome line + per-option subtitles
-  // experience options
-  const ew=$('exps');ew.innerHTML='';
-  Object.values(EXP).forEach(e=>{
-    const b=document.createElement('button');b.type='button';
-    b.className='opt'+(e.key===cfg.key?' on':'')+' track-'+TRACK[e.key];
-    b.setAttribute('role','radio');b.setAttribute('aria-checked',e.key===cfg.key?'true':'false');
-    b.innerHTML='<span class="opt-text"><span class="t">'+e.t+'</span><span class="sub">'+e.cue+'</span></span><span class="opt-aff" aria-hidden="true"></span>';
-    b.onclick=()=>{
-      if(picked&&e.key===cfg.key){picked=false;renderSetup();return;}   // tap the chosen one again to reopen the list
-      practices[active]=fresh(e.key);picked=true;renderSetup();
-    };
-    ew.appendChild(b);
-  });
+  // experience options — built ONCE and then updated in place, so the collapse (on pick) and the
+  // expand (on 'back') are the same CSS transition played in reverse, not a jerky DOM rebuild.
+  const ew=$('exps');
+  if(!ew.children.length){
+    Object.values(EXP).forEach(e=>{
+      const b=document.createElement('button');b.type='button';b.dataset.key=e.key;
+      b.className='opt track-'+TRACK[e.key];
+      b.setAttribute('role','radio');
+      b.innerHTML='<span class="opt-text"><span class="t">'+e.t+'</span><span class="sub">'+e.cue+'</span></span><span class="opt-aff" aria-hidden="true"></span>';
+      b.onclick=()=>{
+        if(picked&&e.key===cfg.key){picked=false;renderSetup();return;}   // tap the chosen one again to reopen the list
+        practices[active]=fresh(e.key);picked=true;renderSetup();
+      };
+      ew.appendChild(b);
+    });
+  }
+  Array.from(ew.children).forEach(b=>{const on=b.dataset.key===cfg.key;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false');});
   // ── standalone "more meditations" path: swap the refine area for a session picker ──
   if(cfg.standalone){
     ['sensewrap','skillwrap','descdefwrap','lenwrap'].forEach(id=>$(id).style.display='none');
