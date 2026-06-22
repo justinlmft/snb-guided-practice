@@ -32,8 +32,9 @@ body{
   font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
   min-height:100svh;overflow-y:auto;overscroll-behavior:none;
   -webkit-tap-highlight-color:transparent;   /* no grey flash on tap (mobile) */
+  touch-action:manipulation;                 /* ignore double-tap-to-zoom (e.g. fast silence taps); pinch-zoom still works */
 }
-button{-webkit-tap-highlight-color:transparent}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .page{width:100%;max-width:600px;margin:0 auto;min-height:100svh;padding:clamp(15px,3vh,30px) 28px clamp(16px,3vh,28px);display:flex;flex-direction:column}
 
 /* ───── brand bar ───── */
@@ -199,13 +200,14 @@ body.playing .brand{display:none}
    (the menu) overlay the bottom, out of flow. When the menu appears, the stage rises toward the
    top (not all the way) and the circle shrinks, so focus shifts to the menu; when it's away, the
    stage settles back to centre and the circle grows again. */
-.stage{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .9s var(--gentle)}
-.ringwrap{width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0;transition:transform .9s var(--gentle)}
+.stage{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .9s var(--gentle);will-change:transform}
+.ringwrap{width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
 .pfoot{position:absolute;left:0;right:0;bottom:0;width:100%;display:flex;flex-direction:column;align-items:stretch}
+/* only the vertical move is a CSS transition; the circle's SIZE is eased inside the canvas
+   animation (see _msz in ringLoop) so it stays perfectly smooth against the 60fps breathing. */
 #player.show-controls .stage{transform:translateY(-12vh)}
-#player.show-controls .ringwrap{transform:scale(.7)}
-@media (prefers-reduced-motion:reduce){.stage,.ringwrap{transition:none}}
-#ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
+@media (prefers-reduced-motion:reduce){.stage{transition:none}}
+#ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block;transform:translateZ(0)}
 .phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
 /* a quiet "it's beginning" cue so the opening silence never reads as broken */
 .starting{font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);margin:0;min-height:1.4em;text-align:center;opacity:0;transition:opacity .6s var(--ease)}
@@ -215,8 +217,8 @@ body.playing .brand{display:none}
 .caption{display:flex;align-items:center;justify-content:flex-start;height:5em;font-size:17px;line-height:1.65;color:var(--ink-80);max-width:none;width:100%;margin:0 0 18px;text-align:left;text-wrap:pretty;padding:0}
 #player:not(.caps-on) .caption{display:none}
 /* paused: the whole field dims to read as resting (not frozen); only the resume button stays full */
-#player .ringwrap,#player .caption,#player .starting,#player .adjustments,#player .endings{transition:opacity .45s var(--ease)}
-#player.paused .ringwrap,#player.paused .caption,#player.paused .adjustments,#player.paused .endings{opacity:.38}
+#player .ringwrap,#player .caption,#player .starting,#player .controlbar,#player .endings{transition:opacity .45s var(--ease)}
+#player.paused .ringwrap,#player.paused .caption,#player.paused .controlbar,#player.paused .endings{opacity:.38}
 .cap-text{display:inline-block;opacity:0;transform:translateY(7px);filter:blur(2px);transition:opacity .6s var(--ease),transform .6s var(--ease),filter .6s var(--ease);will-change:opacity,transform,filter}
 .cap-text.in{opacity:1;transform:none;filter:blur(0)}
 @media (prefers-reduced-motion:reduce){.cap-text{transform:none;filter:none;transition:opacity .4s var(--ease)}}
@@ -235,7 +237,8 @@ body.playing .brand{display:none}
 .iconbtn .ico{width:25px;height:25px;display:block;fill:var(--ink);color:var(--ink)}
 
 /* ── primary transport: the one hero control ── */
-.transport{align-self:center;width:74px;height:74px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
+/* pause/play — a calm rounded square (not a circle), so it never echoes the breathing ring */
+.transport{flex:none;width:54px;height:54px;border-radius:15px;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
 .transport:hover{box-shadow:0 0 0 1.5px var(--ink)}
 .transport:active{transform:scale(.96)}
 .transport:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
@@ -246,14 +249,14 @@ body.playing .brand{display:none}
 
 /* ── adjustments: two quiet, equal setting pills ── */
 /* ── settings: two equal cells on one grid row, sharing the column's edges ── */
-.adjustments{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
-@media (max-width:430px){.adjustments{grid-template-columns:1fr}}
-.adj{display:flex;align-items:center;justify-content:space-between;width:100%;height:48px;border:1px solid var(--hairline);border-radius:12px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
-.adj.silence{padding:0 6px 0 14px}
+/* the controls live on one compact, centred bar — no full-width pills, no wasted space */
+.controlbar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;flex-wrap:nowrap}
+.adj{display:flex;align-items:center;justify-content:center;gap:2px;width:auto;height:54px;border:1px solid var(--hairline);border-radius:14px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
+.adj.silence{padding:0 4px 0 14px}
 .adj-stepper{display:inline-flex;align-items:center;gap:2px}
 .adj-label{color:var(--muted)}
 .adj-val{color:var(--ink-80);font-variant-numeric:tabular-nums;min-width:2.2em;text-align:center}
-.adj-step{width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease) .2s}
+.adj-step{width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:21px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease) .2s}
 .adj-step:hover{color:var(--ink)}
 .adj-step:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .captoggle{padding:0 14px;cursor:pointer}
@@ -445,10 +448,9 @@ body.playing .popout,body.playing .installhint{display:none}
     </div>
     <div class="pfoot">
     <div class="controls">
-      <!-- primary transport: the one hero control -->
+      <!-- one compact bar: pause/play · silence · captions -->
+      <div class="controlbar">
       <button class="transport" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
-      <!-- adjustments: silence + captions, two equal quiet pills -->
-      <div class="adjustments">
         <div class="adj silence">
           <span class="adj-label">silence</span>
           <span class="adj-stepper">
@@ -1240,14 +1242,18 @@ const RING_STATE={
   defense:{col:RING_ORANGE,outer:0,inner:1},
   both:{col:RING_INK,outer:1,inner:1,outerCol:RING_BLUE,innerCol:RING_ORANGE},
   closing:{col:RING_INK,outer:0,inner:0}};
-let _rc=RING_INK.slice(), _roc=RING_INK.slice(), _ric=RING_INK.slice(), _ro=1, _ri=0, _lastState='mind', _breath=0.5, _breath2=0.5;   // eased main / outer-ring / inner-ring colours + outer/inner opacity; held breath values
+let _rc=RING_INK.slice(), _roc=RING_INK.slice(), _ric=RING_INK.slice(), _ro=1, _ri=0, _lastState='mind', _breath=0.5, _breath2=0.5, _msz=1;   // eased main / outer-ring / inner-ring colours + outer/inner opacity; held breath values; _msz = circle size eased as the menu comes/goes
 function buildTrackSeq(){}                                     // (legacy no-op — colour now follows each clip's state, computed live)
 function fitRing(){const dpr=devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
 addEventListener('resize',()=>{if(!$('player').classList.contains('hidden'))fitRing();});
 function ringLoop(){
   rafId=requestAnimationFrame(ringLoop);
   const W=cv.clientWidth,H=cv.clientHeight,cx=W/2,cy=H/2;g.clearRect(0,0,W,H);
-  const unit=Math.min(W,H);
+  // ease the circle's size as the menu (controls) comes and goes — smaller when the menu is up,
+  // full size when it's away. Done here, in the canvas, so it blends with the breathing (no jerk).
+  const wantMsz = $('player').classList.contains('show-controls') ? 0.7 : 1;
+  _msz += (wantMsz-_msz)*0.06;
+  const unit=Math.min(W,H)*_msz;
   const t=performance.now()/1000;
   const moving=playing&&!paused&&!reduce;
   if(moving){_breath=Math.sin(t*0.55)*0.5+0.5;_breath2=Math.sin(t*0.41+0.7)*0.5+0.5;}  // when paused/reduced, hold the last value instead of snapping to a default shape
