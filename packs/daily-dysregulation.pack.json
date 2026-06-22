@@ -1,0 +1,435 @@
+{
+  "id": "daily-dysregulation",
+  "title": "Daily Dysregulation Practice",
+  "track": "most",
+  "silenceDefault": 4,
+  "holdFloor": 8,
+  "loop": false,
+  "_gapTiers": {
+    "full": "chosen silence",
+    "short": 1.5,
+    "hold": "max(chosen,holdFloor)"
+  },
+  "segments": [
+    {
+      "id": "DDP-01",
+      "file": "DDP-01-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Let's check in about a recent event, something that you felt some dysregulation about. Nothing too intense, just something that you noticed and can feel again. First, ground yourself in your safety state. What's something that you can tell yourself as a top-down cue of safety or a message of encouragement or belief in yourself?"
+    },
+    {
+      "id": "DDP-02",
+      "file": "DDP-02-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "It can be something like, \"I can handle this,\" or, \"I'm excited to take the next step in my trauma relief practice.\" Or maybe, \"Justin's courses have been helpful so far. I'm excited about what this practice holds."
+    },
+    {
+      "id": "DDP-03",
+      "file": "DDP-03-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Once you have your top-down, uh, safety message in mind, the next step is to take in your passive environment through your senses. So go ahead and check in with all five of your senses: touch, taste, smell, sight, and hearing Check in with each of these individually, the ones you have access to, and maybe just notice which one of these really kind of pulls you more towards safety than the other ones."
+    },
+    {
+      "id": "DDP-04",
+      "file": "DDP-04-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "And keep this one in mind. This is a, uh, safety cue that we can pull from later on."
+    },
+    {
+      "id": "DDP-05",
+      "file": "DDP-05-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Notice how you feel in your safety environment and the general sense of safety that you might have. What emotion word would you give to this safety experience you're having? Would you say it's calm? Peaceful, settled, content, happy maybe?"
+    },
+    {
+      "id": "DDP-06",
+      "file": "DDP-06-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "settle on, uh, one safety word. Again, this is something that we'll be turning to later on. So one, one sort of safety word that really kind of captures what you're going through as best you can."
+    },
+    {
+      "id": "DDP-07",
+      "file": "DDP-07-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And then notice is there one aspect of the environment that is more grounding than the others? And it might be, you know, something that you're picking up through that sense that you found that you were, uh, more pulled towards."
+    },
+    {
+      "id": "DDP-08",
+      "file": "DDP-08-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Identify where you feel that safety emotion in your body, and you can do a body scan if you need to. But I want you to get specific with where you feel that safety e- emotion in your body."
+    },
+    {
+      "id": "DDP-09",
+      "file": "DDP-09-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What does it feel like to have that safety emotion? Like if I was you, what would I be experiencing?"
+    },
+    {
+      "id": "DDP-10",
+      "file": "DDP-10-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Let the safety emotion in your body begin to take shape. Be open to what your mind creates for it, what it might look like and feel like, and then try to describe the emotion as best you can If you don't have an answer for each of these questions that I'm about to ask you, that's okay. Just hold on to what you do know and let those be there What shape does your safety emotion have?"
+    },
+    {
+      "id": "DDP-11",
+      "file": "DDP-11-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Or is it more of a nonspecific, uh, shape?"
+    },
+    {
+      "id": "DDP-12",
+      "file": "DDP-12-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "How big or how small is that emotion?"
+    },
+    {
+      "id": "DDP-13",
+      "file": "DDP-13-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What color does it have?"
+    },
+    {
+      "id": "DDP-14",
+      "file": "DDP-14-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What texture does it have if you were to touch it?"
+    },
+    {
+      "id": "DDP-15",
+      "file": "DDP-15-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And what temperature is that safety motion?"
+    },
+    {
+      "id": "DDP-16",
+      "file": "DDP-16-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Whatever your mind came up with, just let it be there for a moment and ask yourself, what is your experience right now in your body of this safety emotion?"
+    },
+    {
+      "id": "DDP-17",
+      "file": "DDP-17-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What is it like for you to have this emotion? How does this emotion affect the area around the, uh, specific body area that you feel it in?"
+    },
+    {
+      "id": "DDP-18",
+      "file": "DDP-18-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "How does this emotion affect your overall experience in this present moment?"
+    },
+    {
+      "id": "DDP-19",
+      "file": "DDP-19-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Now give permission for this experience to be here with you, to exist within you right now"
+    },
+    {
+      "id": "DDP-20",
+      "file": "DDP-20-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Now let yourself recall that recent moment of noticeable dysregulation. Just replay the general context of the situation. There's no need to replay it in your mind. We want this to be something where you felt defensive activation, but not something that was a full-blown panic attack or a blackout rage Things like anxiety, anger, numbness, stress, uh, or irritability, uh, those might be okay."
+    },
+    {
+      "id": "DDP-21",
+      "file": "DDP-21-a.mp3",
+      "state": "defense",
+      "gap": "short",
+      "cap": "So make sure it's an emotion that you can tolerate and allow."
+    },
+    {
+      "id": "DDP-22",
+      "file": "DDP-22-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "So once you've remembered the general context of the situation and you have that emotion recalled enough, I want you to give it a name as best you can"
+    },
+    {
+      "id": "DDP-23",
+      "file": "DDP-23-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Now let's validate that emotion. Is it true that you experienced it? Did that actually happen?"
+    },
+    {
+      "id": "DDP-24",
+      "file": "DDP-24-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "If yes, then let's now move on to normalizing it. Did that emotion make sense based on the context that you felt it? In that situation, did it make sense? And if you really think it doesn't make sense, when you think about the larger context of your life, when you think about that your general history Does it make sense in, in that context, a larger context?"
+    },
+    {
+      "id": "DDP-25",
+      "file": "DDP-25-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Or if somebody else had your life, had your history, and then was in that situation that you're recalling generally, would they have likely felt something similar during that same context? If so, then you are now normalized."
+    },
+    {
+      "id": "DDP-26",
+      "file": "DDP-26-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "So we've validated, we have normalized. The next step is to give, uh, give yourself permission to have that emotion right now while also being anchored in your safety state. So can you do that? Can you give yourself permission?"
+    },
+    {
+      "id": "DDP-27",
+      "file": "DDP-27-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "Allow that emotion to be there without trying to change it or make it go away. Just allow it to be there."
+    },
+    {
+      "id": "DDP-28",
+      "file": "DDP-28-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Where do you feel that emotion in your body? And I want you to be specific. Where do you feel that emotion existing within you right now?"
+    },
+    {
+      "id": "DDP-29",
+      "file": "DDP-29-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And briefly just check in with your safety emotion. Check in with your external safety environment."
+    },
+    {
+      "id": "DDP-30",
+      "file": "DDP-30-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And also check in with that one, uh, sensory input that felt more grounding than the other ones."
+    },
+    {
+      "id": "DDP-31",
+      "file": "DDP-31-a.mp3",
+      "state": "both",
+      "gap": "full",
+      "cap": "Are you able to feel both the safety emotion and the recalled defensive emotion? Good."
+    },
+    {
+      "id": "DDP-32",
+      "file": "DDP-32-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Now we're gonna focus more on the defensive emotion. Focus on where it exists in your body right now in the present moment. Now, I know it's connected to a past real event, but you feel it right now, and, and that's the focus here. If you can best feel it through remembering what it felt like, that's fine too."
+    },
+    {
+      "id": "DDP-33",
+      "file": "DDP-33-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "So allow yourself to remember what it felt like, and then allow that feeling to exist in, in your real body right now."
+    },
+    {
+      "id": "DDP-34",
+      "file": "DDP-34-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What does it feel like to have that emotion? Like if I was you, what would I be experiencing?"
+    },
+    {
+      "id": "DDP-35",
+      "file": "DDP-35-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "And allow that defensive emotion in your body to begin to take shape Be open to what your mind creates for it. There's no wrong answer here. Be open to what it might look like and feel like, and then try to describe the defensive e- emotion as best you can."
+    },
+    {
+      "id": "DDP-36",
+      "file": "DDP-36-a.mp3",
+      "state": "defense",
+      "gap": "short",
+      "cap": "I'm gonna ask you a few questions. If you don't have an answer for each of these, that's completely okay. Just notice what you do know and let it be there."
+    },
+    {
+      "id": "DDP-37",
+      "file": "DDP-37-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What shape does this defensive emotion have, or is it more of a nonspecific shape?"
+    },
+    {
+      "id": "DDP-38",
+      "file": "DDP-38-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "How big or how small is that emotion?"
+    },
+    {
+      "id": "DDP-39",
+      "file": "DDP-39-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What color does it have?"
+    },
+    {
+      "id": "DDP-40",
+      "file": "DDP-40-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What texture does it have?"
+    },
+    {
+      "id": "DDP-41",
+      "file": "DDP-41-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What temperature is it?"
+    },
+    {
+      "id": "DDP-42",
+      "file": "DDP-42-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "Let that be there for a moment and ask yourself, what is your experience right now in your body of this defensive emotion?"
+    },
+    {
+      "id": "DDP-43",
+      "file": "DDP-43-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What is it like for you to have this emotion?"
+    },
+    {
+      "id": "DDP-44",
+      "file": "DDP-44-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "How does this emotion affect the area around the specific body area that you feel it in? How does this emotion affect your overall experience in this present moment?"
+    },
+    {
+      "id": "DDP-45",
+      "file": "DDP-45-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "Give permission for this experience to be here with you, to exist within you."
+    },
+    {
+      "id": "DDP-46",
+      "file": "DDP-46-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And return your focus to the safety emotion that you identified and described before. Check in on how that's doing."
+    },
+    {
+      "id": "DDP-47",
+      "file": "DDP-47-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Is it still the same? Has something changed? Is it still the same shape, size, color, texture, and temperature?"
+    },
+    {
+      "id": "DDP-48",
+      "file": "DDP-48-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "If something has shifted, what are you noticing?"
+    },
+    {
+      "id": "DDP-49",
+      "file": "DDP-49-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "And now return your focus to the defensive emotion that you identified and described before."
+    },
+    {
+      "id": "DDP-50",
+      "file": "DDP-50-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "And check in on how that's doing. Is it still the same? Has something changed? Is it still the same shape, size, color, texture, and temperature?"
+    },
+    {
+      "id": "DDP-51",
+      "file": "DDP-51-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "If something has shifted, what are you noticing?"
+    },
+    {
+      "id": "DDP-52",
+      "file": "DDP-52-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Mindfully take in a breath the way that your body naturally wants to, and extend the exhale if you can and allow more settling"
+    },
+    {
+      "id": "DDP-53",
+      "file": "DDP-53-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Is your defensive emotion overall feeling different? Is it easier to allow? Is it less intense?"
+    },
+    {
+      "id": "DDP-54",
+      "file": "DDP-54-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Is your safety emotion overall feeling different? Is it easier to access? Has it lost some anchoring or is it firmly in place? Are you still coming at this process with curiosity?"
+    },
+    {
+      "id": "DDP-55",
+      "file": "DDP-55-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Great job."
+    },
+    {
+      "id": "DDP-56",
+      "file": "DDP-56-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Now check in with the defensive experience again."
+    },
+    {
+      "id": "DDP-57",
+      "file": "DDP-57-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And again, with the safety experience as well."
+    },
+    {
+      "id": "DDP-58",
+      "file": "DDP-58-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Mindfully taking a breath the way that your body naturally needs to and exhale it in the way that your body naturally needs to."
+    },
+    {
+      "id": "DDP-59",
+      "file": "DDP-59-a.mp3",
+      "state": "both",
+      "gap": "full",
+      "cap": "These two experiences can exist within you at the same time, but they can also shift. Their natural inclination is to shift. That's what self-regulation is. Your body's natural task is to self-regulate. If you were to allow some shifting to happen right now, I wonder what would happen. You might notice these two emotional experiences mix, or one might become more present as the other one recedes. Or another experience may come to your consciousness as well If you were to take a step back and be a witness to these two emotional states, these experiences, I wonder what would happen Are you curious to find out as well? If you are curious, allow yourself to be a viewer of your inner sensations and what they have to tell you and how they want to interact. If you notice some shifting happening within you, just let it happen and be an observer of it. It's completely okay to ask yourself what it's like to have that shift and really directly, mindfully experience it. You might feel an impulse arise within your body. Your brain might give an, an image. So be open to what impulse there might be, if any. If you notice it, allow yourself to act on it while maintaining access to your safety state and experiencing the body's natural self-regulation process Use one of the unstucking methods that you learned about: movement, fidgeting, journaling, or creativity. You could also just stick with the mindful experience of what's happening within your body and the images that pop into your mind. You could stick with that and just see where it takes you if you need to as well, or if you want to as well If you're not noticing an impulse, that is fine too."
+    },
+    {
+      "id": "DDP-60",
+      "file": "DDP-60-a.mp3",
+      "state": "closing",
+      "gap": "short",
+      "cap": "Exit this exercise knowing that you allowed two different emotional experiences, two different emotional states to exist without overwhelm, and practice this again when you're ready to."
+    }
+  ]
+}

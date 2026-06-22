@@ -1,0 +1,722 @@
+{
+  "id": "outside-the-cave",
+  "title": "Outside the Cave",
+  "track": "most",
+  "silenceDefault": 4,
+  "holdFloor": 8,
+  "loop": false,
+  "_gapTiers": {
+    "full": "chosen silence",
+    "short": 1.5,
+    "hold": "max(chosen,holdFloor)"
+  },
+  "segments": [
+    {
+      "id": "CAVE-01",
+      "file": "CAVE-01-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "I am inviting you to use your imagination with me to discover more about what is going on inside of you, to do a little bit of stucknot journeying, exploring your inner world. If you are ready, then continue. If not, come back when you are. Take your time. We are gonna use your imagination to feel both safety and danger."
+    },
+    {
+      "id": "CAVE-02",
+      "file": "CAVE-02-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "I'm going to lead you in a scenario to do that. It's up to you to fill in the details that work for you, but I will prompt and guide you in that. Besides using your imagination, you will also be reflecting on your present moment experience, the real you in your real body. It's important to be able to feel a range of sensations while staying connected to the present moment."
+    },
+    {
+      "id": "CAVE-03",
+      "file": "CAVE-03-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "I'll lead you in balancing those two aspects during this meditation. I'm also gonna prompt you to make a couple decisions on this around whether to continue or to stop. I want you to be a full participant in this meditation and to have a choice before things get more difficult. If you choose to stop the meditation, that is okay."
+    },
+    {
+      "id": "CAVE-04",
+      "file": "CAVE-04-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "You can always return to it when you're ready to. I'm glad you're here and ready for this next step. Take a moment to inhale and exhale, and mindfully do so. Extend your breath on the way out and let your body relax just a little."
+    },
+    {
+      "id": "CAVE-05",
+      "file": "CAVE-05-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Do so again and allow a little more relaxation. Remind yourself that you are safe. You're in an environment that is safe. There is no danger around. Look around and see that you're literally safe and tell yourself that it is safe to do this meditation. Remind yourself that you can handle this. You know what to do and have prepared for this."
+    },
+    {
+      "id": "CAVE-06",
+      "file": "CAVE-06-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Imagine you're standing in a place of safety. This can be almost anywhere that you like, as long as it is on ground, so no hot air balloons. Outdoors would be easier, and that's what I recommend, but if you can make it work indoors, that's fine too. Just find some place that you would go to feel relaxed, to feel comfortable."
+    },
+    {
+      "id": "CAVE-07",
+      "file": "CAVE-07-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Maybe you feel peace or calm. You could feel playfulness, happiness, or excitement. Whichever of those words feels right for you or others, latch onto it and create an imaginary environment to suit that feeling. I'll be using the word safe more often than not, but know that the word safe is really referring to whatever feeling word you latched onto."
+    },
+    {
+      "id": "CAVE-08",
+      "file": "CAVE-08-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Mindfully take a breath as you listen to this into your body. Feel the air fill your lungs and let it out slowly."
+    },
+    {
+      "id": "CAVE-09",
+      "file": "CAVE-09-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Now that you have a safety environment in mind, let's create more details. Allow the safety environment to take shape and unfold before you."
+    },
+    {
+      "id": "CAVE-10",
+      "file": "CAVE-10-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Is the environment in shade or in sunlight? Is it in quiet or with noise?"
+    },
+    {
+      "id": "CAVE-11",
+      "file": "CAVE-11-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What's under your feet?"
+    },
+    {
+      "id": "CAVE-12",
+      "file": "CAVE-12-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "what is behind you"
+    },
+    {
+      "id": "CAVE-13",
+      "file": "CAVE-13-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What is to the sides of you?"
+    },
+    {
+      "id": "CAVE-14",
+      "file": "CAVE-14-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Are there any animals around?"
+    },
+    {
+      "id": "CAVE-15",
+      "file": "CAVE-15-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Do you have anyone with you or are you alone? What do you hear?"
+    },
+    {
+      "id": "CAVE-16",
+      "file": "CAVE-16-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What can you feel on your skin?"
+    },
+    {
+      "id": "CAVE-17",
+      "file": "CAVE-17-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What are you wearing?"
+    },
+    {
+      "id": "CAVE-18",
+      "file": "CAVE-18-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Is the air moving and how does that feel on your face?"
+    },
+    {
+      "id": "CAVE-19",
+      "file": "CAVE-19-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Notice right now what it would feel like to be in this safe environment, in your body, in your muscles, in your breathing. What does this feel like as you listen to my voice and imagine this environment?"
+    },
+    {
+      "id": "CAVE-20",
+      "file": "CAVE-20-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What name does this experience have?"
+    },
+    {
+      "id": "CAVE-21",
+      "file": "CAVE-21-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Can you feel this in your body right now? And not, not just imagine it in the scenario, but in your body or your real body in the present moment."
+    },
+    {
+      "id": "CAVE-22",
+      "file": "CAVE-22-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Do you notice anywhere in your body that feels more of the safety feeling than others? Now return to imagining the safety environment because something has changed. You missed something in the environment It's a cave. If you haven't already, imagine yourself turning toward the cave and looking directly at it The cave is dark inside."
+    },
+    {
+      "id": "CAVE-23",
+      "file": "CAVE-23-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "There's a large opening, but you can't see anything inside of it Notice how far or close you are to the cave."
+    },
+    {
+      "id": "CAVE-24",
+      "file": "CAVE-24-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You can move back to create more space if you feel the impulse to do so, but, uh, don't move toward the cave quite yet You don't know what's in there. It feels different from the rest of your environment You suspect that whatever is in there is not safe, not a place that you want to spend time in, not a place that you would be doing any smiling in."
+    },
+    {
+      "id": "CAVE-25",
+      "file": "CAVE-25-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You feel a sense of disconnection coming from the cave."
+    },
+    {
+      "id": "CAVE-26",
+      "file": "CAVE-26-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Notice what happens in your body. How does it feel now? Is there more tension? Do you feel some hesitancy? How much curiosity is in you?"
+    },
+    {
+      "id": "CAVE-27",
+      "file": "CAVE-27-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Are you able to smile or has that lessened? How's your feeling of safety in your body doing right now?"
+    },
+    {
+      "id": "CAVE-28",
+      "file": "CAVE-28-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "You stare at the cave, your eyes fixed on it. You know there's danger inside, but you also feel drawn to the opening of the cave. Your body feels that it must move closer For right now, just allow yourself to feel. Don't do anything in this scenario just yet. Just allow yourself to feel the impulse to move toward the danger of the cave."
+    },
+    {
+      "id": "CAVE-29",
+      "file": "CAVE-29-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You will not act on the impulse to move forward. You will simply experience the impulse to move forward, of being drawn to it with some hesitancy or, or of not knowing or of being unsure, but of being interested in wanting to know more. Notice how much curiosity is within you now. Also notice how much immobilization is in your system."
+    },
+    {
+      "id": "CAVE-30",
+      "file": "CAVE-30-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "As you feel the impulse to move toward danger, you also remember where you are. You turn your head and look around at the rest of your environment. You allow the experience of danger to exist while also taking in the experience of safety. You take in the sensory experience of your environment, noticing what your sight, hearing, smell, touch, and maybe even your taste are telling you."
+    },
+    {
+      "id": "CAVE-31",
+      "file": "CAVE-31-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You feel what is under you You feel the air or the sun or the shade on your skin You take a deep breath into your chest and let it out slowly You experience being in the safety environment."
+    },
+    {
+      "id": "CAVE-32",
+      "file": "CAVE-32-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "It's reassuring and feeds your feelings of safety in your body And then you bring your attention back to the cave You know what is in there now. It's all the stuff that you've been reluctant to feel. Maybe what you've ignored or minimized. The stuff you don't want to think about. The sensations in your body that are too painful."
+    },
+    {
+      "id": "CAVE-33",
+      "file": "CAVE-33-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "The stuff you avoid through various coping mechanisms It's the stuff that you may not be able to name, but you know it's there. You know it and you feel it."
+    },
+    {
+      "id": "CAVE-34",
+      "file": "CAVE-34-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You feel that impulse to move forward, to move toward it, but you don't move forward quite yet Notice how you are feeling right now, how you are feeling at the thought of moving forward toward the cave. Notice if there's another impulse to not move or to move away from the cave. Let yourself experience the impulse to not move if it is there, to be immobile."
+    },
+    {
+      "id": "CAVE-35",
+      "file": "CAVE-35-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "Normalize that immobilization impulse as protective Normalize the feelings of hesitancy being present based on the context that you're in. Anyone would probably be hesitant in this situation, right?"
+    },
+    {
+      "id": "CAVE-36",
+      "file": "CAVE-36-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Then turn your head to take in your surroundings. You experience the safety that you are surrounded by You let it nurture you and comfort you. You breathe in and you breathe out, extending your exhale and allowing the hesitancy to soften Now notice the experience of being comforted. Notice if you have an interest to turn back to the cave or to turn away from it You now get to decide on what you are going to do."
+    },
+    {
+      "id": "CAVE-37",
+      "file": "CAVE-37-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "You may choose to move forward to the next step, or you can choose to turn and leave and enjoy the safety that surrounds you. There is no wrong answer, and you can always come back to this for the next step when you're ready. If you're ready, then continue this. If not, then end this now. Either way, I want you to make the decision to continue or end and own that decision as what you need in this moment."
+    },
+    {
+      "id": "CAVE-38",
+      "file": "CAVE-38-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Respect it and give yourself that validation and normalization Give yourself some gratitude for getting this far and set the intention to come back when you're ready."
+    },
+    {
+      "id": "CAVE-39",
+      "file": "CAVE-39-a.mp3",
+      "state": "both",
+      "gap": "hold",
+      "cap": "You mindfully and purposefully take in the safety of your environment one more time, noticing how it feels in your body and holding onto the feeling of safety that you began with, letting it exist along with your other feelings about moving toward the cave."
+    },
+    {
+      "id": "CAVE-40",
+      "file": "CAVE-40-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Notice where those two feelings are and how intensely they are present in your body."
+    },
+    {
+      "id": "CAVE-41",
+      "file": "CAVE-41-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You decide to follow your impulse and return your attention to the large, dark opening of the cave. You know there is danger inside, but you also know that you are in safety and can choose to turn your back to the cave at any time and return when you are ready. You feel reassurance in your ability to make a decision."
+    },
+    {
+      "id": "CAVE-42",
+      "file": "CAVE-42-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You feel an impulse to move toward the cave, just a small movement forward, just one. You take that movement forward, getting closer to the dark opening of the cave."
+    },
+    {
+      "id": "CAVE-43",
+      "file": "CAVE-43-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You stop with that one small movement forward and notice how you feel. You direct your attention toward your body and notice any feelings of tension or hesitation, and you let those feelings be there with compassion Notice your feelings of hesitation Notice your breath. Notice any muscle tension or apprehension in your body."
+    },
+    {
+      "id": "CAVE-44",
+      "file": "CAVE-44-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Notice and let it be there. Use a word to describe what you're noticing, a feeling word"
+    },
+    {
+      "id": "CAVE-45",
+      "file": "CAVE-45-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Now use a sensation word. What is the experience of having that feeling for you right now? What is the experience in your body Focus on where that feeling is in your body. What shape does it have?"
+    },
+    {
+      "id": "CAVE-46",
+      "file": "CAVE-46-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What texture does it have if you were to touch it?"
+    },
+    {
+      "id": "CAVE-47",
+      "file": "CAVE-47-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What temperature is that feeling? What color? Does it have a sound? Does it have a thought or memory attached to it? You're not gonna do anything with this right now besides notice it and allow it to be there. Give this feeling permission to be there, to exist within you right now While that exists within you, remember where the safety feelings are in your body and allow your attention to shift there Focus on that feeling a moment."
+    },
+    {
+      "id": "CAVE-48",
+      "file": "CAVE-48-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Let's do the same thing with the safety feelings. What shape does it have? What texture does it have if you were to touch it? What temperature is that feeling? What color? Does it have a sound? Does it have a thought or memory attached to it?"
+    },
+    {
+      "id": "CAVE-49",
+      "file": "CAVE-49-a.mp3",
+      "state": "both",
+      "gap": "hold",
+      "cap": "And again, you're, you're not gonna do anything with this right now besides notice it and allow it to be there. Give it permission to be there, to exist within you right now. Next, allow those two sensations to exist simultaneously. They are both within you. You have the capacity to experience both right now."
+    },
+    {
+      "id": "CAVE-50",
+      "file": "CAVE-50-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "If the two bodily sensations want to interact, then allow them to do so before you return your attention to the cave. If this is enough for you for now, then allow yourself to exit this meditation and return to your external environment. Give yourself some praise and love and return to the meditation when you're ready."
+    },
+    {
+      "id": "CAVE-51",
+      "file": "CAVE-51-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "As you look into the cave, you realize more of what is inside There are feelings in there that you have a hard time with experiencing. I'm gonna name a number of feelings, and I invite you to pull from them what is useful for you. If you already have an idea of what is inside of your cave, listen for more of what may be in there."
+    },
+    {
+      "id": "CAVE-52",
+      "file": "CAVE-52-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "It's easy to miss these things. Although I do recommend that you focus on one feeling. I, I think it's probably best just to focus on one thing right now. Inside of your cave might be shame, guilt, embarrassment, anxiety, overwhelm, worry, judgment, hatred, exposure, hurt, jealousy, regret, anger, insecurity, distrust, panic, rage, sadness, emptiness, disconnection, fear Pull from this word list what is useful for you right now."
+    },
+    {
+      "id": "CAVE-53",
+      "file": "CAVE-53-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What is in the cave that you see in front of you in your mind? If it's difficult to name a feeling, you can focus on the hesitancy within you, the apprehension or the fear of looking inward. That's completely fine. Identify that feeling and ask yourself, \"What is the experience of having that feeling?\""
+    },
+    {
+      "id": "CAVE-54",
+      "file": "CAVE-54-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What is the experience in your body? What sensations are there? And then focus on where that feeling is in your body."
+    },
+    {
+      "id": "CAVE-55",
+      "file": "CAVE-55-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What shape does it have? What texture does it have if you were to touch it?"
+    },
+    {
+      "id": "CAVE-56",
+      "file": "CAVE-56-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What temperature is that feeling?"
+    },
+    {
+      "id": "CAVE-57",
+      "file": "CAVE-57-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "What color?"
+    },
+    {
+      "id": "CAVE-58",
+      "file": "CAVE-58-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Does it have a sound?"
+    },
+    {
+      "id": "CAVE-59",
+      "file": "CAVE-59-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Does it have a thought or memory attached to it? Give it permission to be there, to exist within you right now While that exists within you, remember where the safety feelings are in your body and allow your attention to shift there You can also use your imaginary safety environment to help yourself experience the safety feeling again."
+    },
+    {
+      "id": "CAVE-60",
+      "file": "CAVE-60-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Focus on that safety feeling a moment. What shape does it have? What texture does it have if you were to touch it?"
+    },
+    {
+      "id": "CAVE-61",
+      "file": "CAVE-61-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What temperature is that feeling?"
+    },
+    {
+      "id": "CAVE-62",
+      "file": "CAVE-62-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What color?"
+    },
+    {
+      "id": "CAVE-63",
+      "file": "CAVE-63-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Does it have a sound? Does it have a thought or a memory attached to it?"
+    },
+    {
+      "id": "CAVE-64",
+      "file": "CAVE-64-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Give that safety feeling permission to be there, to exist within you right now"
+    },
+    {
+      "id": "CAVE-65",
+      "file": "CAVE-65-a.mp3",
+      "state": "both",
+      "gap": "full",
+      "cap": "Allow those two sensations to exist simultaneously. They are both within you. You have the capacity to experience both right now If the two bodily sensations begin to interact, allow them to do so before you return your attention to the cave If this is enough for you now, then allow yourself to exit this meditation and return to your external environment."
+    },
+    {
+      "id": "CAVE-66",
+      "file": "CAVE-66-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Give yourself some praise and love and return to the meditation when you are ready"
+    },
+    {
+      "id": "CAVE-67",
+      "file": "CAVE-67-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You stand there in your imaginary safety environment As you look at the cave, you realize that you don't need to enter it in order to discover what is inside. You can stay right where you are, or you can move forward or even move back. You have choice in this place, in this moment. You realize that what you need will come out of the cave as you are ready There is nothing to fear in your safety environment."
+    },
+    {
+      "id": "CAVE-68",
+      "file": "CAVE-68-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You are open to what there is inside of the cave. You are curious Check in with your balanced sensations and feelings from before"
+    },
+    {
+      "id": "CAVE-69",
+      "file": "CAVE-69-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "How are you feeling now? How are those sensations in your body? How is your feeling of openness or curiosity? Can you identify where you feel those? The feelings that come from the cave, are they tolerable? Ensure that you are coming from safety and curiosity right now"
+    },
+    {
+      "id": "CAVE-70",
+      "file": "CAVE-70-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You also realize that there is even more in the cave. It's not just feelings. Inside of your cave is more. There might be memories, pieces of memories, thoughts, questions, or even unmet needs."
+    },
+    {
+      "id": "CAVE-71",
+      "file": "CAVE-71-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You feel what is under your feet in your safety environment and what the air feels like You take a deep breath in and exhale it slowly Allow a moment of appreciation to be within you. You get to be here in your imagination. You get to exist in your real world external safety environment you have the opportunity for your self-development."
+    },
+    {
+      "id": "CAVE-72",
+      "file": "CAVE-72-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You're giving yourself time and space to get unstuck. Appreciate yourself for your efforts. Notice any sensations or general feelings of appreciation you may have as you continue"
+    },
+    {
+      "id": "CAVE-73",
+      "file": "CAVE-73-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You have the opportunity right now to choose what may come out of the cave and into your awareness. You can choose the content that emerges. Something or many things may have already popped into your mind during this meditation that you can pull from and focus on"
+    },
+    {
+      "id": "CAVE-74",
+      "file": "CAVE-74-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Maybe it is something connected to the feeling that you identified previously. If not, I would recommend something that is tolerable but challenging. It could be a memory that's specific or a general memory across time, or a specific person you would like to recall, a feeling you want to focus on, a life theme, a decision you made."
+    },
+    {
+      "id": "CAVE-75",
+      "file": "CAVE-75-a.mp3",
+      "state": "defense",
+      "gap": "short",
+      "cap": "You also, of course, have the power to choose to stop this meditation now and return when you are ready."
+    },
+    {
+      "id": "CAVE-76",
+      "file": "CAVE-76-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You look to your right and your left, taking in the environment. You feel the air. You listen to the sounds around you, and you smile, feeling safety in your body, knowing that you are in control and coming from curiosity."
+    },
+    {
+      "id": "CAVE-77",
+      "file": "CAVE-77-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "As you do this, you allow what you identified to emerge from the cave. It comes out of the darkness of the cave and into your safety environment. Give it a visualization as it emerges from the darkness. Give it an image, something that you can see in front of you in your safety environment of your imagination."
+    },
+    {
+      "id": "CAVE-78",
+      "file": "CAVE-78-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You have the power to tell this image how far it can come out, how close it can get to you. You also have the power to send it back into the cave."
+    },
+    {
+      "id": "CAVE-79",
+      "file": "CAVE-79-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Notice how you're feeling inside right now. Do a body scan and identify if there are feelings of discomfort."
+    },
+    {
+      "id": "CAVE-80",
+      "file": "CAVE-80-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Do another body scan and note if there are feelings of comfort or of power, or of curiosity? Right now, do you feel more like connecting, running, fighting, collapsing, or freezing? Notice the impulse within you Take a breath and remind yourself that you are literally safe, and you can send the image back if you choose to do so."
+    },
+    {
+      "id": "CAVE-81",
+      "file": "CAVE-81-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "If you can tolerate it, stay with the impulse that is within you. Feel it and let it be there for this moment. What are you noticing within you? How does your impulse feel? How is your breathing affected? Are your muscles prepared to do something?"
+    },
+    {
+      "id": "CAVE-82",
+      "file": "CAVE-82-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "In this moment, there is no need to collapse or freeze. You are in your imaginary safety environment where nothing can hurt you."
+    },
+    {
+      "id": "CAVE-83",
+      "file": "CAVE-83-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You're able to act on the impulse to escape or use powerful aggression. You have it within you to do so. Let yourself feel strength in your body and confidence in your mind. You breathe into your chest and remind yourself that you are safe. You tell yourself that you're capable, you're powerful."
+    },
+    {
+      "id": "CAVE-84",
+      "file": "CAVE-84-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "Be with the energy that is within you. Let your inner strength fill you. Your energy to fight or run, feel it. Feel it in your muscles, your shoulders, your arms, back, sides, gut, and your legs. This energy will keep you alive. Allow that survival energy to be there. Invite it and welcome it."
+    },
+    {
+      "id": "CAVE-85",
+      "file": "CAVE-85-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "You take in another breath and let it out a little slower than you took it in."
+    },
+    {
+      "id": "CAVE-86",
+      "file": "CAVE-86-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Return your attention to the image from the cave in front of you, which is as far or as close as you need it to be and decide it to be. You can feel the impulse of your body. You feel the power that you have inside of you to survive."
+    },
+    {
+      "id": "CAVE-87",
+      "file": "CAVE-87-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "While allowing yourself to feel this, you look around your safety environment The image from the cave is staying right where you want it to."
+    },
+    {
+      "id": "CAVE-88",
+      "file": "CAVE-88-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "You look around and notice the colors around you. You notice the sounds And the quiet underneath the sounds, if they're there You feel the sun or the shade. You feel the support under your feet. The cave image is staying put right where you wanted it to stay."
+    },
+    {
+      "id": "CAVE-89",
+      "file": "CAVE-89-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "You are able to breathe. You take a breath and let it out, extending the exhale."
+    },
+    {
+      "id": "CAVE-90",
+      "file": "CAVE-90-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "Return your attention to the cave image and notice your impulses, what your body wants to do now. Do you feel more or less activation? More or less survival impulse? Are you able to be in the imaginary safety environment without fear?"
+    },
+    {
+      "id": "CAVE-91",
+      "file": "CAVE-91-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Allow whatever feeling is there to remain while you again return your attention to the imaginary safety environment. You purposefully turn your attention to your favorite aspect of the environment, a detail that grabs your attention and your curiosity."
+    },
+    {
+      "id": "CAVE-92",
+      "file": "CAVE-92-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "And once again, return your attention to the image that has come from the cave."
+    },
+    {
+      "id": "CAVE-93",
+      "file": "CAVE-93-a.mp3",
+      "state": "defense",
+      "gap": "full",
+      "cap": "You allow yourself to become curious about it, to let it be in your presence and exist in your imaginary safety environment."
+    },
+    {
+      "id": "CAVE-94",
+      "file": "CAVE-94-a.mp3",
+      "state": "defense",
+      "gap": "hold",
+      "cap": "Ask yourself if there is an impulse you're feeling to connect or mobilize. Allow that impulse to exist. Don't make it go away. Just let it be within you as we end this meditation You will be doing something to use the impulse once this is over in a few moments. Tell yourself that you are safe, that the emotions, sensations, and impulses inside of you are not a threat to you."
+    },
+    {
+      "id": "CAVE-95",
+      "file": "CAVE-95-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Neither are the images, thoughts, or memories."
+    },
+    {
+      "id": "CAVE-96",
+      "file": "CAVE-96-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "They are a piece of the larger you, not separate but intertwined with what makes you who you are. They can exist as they are along with the experiences of safety that you can access As these sensations are allowed to be without judgment and with curiosity, while balanced with safety, they will reduce in intensity."
+    },
+    {
+      "id": "CAVE-97",
+      "file": "CAVE-97-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Give yourself some praise for what you have accomplished here. Tell yourself that you have done well and that you can do it again when you need to. Validate your experience as being real and normalize your experience as being there for a reason."
+    },
+    {
+      "id": "CAVE-98",
+      "file": "CAVE-98-a.mp3",
+      "state": "closing",
+      "gap": "full",
+      "cap": "Allow yourself to gently and softly come back to your external safety environment. Use your senses as you come out, noticing what you hear besides my voice what you see with your eyes what you smell, and what you feel."
+    },
+    {
+      "id": "CAVE-99",
+      "file": "CAVE-99-a.mp3",
+      "state": "closing",
+      "gap": "short",
+      "cap": "Don't make any large movements yet. Allow yourself to come out of stillness gently."
+    },
+    {
+      "id": "CAVE-100",
+      "file": "CAVE-100-a.mp3",
+      "state": "closing",
+      "gap": "short",
+      "cap": "Take in a breath and smile if you can."
+    },
+    {
+      "id": "CAVE-101",
+      "file": "CAVE-101-a.mp3",
+      "state": "closing",
+      "gap": "short",
+      "cap": "Now use the impulse that you felt from the meditation in the real world. Use it through movement, fidgeting, creativity, or journaling."
+    }
+  ]
+}

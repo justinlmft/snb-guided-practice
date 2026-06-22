@@ -1,0 +1,281 @@
+{
+  "id": "uye",
+  "title": "Use Your Ears",
+  "track": "anchoring",
+  "silenceDefault": 8,
+  "holdFloor": 8,
+  "loop": false,
+  "_gapTiers": {
+    "full": "chosen silence",
+    "short": 1.5,
+    "hold": "max(chosen,holdFloor)"
+  },
+  "segments": [
+    {
+      "id": "UYE-01",
+      "file": "UYE-01-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Hey, it's Justin. I am really glad you're here with me to practice mindfulness and grounding in the present moment. Let's start by allowing your body to be a little bit more still than it is right now. First, notice how your body naturally breathes. Does your breath go into your chest or into your belly?"
+    },
+    {
+      "id": "UYE-02",
+      "file": "UYE-02-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Do your shoulders move? Don't change it. Just let it be for a moment."
+    },
+    {
+      "id": "UYE-03",
+      "file": "UYE-03-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Great job. Now, consciously slow your breath down a little on the exhale and let it fully leave your lungs before taking in the next."
+    },
+    {
+      "id": "UYE-04",
+      "file": "UYE-04-a.mp3",
+      "state": "mind",
+      "gap": "full",
+      "cap": "If you can, breathe in through your nose, feel your belly expand, and let it out through your mouth. If not, that's fine. Breathe as is most comfortable, but focus on extending that exhale a bit."
+    },
+    {
+      "id": "UYE-05",
+      "file": "UYE-05-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Great job. Let's take in one more intentional breath. This time, extend the exhale a tad longer and feel yourself settling into your body, becoming a little more still."
+    },
+    {
+      "id": "UYE-06",
+      "file": "UYE-06-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Really good. Let go now of intentional control of your breath. Let it come and go naturally as you listen and do the following steps."
+    },
+    {
+      "id": "UYE-07",
+      "file": "UYE-07-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Bring your conscious attention to your ears. Not what they're hearing, but the fact that you have ears on your head. Wiggle them if you can. I don't know about you, but I can wiggle mine. If you can't, that's okay. Just smile and maybe even let out a little giggle as you try and struggle to wiggle your ears."
+    },
+    {
+      "id": "UYE-08",
+      "file": "UYE-08-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Either way, you have ears, or at least one. Right now, there's probably a number of different sound waves that are hitting your eardrums and causing the experience of sound in your conscious awareness. So bring your attention to the experience of hearing."
+    },
+    {
+      "id": "UYE-09",
+      "file": "UYE-09-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "For now, leave your eyes open. If you wanna close them as we move forward, that's fine. For now, though, I'd recommend leaving them open The first sound experience you'll probably notice is me. It's my voice. You can hear the ups and the downs of me speaking directly to you. Hi again, by the way Aside from my voice, there are other sounds you might attune to as well Purposefully use your ears to take in your immediate environment."
+    },
+    {
+      "id": "UYE-10",
+      "file": "UYE-10-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Let your neck and your body relax in stillness as you listen to the sounds of what you immediately have around you If you want to close your eyes now, go right ahead Consciously choose to shift your hearing attention from one thing to another if you can. There might be more than one sound you can tune to, maybe something obvious or not so obvious."
+    },
+    {
+      "id": "UYE-11",
+      "file": "UYE-11-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Check in with your breath again. Don't change it, just keep breathing naturally. If it changes on its own because you're paying attention to it now, that's totally fine. Thank it and let it breathe the way that it needs to. Remind yourself that you're safe as you focus on your hearing."
+    },
+    {
+      "id": "UYE-12",
+      "file": "UYE-12-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Allow your body and neck to relax more. If you need to move your neck to better position your ears to take in sound, that's totally fine."
+    },
+    {
+      "id": "UYE-13",
+      "file": "UYE-13-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What obvious sounds are there? Which ones are loudest? Which ones are closest? And which ones grab your attention the most? In your body, you might have a reaction to these sounds, specifically in your gut, your chest, neck, or maybe even your face."
+    },
+    {
+      "id": "UYE-14",
+      "file": "UYE-14-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Images may appear in your mind or words. Don't make them go away. Just let them come and go as they like while you also listen."
+    },
+    {
+      "id": "UYE-15",
+      "file": "UYE-15-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Notice these images, thoughts, or internal reactions and return your attention to the sounds that you hear outside of yourself Check on your natural breath again."
+    },
+    {
+      "id": "UYE-16",
+      "file": "UYE-16-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Can you notice anything outside of the most obvious sounds? Maybe sounds in the distance."
+    },
+    {
+      "id": "UYE-17",
+      "file": "UYE-17-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "How about sounds that are just quieter?"
+    },
+    {
+      "id": "UYE-18",
+      "file": "UYE-18-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Can you hear an ambient hum in the background?"
+    },
+    {
+      "id": "UYE-19",
+      "file": "UYE-19-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And can you hear the quiet underneath all the sounds surrounding you?"
+    },
+    {
+      "id": "UYE-20",
+      "file": "UYE-20-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Can you feel the stillness within yourself right now? The settling, the curiosity, the connection with yourself? What does that feel like in your body? In your belly, chest, neck, or in your face."
+    },
+    {
+      "id": "UYE-21",
+      "file": "UYE-21-a.mp3",
+      "state": "safety",
+      "gap": "hold",
+      "cap": "Let yourself be in that quiet, safe space for a moment and hold that experience in your body. It's not going to last forever, but give it an appreciative hug while it's here."
+    },
+    {
+      "id": "UYE-22",
+      "file": "UYE-22-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Bring your attention back to a specific sound in the environment that catches your attention and listen to it for a moment."
+    },
+    {
+      "id": "UYE-23",
+      "file": "UYE-23-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Bring your awareness to another sound."
+    },
+    {
+      "id": "UYE-24",
+      "file": "UYE-24-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "And another if you can hear it."
+    },
+    {
+      "id": "UYE-25",
+      "file": "UYE-25-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "These sounds provide gentle auditory stepping stones for you to connect fully with the present moment. Everything you heard and hear are happening right here and right now. This is where you exist, and this is what the present moment sounds like. Continue to allow your body to breathe naturally."
+    },
+    {
+      "id": "UYE-26",
+      "file": "UYE-26-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Continue to allow yourself to be still in the present moment."
+    },
+    {
+      "id": "UYE-27",
+      "file": "UYE-27-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Notice the sounds of your environment that you've been hearing and realize how they create a larger whole that you exist within."
+    },
+    {
+      "id": "UYE-28",
+      "file": "UYE-28-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "They are a part of a larger space that safely surrounds you. Use those surrounding sounds to reconnect with the environment as a whole."
+    },
+    {
+      "id": "UYE-29",
+      "file": "UYE-29-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Open your eyes if they're closed and connect your vision with your hearing. Can you see anything that you heard?"
+    },
+    {
+      "id": "UYE-30",
+      "file": "UYE-30-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "This is where you exist in this location, in this time right now. Tell yourself that."
+    },
+    {
+      "id": "UYE-31",
+      "file": "UYE-31-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Look around and tell yourself, \"I'm safe, I'm here, I exist now, and I can hear that.\""
+    },
+    {
+      "id": "UYE-32",
+      "file": "UYE-32-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Check in with your breath one more time."
+    },
+    {
+      "id": "UYE-33",
+      "file": "UYE-33-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Take in a purposeful breath and let it out a bit slower than it would naturally."
+    },
+    {
+      "id": "UYE-34",
+      "file": "UYE-34-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Notice what it's like to feel safe in the present moment. What's happening within your body?"
+    },
+    {
+      "id": "UYE-35",
+      "file": "UYE-35-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Check your belly, chest, neck, and face."
+    },
+    {
+      "id": "UYE-36",
+      "file": "UYE-36-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What are your hands doing? What are your feet doing? What's your body posture?"
+    },
+    {
+      "id": "UYE-37",
+      "file": "UYE-37-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Can you identify safety within? Is it all over or do you feel safer in a specific part of your body? And finally, welcome yourself to the present moment."
+    },
+    {
+      "id": "UYE-38",
+      "file": "UYE-38-a.mp3",
+      "state": "closing",
+      "gap": "short",
+      "cap": "Thank you for letting me be a part of this experience with you. Great job. I'll see you in the community."
+    }
+  ]
+}

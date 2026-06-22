@@ -1,0 +1,246 @@
+{
+  "id": "eye",
+  "title": "Use Your Eyes",
+  "track": "anchoring",
+  "silenceDefault": 8,
+  "holdFloor": 8,
+  "loop": false,
+  "_gapTiers": {
+    "full": "chosen silence",
+    "short": 1.5,
+    "hold": "max(chosen,holdFloor)"
+  },
+  "segments": [
+    {
+      "id": "EYE-01",
+      "file": "EYE-01-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Hey, it's Justin. I am really glad you're here with me to practice mindfulness and grounding in the present moment. Let's start by allowing your body to be a little bit more still than it is right now First, notice how your body naturally breathes. Does your breath go into your chest or your belly? Do your shoulders move?"
+    },
+    {
+      "id": "EYE-02",
+      "file": "EYE-02-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Don't change it. Just let it be there for a moment. And if it changes by itself because now you're paying attention to it, that's fine too."
+    },
+    {
+      "id": "EYE-03",
+      "file": "EYE-03-a.mp3",
+      "state": "mind",
+      "gap": "full",
+      "cap": "Great job. Now, consciously slow your breath down a little on the exhale, just a little bit longer than how long it took to bring it in. And let that exhale fully leave your lungs before you take in the next inhale If you can, breathe in through your nose, feel your belly expand, and let it out through your mouth."
+    },
+    {
+      "id": "EYE-04",
+      "file": "EYE-04-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "If not, that's fine. Breathe as is most comfortable, but focus on extending that exhale a bit."
+    },
+    {
+      "id": "EYE-05",
+      "file": "EYE-05-a.mp3",
+      "state": "mind",
+      "gap": "short",
+      "cap": "Great job. Let's take in one more intentional breath. This time, extend the exhale a tad longer and feel yourself settling into your body, becoming a little more still."
+    },
+    {
+      "id": "EYE-06",
+      "file": "EYE-06-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Really good. Now let go of intentional control of your breath. Let your breath come and go naturally as you listen to me and do the following steps Open your eyes if they're closed. Bring your attention to what you're seeing. Use only your eyes to look around you. Relax your neck and body as you purposely control your eye movements."
+    },
+    {
+      "id": "EYE-07",
+      "file": "EYE-07-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Point your eyes at something intentionally, then look at something else."
+    },
+    {
+      "id": "EYE-08",
+      "file": "EYE-08-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Look and notice there is no danger and you're literally safe. If you find your mind wandering, just return to my voice. In this moment, you're safe. You're in actual safety. There is no danger, and you can use your eyes to see it. You can control your eye movements, look around the room, and see your environmental safety."
+    },
+    {
+      "id": "EYE-09",
+      "file": "EYE-09-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "It's okay to be still right now. Your body might be fidgety, but you can notice that and let it be. Tell yourself there's no danger here. You exist here and nowhere else. Your eyes are in the present moment, seeing things right here and now in this space and this time. Let your body ease up a bit more and relax as you realize that in your thoughts."
+    },
+    {
+      "id": "EYE-10",
+      "file": "EYE-10-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "That thought sends a cue of safety to the rest of your body."
+    },
+    {
+      "id": "EYE-11",
+      "file": "EYE-11-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "For now, keep your neck and body still and relaxed, just looking forward as you allow your eyes to become curious and drift from thing to thing, letting go of conscious control over your eye movement Let your eyes follow the lines and shadows and highlights and colors. Let them land on objects if they like, and then move on If something catches your eyes' interest, let them be curious."
+    },
+    {
+      "id": "EYE-12",
+      "file": "EYE-12-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Allow your eyes to dance from thing to thing, from highlights to shadows, from colors to colors, from things closer to you and things further from you. And if you notice what's happening, let yourself be curious about what they land on. Notice the details of whatever it is that your eyes want to show you: the shapes, how the light hits that object, the textures of what your eyes are landing on."
+    },
+    {
+      "id": "EYE-13",
+      "file": "EYE-13-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Check in with your breathing again. Just notice it. Don't control it. Your body breathes as it needs to, and it's, it's gonna take care of you."
+    },
+    {
+      "id": "EYE-14",
+      "file": "EYE-14-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Good job. Now, notice the edges of where your eyes cannot see further without moving your neck. As you focus on the edges of your vision, your eyes may be pulled to one thing in particular. What is drawing the attention of your eyes?"
+    },
+    {
+      "id": "EYE-15",
+      "file": "EYE-15-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Is it a color? Is it something that's moving? Is it a, a shadow or a highlight? Just notice what's pulling at your eyes on the outer edges of your vision."
+    },
+    {
+      "id": "EYE-16",
+      "file": "EYE-16-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Then allow your neck, as it's ready, to work with your eyes and fulfill the curiosity."
+    },
+    {
+      "id": "EYE-17",
+      "file": "EYE-17-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Let your neck move and position your head to better see what your eyes are curious about Again, notice the details of whatever it is, the shapes, the lighting, the textures, the colors As you're ready, use your neck and eyes to let your interest wander to other things."
+    },
+    {
+      "id": "EYE-18",
+      "file": "EYE-18-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Allow your body to breathe naturally as it holds you comfortably in stillness."
+    },
+    {
+      "id": "EYE-19",
+      "file": "EYE-19-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Focus on the small pieces of your environment little by little, letting your eyes dance and play on the visual landscape But those smaller pieces make up a larger whole, a space that safely surrounds you."
+    },
+    {
+      "id": "EYE-20",
+      "file": "EYE-20-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Try to zoom your attention out and take in the entire visual environment."
+    },
+    {
+      "id": "EYE-21",
+      "file": "EYE-21-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Let your eyes scan the space in more sweeping motions, left to right, top to bottom Your neck will work with your eyes to take everything in with curiosity."
+    },
+    {
+      "id": "EYE-22",
+      "file": "EYE-22-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "This is where you exist, in this location, in this time, right now."
+    },
+    {
+      "id": "EYE-23",
+      "file": "EYE-23-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "And yeah, you can hear me say that, but I also want you to tell that to yourself."
+    },
+    {
+      "id": "EYE-24",
+      "file": "EYE-24-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Look around and tell yourself, \"I'm safe. I'm here. I exist now, and I can see that.\""
+    },
+    {
+      "id": "EYE-25",
+      "file": "EYE-25-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Check in with your breath one more time."
+    },
+    {
+      "id": "EYE-26",
+      "file": "EYE-26-a.mp3",
+      "state": "safety",
+      "gap": "short",
+      "cap": "Now take in a purposeful breath and let it out a bit slower than it normally would."
+    },
+    {
+      "id": "EYE-27",
+      "file": "EYE-27-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Notice what it's like to feel safe in the present moment."
+    },
+    {
+      "id": "EYE-28",
+      "file": "EYE-28-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What is happening within your body as best you can tell?"
+    },
+    {
+      "id": "EYE-29",
+      "file": "EYE-29-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What are your hands doing?"
+    },
+    {
+      "id": "EYE-30",
+      "file": "EYE-30-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What are your feet doing?"
+    },
+    {
+      "id": "EYE-31",
+      "file": "EYE-31-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "What's your body posture?"
+    },
+    {
+      "id": "EYE-32",
+      "file": "EYE-32-a.mp3",
+      "state": "safety",
+      "gap": "full",
+      "cap": "Can you identify a sense of safety within? And if so, is it all over or is it a specific part of your body?"
+    },
+    {
+      "id": "EYE-33",
+      "file": "EYE-33-a.mp3",
+      "state": "closing",
+      "gap": "short",
+      "cap": "And finally, welcome yourself to the present moment. Congratulations and great job."
+    }
+  ]
+}
