@@ -3,9 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>A guided practice — Stuck Not Broken</title>
-<!-- ───── installable web app (PWA) ───── -->
-<link rel="manifest" href="manifest.webmanifest">
+<!-- installable web app (add to home screen) — all inline, single file -->
 <meta name="theme-color" content="#F4F1E8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,6 +11,9 @@
 <meta name="apple-mobile-web-app-title" content="Guided Practice">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<title>A guided practice — Stuck Not Broken</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -28,9 +29,9 @@ body{
   font-family:'Inter',system-ui,-apple-system,sans-serif;
   background:var(--bone);color:var(--ink);
   font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
-  height:100dvh;overflow-y:auto;
+  min-height:100svh;overflow-y:auto;overscroll-behavior:none;
 }
-.page{width:100%;max-width:600px;margin:0 auto;min-height:100dvh;padding:clamp(15px,3vh,30px) 28px clamp(16px,3vh,28px);display:flex;flex-direction:column}
+.page{width:100%;max-width:600px;margin:0 auto;min-height:100svh;padding:clamp(15px,3vh,30px) 28px clamp(16px,3vh,28px);display:flex;flex-direction:column}
 
 /* ───── brand bar ───── */
 .brand{display:flex;align-items:center;gap:12px;margin:0 0 clamp(16px,3.6vh,30px);flex:none}
@@ -39,13 +40,13 @@ body{
 .mark.mark-sky .g-heart{fill:var(--sky)}
 .mark.mark-amber .g-bolt,.mark.mark-amber .g-x{fill:var(--amber)}
 .brand-tag{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding-left:12px;border-left:1px solid var(--hairline)}
-.eyebrow{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+.eyebrow{font-size:12.5px;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
 .chooser .block>.eyebrow{display:flex;align-items:center;gap:8px;color:var(--trk-ink,var(--ink-80))}
 .chooser .eyebrow::before{content:"";width:16px;height:2px;border-radius:1px;background:var(--trk,var(--muted));flex:none}
 
 /* ───── setup layout (fits one screen) ───── */
 .screen{display:flex;flex-direction:column;flex:1;min-height:0}
-#setup{justify-content:flex-start;gap:clamp(14px,2.6vh,24px)}
+#setup{justify-content:flex-end;gap:clamp(14px,2.6vh,24px)}
 .hidden{display:none !important}
 
 /* zero-decision entry */
@@ -61,7 +62,7 @@ body{
 .choose-link.back{align-self:flex-start;margin:0 0 2px;color:var(--muted);text-decoration:none}
 .choose-link.back:hover{color:var(--ink)}
 /* chooser hidden until the user opts into deciding */
-.chooser{display:flex;flex:1;min-height:0;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
+.chooser{display:flex;flex:1;min-height:0;flex-direction:column;justify-content:flex-end;gap:clamp(13px,2.4vh,22px)}
 #setup.choosing .entry{display:none}
 #setup.choosing .chooser{display:flex;animation:riseIn .5s var(--ease)}
 
@@ -85,22 +86,51 @@ body{
 .tabs[data-single] .tab.on{border-color:transparent;padding-left:0;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
 
 /* ───── primary choices: radio rows ───── */
+/* first-run orientation — only on the calm, unchosen view */
+.welcome{font-size:16px;line-height:1.5;color:var(--ink-80);margin:0 0 2px;max-width:23em;text-wrap:pretty}
+.chooser.picked .welcome{display:none}
 .block{margin:0}
 .block>.eyebrow{display:block;margin-bottom:11px}
-.choices{display:flex;flex-direction:column;gap:8px}
+.choices{display:flex;flex-direction:column}
+.choices .opt{margin-bottom:10px}
+.choices .opt:last-child{margin-bottom:0}
 .opt{
   display:flex;align-items:center;width:100%;text-align:left;
   font:inherit;color:inherit;cursor:pointer;
   background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);
-  padding:14px 18px;transition:border-color var(--ease) .2s,border-width var(--ease) .2s,box-shadow var(--ease) .2s;
+  padding:19px 22px;max-height:140px;overflow:hidden;
+  transition:border-color var(--ease) .2s,border-width var(--ease) .2s,box-shadow var(--ease) .2s,max-height var(--ease) .35s,opacity var(--ease) .3s,padding var(--ease) .35s,margin var(--ease) .35s;
 }
-.opt:hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}
-.opt.on{border-width:2px;padding:13px 17px}
+.opt:not(.on):hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}
+.opt.track-sky.on:hover{box-shadow:inset 0 0 0 1px var(--sky)}
+.opt.track-amber.on:hover{box-shadow:inset 0 0 0 1px var(--amber)}
+.opt.on{border-width:2px;padding:18px 21px}
 .opt.on .t{font-weight:500;color:var(--ink)}
 .opt.track-sky.on{border-color:var(--sky)}
+.opt.track-ink.on{border-color:var(--ink)}
 .opt.track-amber.on{border-color:var(--amber)}
 .opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.opt .t{display:block;flex:1 1 auto;min-width:0;font-size:15.5px;line-height:1.3;font-weight:400;transition:font-weight var(--ease) .2s}
+.opt-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.opt .t{display:block;flex:none;min-width:0;font-size:18px;line-height:1.3;font-weight:400;transition:font-weight var(--ease) .2s}
+.opt .sub{font-size:13px;line-height:1.3;color:var(--muted);font-weight:400}
+.chooser.picked .sub{display:none}
+/* a clear way back once a practice is chosen */
+.change-hint{display:none;font-size:12px;letter-spacing:.04em;color:var(--muted);margin-left:10px;white-space:nowrap}
+.chooser.picked .opt.on .change-hint{display:inline}
+/* tap affordance — right chevron to choose, rotates down on the chosen one (tap to change) */
+.opt-aff{flex:none;width:9px;height:9px;margin-left:14px;border-right:1.5px solid var(--muted);border-top:1.5px solid var(--muted);transform:rotate(45deg);transition:transform var(--ease) .3s,border-color var(--ease) .2s}
+.opt.on .opt-aff{border-color:var(--ink)}
+.chooser.picked .opt.on .opt-aff{transform:rotate(135deg)}
+/* on choosing, the other two collapse away */
+.chooser.picked .choices .opt:not(.on){max-height:0;opacity:0;margin:0;padding-top:0;padding-bottom:0;border-width:0;pointer-events:none}
+/* customization stays hidden until a practice is chosen — a calm first view */
+.chooser:not(.picked) .summary,
+.chooser:not(.picked) .surprise-all{display:none !important}
+.chooser.picked .begin-help{display:none}
+/* the customization area grows in and recedes smoothly — grid-rows 0fr<->1fr animates to natural height, both directions */
+.reveal{max-height:0;opacity:0;overflow:hidden;pointer-events:none;transition:max-height .5s var(--ease),opacity .4s var(--ease)}
+.reveal-inner{display:flex;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
+.chooser.picked .reveal{opacity:1;pointer-events:auto}
 
 /* ───── contextual refinements ───── */
 .refine{display:flex;flex-direction:column;gap:clamp(11px,2vh,18px);flex:none}
@@ -130,7 +160,7 @@ body{
 .adjust-body{display:flex;flex-direction:column;gap:22px}
 
 /* ───── summary + begin (pinned low) ───── */
-.foot{margin-top:auto;display:flex;flex-direction:column;gap:14px;flex:none;padding-top:clamp(12px,2.4vh,22px)}
+.foot{display:flex;flex-direction:column;gap:14px;flex:none;padding-top:clamp(16px,3vh,26px)}
 .summary{font-size:15px;color:var(--ink-80);margin:0;min-height:1.4em;text-wrap:pretty}
 .summary b{font-weight:500;color:var(--ink)}
 .begin-help{font-size:13px;color:var(--muted);margin:0;text-align:left;text-wrap:pretty}
@@ -141,7 +171,7 @@ body{
 }
 .btn:hover{box-shadow:0 0 0 2px var(--bone),0 0 0 3.5px var(--ink);transform:translateY(-1px)}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-.btn.primary{width:100%;padding:16px 30px;font-size:16.5px;border-radius:12px}
+.btn.primary{width:100%;padding:18px 30px;font-size:17px;border-radius:14px}
 .btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
 .btn.quiet:hover{box-shadow:inset 0 0 0 1px var(--ink);transform:translateY(-1px)}
 body.playing .brand{display:none}
@@ -151,12 +181,20 @@ body.playing .brand{display:none}
 .ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
 #ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
 .phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
-.caption{display:none;font-size:17px;line-height:1.65;color:var(--ink-80);max-width:30em;margin:0 auto;text-align:center;text-wrap:pretty;padding:0 6px}
-#player.caps-on .caption{display:flex;align-items:center;justify-content:center;height:5em;margin:0 auto 18px}
+/* a quiet "it's beginning" cue so the opening silence never reads as broken */
+.starting{font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);margin:0;min-height:1.4em;text-align:center;opacity:0;transition:opacity .6s var(--ease)}
+.starting.show{opacity:1;animation:startpulse 1.9s ease-in-out infinite}
+@keyframes startpulse{0%,100%{opacity:.4}50%{opacity:.85}}
+@media (prefers-reduced-motion:reduce){.starting.show{animation:none;opacity:.7}}
+.caption{display:flex;align-items:center;justify-content:flex-start;height:5em;font-size:17px;line-height:1.65;color:var(--ink-80);max-width:none;width:100%;margin:0 0 18px;text-align:left;text-wrap:pretty;padding:0}
+#player:not(.caps-on) .caption{visibility:hidden}
+/* paused: the whole field dims to read as resting (not frozen); only the resume button stays full */
+#player .ringwrap,#player .caption,#player .starting,#player .adjustments,#player .endings{transition:opacity .45s var(--ease)}
+#player.paused .ringwrap,#player.paused .caption,#player.paused .adjustments,#player.paused .endings{opacity:.38}
 .cap-text{display:inline-block;opacity:0;transform:translateY(7px);filter:blur(2px);transition:opacity .6s var(--ease),transform .6s var(--ease),filter .6s var(--ease);will-change:opacity,transform,filter}
 .cap-text.in{opacity:1;transform:none;filter:blur(0)}
 @media (prefers-reduced-motion:reduce){.cap-text{transform:none;filter:none;transition:opacity .4s var(--ease)}}
-.controls{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;max-width:330px;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
+.controls{display:flex;flex-direction:column;gap:18px;align-items:stretch;width:100%;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
 #player.show-controls .controls{opacity:1;pointer-events:auto}
 /* the controls flow in softly, one tier after the next */
 #player.show-controls .controls>*{animation:riseIn .5s var(--ease) both}
@@ -171,7 +209,7 @@ body.playing .brand{display:none}
 .iconbtn .ico{width:25px;height:25px;display:block;fill:var(--ink);color:var(--ink)}
 
 /* ── primary transport: the one hero control ── */
-.transport{width:74px;height:74px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
+.transport{align-self:center;width:74px;height:74px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
 .transport:hover{box-shadow:0 0 0 1.5px var(--ink)}
 .transport:active{transform:scale(.96)}
 .transport:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
@@ -181,15 +219,18 @@ body.playing .brand{display:none}
 .transport.is-paused .ico-play{display:block}
 
 /* ── adjustments: two quiet, equal setting pills ── */
-.adjustments{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;width:100%}
-.adj{display:inline-flex;align-items:center;height:40px;border:1px solid var(--hairline);border-radius:999px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
-.adj.silence{gap:3px;padding:0 6px 0 15px}
+/* ── settings: two equal cells on one grid row, sharing the column's edges ── */
+.adjustments{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+@media (max-width:430px){.adjustments{grid-template-columns:1fr}}
+.adj{display:flex;align-items:center;justify-content:space-between;width:100%;height:48px;border:1px solid var(--hairline);border-radius:12px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
+.adj.silence{padding:0 6px 0 14px}
+.adj-stepper{display:inline-flex;align-items:center;gap:2px}
 .adj-label{color:var(--muted)}
 .adj-val{color:var(--ink-80);font-variant-numeric:tabular-nums;min-width:2.2em;text-align:center}
-.adj-step{width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease) .2s}
+.adj-step{width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease) .2s}
 .adj-step:hover{color:var(--ink)}
 .adj-step:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.captoggle{gap:9px;padding:0 17px;cursor:pointer}
+.captoggle{padding:0 14px;cursor:pointer}
 .captoggle .cc{font-weight:500;letter-spacing:.1em;color:var(--muted);transition:color var(--ease) .2s}
 .captoggle .cc-state{color:var(--muted);transition:color var(--ease) .2s}
 .captoggle:hover{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
@@ -202,11 +243,11 @@ body.playing .brand{display:none}
 .endings{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
 .endings .endbtn{width:100%}
 .endnow{background:none;border:0;font:inherit;font-size:12.5px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted);cursor:pointer;padding:4px 10px;transition:color var(--ease) .2s}
-.endnow:hover{color:var(--ink)}
+.endnow:hover{color:var(--ink);font-weight:600}
 .endnow:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
 
 /* gentle completion */
-.done{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%;max-width:300px}
+.done{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%}
 #player.finished .controls{display:none}
 #player.finished .done{display:flex;animation:riseIn .55s var(--ease)}
 .done .btn{width:100%}
@@ -262,7 +303,7 @@ body.playing .brand{display:none}
   .foot{padding-top:8px;gap:9px}
   .chip{padding:6px 13px}
 }
-/* ───── embed → standalone affordance (only shows inside Circle / on installable iOS) ───── */
+/* embed → standalone affordance (only shows inside Circle / on installable iOS) */
 .popout,.installhint{display:none}
 body.embedded .popout,body.can-install .installhint{
   display:flex;align-items:center;gap:10px;justify-content:space-between;flex:none;
@@ -280,9 +321,6 @@ body.embedded .popout,body.can-install .installhint{
 .popout-x:hover{color:var(--ink)}
 .popout-x:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 body.playing .popout,body.playing .installhint{display:none}
-/* ───── safe-area insets (notch / home indicator) for installed full-screen app ─────
-   Last in the cascade so it adds clearance across every breakpoint without losing the
-   responsive vertical rhythm. */
 @supports(padding:max(0px)){
   .page{
     padding-top:max(14px,env(safe-area-inset-top));
@@ -322,10 +360,12 @@ body.playing .popout,body.playing .installhint{display:none}
     <!-- the customizer: choose a practice, shape it, begin -->
     <div class="chooser" id="chooser">
 
+      <p class="welcome" id="welcome">A few quiet minutes to find your way back to safety. Choose where to begin.</p>
       <div class="block">
         <div class="choices" id="exps"></div>
       </div>
 
+      <div class="reveal" id="reveal"><div class="reveal-inner">
       <div class="refine">
         <div class="block" id="sensewrap">
           <span class="eyebrow">anchor your attention with</span>
@@ -354,6 +394,7 @@ body.playing .popout,body.playing .installhint{display:none}
           </div>
         </div>
       </details>
+      </div></div>
 
       <div class="foot">
         <p class="summary" id="summary"></p>
@@ -367,6 +408,7 @@ body.playing .popout,body.playing .installhint{display:none}
   <!-- ───────────── PLAYER ───────────── -->
   <main id="player" class="screen hidden">
     <div class="ringwrap"><canvas id="ring"></canvas></div>
+    <p class="starting" id="starting" aria-live="polite"></p>
     <p class="caption" id="caption"><span class="cap-text" id="captext"></span></p>
     <div class="controls">
       <!-- primary transport: the one hero control -->
@@ -375,15 +417,17 @@ body.playing .popout,body.playing .installhint{display:none}
       <div class="adjustments">
         <div class="adj silence">
           <span class="adj-label">silence</span>
-          <button class="adj-step" id="lesssil" aria-label="less silence">−</button>
-          <span class="adj-val" id="silnow"></span>
-          <button class="adj-step" id="moresil" aria-label="more silence">+</button>
+          <span class="adj-stepper">
+            <button class="adj-step" id="lesssil" aria-label="less silence">−</button>
+            <span class="adj-val" id="silnow"></span>
+            <button class="adj-step" id="moresil" aria-label="more silence">+</button>
+          </span>
         </div>
         <button class="adj captoggle" id="captoggle" type="button" aria-pressed="false"><span class="cc">CC</span><span class="cc-state" id="capstate">off</span></button>
       </div>
       <!-- endings: graceful close, and a quiet escape -->
       <div class="endings">
-        <button class="btn quiet endbtn" id="endbtn">Begin gentle close</button>
+        <button class="btn quiet endbtn" id="endbtn">Begin ease out</button>
         <button class="endnow" id="stopbtn" aria-label="End now">end now</button>
       </div>
     </div>
@@ -422,8 +466,6 @@ const BASE="https://justinlmft.github.io/snb-guided-practice/clips/";
 /* CAPTIONS: fetch the filename-keyed transcript once on load. On/off toggle, default OFF, nothing persisted. */
 let CAP={};
 fetch(BASE+'captions.json').then(r=>r.ok?r.json():{}).then(j=>{CAP=j||{};}).catch(()=>{});
-let CAPT={};
-fetch(BASE+'captions-timed.json').then(r=>r.ok?r.json():{}).then(j=>{CAPT=j||{};}).catch(()=>{});
 let capsOn=false,curFile='';
 
 /* ====== content data (manifest, order, rules, durations) ====== */
@@ -661,21 +703,22 @@ const ladder=senseFront;
 const allSenses=['touch','sound','sight','movement','imagination'].filter(s=>senseFront(s).length);
 
 /* the four practices, gentlest first. Copy in Justin's voice. */
-const TRACK={mindfulness:'sky',anchoring:'sky',most:'amber'};
+const TRACK={mindfulness:'ink',anchoring:'sky',most:'amber'};
 /* skills offered within self-regulation (like the anchor menu) */
 const SKILLS={
   most:[['imagery','imagery & invitation'],['obstacles','obstacles'],['balancing','balancing'],['pendulation','pendulation']]
 };
 const EXP={
- mindfulness:{key:'mindfulness',t:'I want to practice simple mindfulness',d:"",sense:'touch',silence:8,gentle:true,mind:true,tier:0,
+ mindfulness:{key:'mindfulness',t:'Practice simple mindfulness',cue:'the gentlest — a calm place to start',d:"",sense:'touch',silence:8,gentle:true,mind:true,tier:0,
    sum:"We'll arrive, follow the breath, and move gently through your senses."},
- anchoring:{key:'anchoring',t:'I want to connect with safety',d:'',sense:'touch',silence:8,gentle:true,mind:false,tier:1,
+ anchoring:{key:'anchoring',t:'Connect with safety',cue:'a step in — settling into safety',d:'',sense:'touch',silence:8,gentle:true,mind:false,tier:1,
    sum:"We'll settle into safety through your {sense}, and stay there a while."},
- most:{key:'most',t:'I want to practice self-regulation',d:"",sense:'touch',skill:'imagery',descDefense:false,silence:4,gentle:false,mind:false,tier:3,
+ most:{key:'most',t:'Practice self-regulation',cue:'the deepest — meeting what is hard',d:"",sense:'touch',skill:'imagery',descDefense:false,silence:4,gentle:false,mind:false,tier:3,
    sum:"We'll hold safety and not-safety, and let them take turns. This one goes deepest."}
 };
 let practices=[fresh('mindfulness')];
 let active=0;
+let picked=false;   // has the user actively chosen a practice this visit? (drives the collapse + reveal)
 let cfg=practices[active];
 function fresh(k){return {...EXP[k],open:false};}
 
@@ -759,20 +802,24 @@ function estimate(o){let t=0;o.seq.forEach((b,i)=>{t+=(DUR[b]||4);if(i<o.seq.len
 /* ====== setup screen ====== */
 function renderSetup(){
   cfg=practices[active];
+  $('chooser').classList.toggle('picked',picked);
   // tint the brand mark + section eyebrows to the current practice's track
   const mk=document.querySelector('.mark');
-  if(mk){mk.classList.remove('mark-sky','mark-amber');mk.classList.add('mark-'+TRACK[cfg.key]);}
+  if(mk){mk.classList.remove('mark-sky','mark-amber','mark-ink');mk.classList.add('mark-'+TRACK[cfg.key]);}
   $('chooser').style.setProperty('--trk','var(--'+TRACK[cfg.key]+')');
-  $('chooser').style.setProperty('--trk-ink',TRACK[cfg.key]==='amber'?'#8C5E1C':'#356291');
-  $('beginhelp').style.display=cfg.key==='mindfulness'?'block':'none';   // gentle reassurance on the default path
+  $('chooser').style.setProperty('--trk-ink',TRACK[cfg.key]==='amber'?'#8C5E1C':TRACK[cfg.key]==='ink'?'#3A3F4A':'#356291');
+  $('beginhelp').style.display='none';   // orientation now lives in the welcome line + per-option subtitles
   // experience options
   const ew=$('exps');ew.innerHTML='';
   Object.values(EXP).forEach(e=>{
     const b=document.createElement('button');b.type='button';
     b.className='opt'+(e.key===cfg.key?' on':'')+' track-'+TRACK[e.key];
     b.setAttribute('role','radio');b.setAttribute('aria-checked',e.key===cfg.key?'true':'false');
-    b.innerHTML='<span class="t">'+e.t+'</span>';
-    b.onclick=()=>{practices[active]=fresh(e.key);renderSetup();};
+    b.innerHTML='<span class="opt-text"><span class="t">'+e.t+'</span><span class="sub">'+e.cue+'</span></span><span class="change-hint">change</span><span class="opt-aff" aria-hidden="true"></span>';
+    b.onclick=()=>{
+      if(picked&&e.key===cfg.key){picked=false;renderSetup();return;}   // tap the chosen one again to reopen the list
+      practices[active]=fresh(e.key);picked=true;renderSetup();
+    };
     ew.appendChild(b);
   });
   // anchor sense (only when the practice uses a chosen sense)
@@ -803,6 +850,8 @@ function renderSetup(){
   const time = o.loop ? '<b>The practice continues until you choose to stop.</b>' : '<b>About '+estimate(o)+' min.</b>';
   const pre = practices.length>1 ? (['','','Two','Three'][practices.length]+' practices, back to back. ') : '';
   $('summary').innerHTML = pre + time;
+  // size the reveal to its content so the customization grows in / recedes smoothly (deterministic inside the flex column)
+  const rv=$('reveal'); if(rv) rv.style.maxHeight = picked ? rv.scrollHeight+'px' : '0px';
 }
 function chip(label,on){
   const b=document.createElement('button');b.type='button';
@@ -824,10 +873,10 @@ $('surprise').onclick=()=>{
    (a clip whose take ran longer than DUR bled into the silence). DUR is no longer
    used to advance; we wait for `ended`, then hold the silence gap, then play next. */
 let SEQ=[],PH=[],idx=-1,LOOP=false,LOOPFROM=0;
-let playing=false,paused=false,finished=false;
+let playing=false,paused=false,finished=false,started=false,closingNow=false;
 let gapTimer=null,inGap=false,gapRemain=0,gapStart=0;
 
-function showScreen(id){['setup','player'].forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('playing',id==='player');}
+function showScreen(id){if(id==='setup')picked=false;['setup','player'].forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('playing',id==='player');}
 
 /* TEST-ONLY: live sequence preview so you can see what's coming. Remove for production. */
 function renderTest(){
@@ -859,7 +908,7 @@ let ctrlTimer=null;
 function revealControls(){
   const p=$('player');p.classList.add('show-controls');
   clearTimeout(ctrlTimer);
-  if(finished)return;                                   // at the end, leave controls up
+  if(finished||paused)return;                                   // at the end — or while paused — leave controls up
   ctrlTimer=setTimeout(()=>{p.classList.remove('show-controls');},4500);
 }
 $('player').addEventListener('pointerdown',()=>{if(playing||finished)revealControls();});
@@ -901,9 +950,10 @@ $('contbtn').onclick=()=>{inBreak=false;$('player').classList.remove('breaking')
 function startPlayer(){
   const o=buildPlan();SEQ=o.seq;PH=o.phase;LOOP=o.loop;LOOPFROM=o.loopFrom;buildTrackSeq();
   $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
-  finished=false;paused=false;playing=true;inGap=false;idx=-1;
+  finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
   showScreen('player');fitRing();renderTest();showSil();
-  inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested');revealControls();
+  started=false;const _st=$('starting');if(_st){_st.textContent='beginning';_st.classList.add('show');}
+  inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested','paused');revealControls();
   cancelAnimationFrame(rafId);ringLoop();
   advance();
 }
@@ -925,7 +975,7 @@ function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer)
    No per-word timestamps exist, so we split CAP[file] into phrases and reveal each across
    the clip's playback, weighting by phrase length (a proxy for how long it takes to say).
    Purely a renderer over CAP[file]; the sequencing/timing engine is untouched. */
-let CAP_CHUNKS=[],CAP_BOUNDS=[],CAP_TIMES=null,capShown=-1,capFadeT=null;
+let CAP_CHUNKS=[],CAP_BOUNDS=[],capShown=-1,capFadeT=null;
 function splitCaption(txt){
   txt=(txt||'').trim();if(!txt)return [];
   let parts=(txt.match(/[^.!?]+[.!?]*/g)||[txt]).map(s=>s.trim()).filter(Boolean);
@@ -941,25 +991,21 @@ function splitCaption(txt){
   });
   return out;
 }
-function capStartTimed(cues){CAP_CHUNKS=cues.map(c=>c[1]);CAP_TIMES=cues.map(c=>c[0]);capShown=-1;if(CAP_CHUNKS.length)capShow(0);else capRender('');}
-function capFor(file){const t=CAPT[file];if(t&&t.length){capStartTimed(t);}else{CAP_TIMES=null;capStart(CAP[file]||'');}}
 function capStart(txt){
-  CAP_TIMES=null;CAP_CHUNKS=splitCaption(txt);capShown=-1;
+  CAP_CHUNKS=splitCaption(txt);capShown=-1;
   let total=CAP_CHUNKS.reduce((n,s)=>n+s.length,0)||1,acc=0;
   CAP_BOUNDS=CAP_CHUNKS.map(s=>{acc+=s.length;return acc/total;});   // cumulative phrase-length fractions
   if(CAP_CHUNKS.length){capTick();if(capShown<0)capShow(0);}else capRender('');
 }
 function capTick(){
   if(!capsOn||paused||inGap||!CAP_CHUNKS.length)return;
-  let i=0;
-  if(CAP_TIMES){while(i<CAP_TIMES.length-1&&au.currentTime>=CAP_TIMES[i+1])i++;}
-  else{const dur=(isFinite(au.duration)&&au.duration>0)?au.duration:(DUR[SEQ[idx]]||CAP_CHUNKS.length*3);
-    const prog=Math.min(1,au.currentTime/dur);
-    while(i<CAP_BOUNDS.length-1&&prog>=CAP_BOUNDS[i])i++;}
+  const dur=(isFinite(au.duration)&&au.duration>0)?au.duration:(DUR[SEQ[idx]]||CAP_CHUNKS.length*3);
+  const prog=Math.min(1,au.currentTime/dur);
+  let i=0;while(i<CAP_BOUNDS.length-1&&prog>=CAP_BOUNDS[i])i++;
   if(i!==capShown)capShow(i);
 }
 function capShow(i){capShown=i;capRender(CAP_CHUNKS[i]||'');}
-function capClear(){CAP_CHUNKS=[];CAP_BOUNDS=[];CAP_TIMES=null;capShown=-1;capRender('');}
+function capClear(){CAP_CHUNKS=[];CAP_BOUNDS=[];capShown=-1;capRender('');}
 function capRender(text){
   const el=$('captext');if(!el||el.textContent===text)return;
   el.classList.remove('in');                              // fade/blur the current phrase out
@@ -967,11 +1013,13 @@ function capRender(text){
   capFadeT=setTimeout(()=>{el.textContent=text;if(text){void el.offsetWidth;el.classList.add('in');}},260);
 }
 au.addEventListener('timeupdate',capTick);
+/* the opening "beginning" cue clears the moment real audio starts */
+au.addEventListener('playing',()=>{if(!started){started=true;const s=$('starting');if(s)s.classList.remove('show');}});
 
 function playCurrent(){
   const b=SEQ[idx];
   const file=rand(MAN[b]);          // CAPTIONS: this is the chosen variant filename — caption key is CAP[file]
-  curFile=file;capFor(file);   // timed reveal if available, else estimate (shown only when captions on)
+  curFile=file;capStart(CAP[file]||'');   // parse caption into phrases, reveal progressively (shown only when captions on)
   try{au.src=clipUrl(file);au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{});}catch(e){}
 }
 function advance(){
@@ -989,13 +1037,14 @@ au.onended=()=>{                                      // a clip finished playing
   clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);
 };
 au.onerror=()=>{                                      // a clip failed to load — skip on, don't freeze
+  $('starting').classList.remove('show');
   if(!playing||paused)return;
   if(!LOOP&&idx>=SEQ.length-1)return finish();
   inGap=true;gapRemain=300;gapStart=performance.now();
   clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},300);
 };
 function finish(){playing=false;finished=true;finishAt=performance.now();inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}
-  capClear();
+  capClear();$('starting').classList.remove('show');
   $('pause').style.display='none';
   clearTimeout(ctrlTimer);$('player').classList.add('finished');$('player').classList.remove('conn-trouble');
 }
@@ -1006,11 +1055,13 @@ $('pause').onclick=()=>{
     if(inGap){gapStart=performance.now();clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);}
     else{try{au.play();}catch(e){}}
     $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');
+    $('player').classList.remove('paused');revealControls();
   }else{ // pause
     paused=true;
     if(inGap){clearTimeout(gapTimer);gapRemain=Math.max(0,gapRemain-(performance.now()-gapStart));}
     else{try{au.pause();}catch(e){}}
     $('pause').classList.add('is-paused');$('pause').setAttribute('aria-label','Resume');
+    $('player').classList.add('paused','show-controls');clearTimeout(ctrlTimer);$('starting').classList.remove('show');
   }
 };
 /* live silence control — adjusts the current practice's gap length on the fly */
@@ -1020,7 +1071,7 @@ function showSil(){const e=$('silnow');if(e)e.textContent=cfg.silence+'s';}
 function stepSil(d){let i=SILSTEPS.indexOf(nearestSil(cfg.silence));i=Math.max(0,Math.min(SILSTEPS.length-1,i+d));cfg.silence=SILSTEPS[i];showSil();}
 $('lesssil').onclick=()=>stepSil(-1);
 $('moresil').onclick=()=>stepSil(1);
-$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capFor(curFile);}else{capClear();}};
+$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capStart(CAP[curFile]||'');}else{capClear();}};
 
 $('stopbtn').onclick=()=>{stopAll();finished=false;showScreen('setup');};   // immediate exit, no close
 $('againbtn').onclick=()=>{startPlayer();};                                  // replay the same session from the top
@@ -1029,8 +1080,10 @@ $('restbtn').onclick=()=>{$('player').classList.add('rested');};               /
 $('restagain').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
 $('endbtn').onclick=()=>{
   if(finished){stopAll();showScreen('setup');return;}
+  closingNow=true;   // ease-out: the circle returns to black, confirming the close has begun
   clearTimeout(gapTimer);inGap=false;playing=true;paused=false;LOOP=false;
   $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');
+  $('player').classList.remove('paused');
   // is there another meditation queued after this point? (a practice boundary further along)
   let nextStart=-1;for(let i=idx+1;i<PH.length;i++){if(PH[i-1]==='closing'&&PH[i]!=='closing'){nextStart=i;break;}}
   const closes=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05'].filter(has);
@@ -1052,18 +1105,27 @@ $('endbtn').onclick=()=>{
   advance();
 };
 
-/* ====== breathing ring — soft, brand-toned glow, track-tinted, reduced-motion aware ======
-   The one bit of "decoration" in the app, and intentionally so: it is the practice's
-   living focal point. Two soft radial layers (a wide halo + a denser core) breathe on a
-   ~9.6s cycle in the chosen practice's track colour (sky for mindfulness / safety,
-   amber for self-regulation), with a faint steady guide ring as a sense of "home". */
+/* ====== focal point — whole breathing circle, two-state colour, migrating ring, reduced-motion aware ======
+   The one bit of "decoration" in the app, and intentionally so: it is the practice's living focal point.
+   A single whole circle breathes on a slow cycle. Its colour is BLUE while the voice is in mindfulness or
+   safety and shifts to ORANGE when it turns toward the defense; the centre dot shifts with it. A faint
+   second ring sits OUTSIDE the circle in mindfulness, vanishes as you settle into safety, and reappears
+   INSIDE the circle at the defense — so the ring travels inward as the work deepens. No glow. */
 const cv=$('ring'),g=cv.getContext('2d');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let rafId=null,_phaseShown='',finishAt=0,TRACKSEQ=[];
-const TRACK_RGB={sky:[88,145,197],amber:[210,154,74],leaf:[91,160,112]};
-/* which practice's track colour each clip belongs to, so a stacked session recolours per meditation */
-function buildTrackSeq(){TRACKSEQ=[];let seg=0;for(let i=0;i<SEQ.length;i++){if(i>0&&PH[i-1]==='closing'&&PH[i]!=='closing')seg++;const p=practices[seg]||practices[practices.length-1]||{key:'mindfulness'};TRACKSEQ.push(TRACK[p.key]);}}
-function ringRGB(){return TRACK_RGB[TRACKSEQ[idx]||TRACK[cfg.key]]||TRACK_RGB.sky;}
+let rafId=null,finishAt=0;
+const RING_BLUE=[88,145,197], RING_ORANGE=[210,154,74], RING_INK=[26,31,42];
+/* classify the current clip into one of three moments by its id (works the same in any practice & when stacked) */
+function clipState(b){
+  if(!b)return 'mind';
+  if(/^(INVITE|IMG-|OBST|HOLD-WATCH|DESC-DEFENSE|NUMB-OK|PEND-DEFENSE|PEND-TO-DEFENSE)/.test(b))return 'defense';  // the harder edge
+  if(/^(CLOSE-|OUTRO)/.test(b))return 'closing';                                                                 // easing out — the circle returns to black
+  if(/^(INTRO-01|MIND-0[1-8])$/.test(b))return 'mind';                                                            // gentle noticing prompts
+  return 'safety';                                                                                                 // anchoring / resting in safety
+}
+const RING_STATE={mind:{col:RING_INK,outer:1,inner:0},safety:{col:RING_BLUE,outer:0,inner:0},defense:{col:RING_ORANGE,outer:0,inner:1},closing:{col:RING_INK,outer:0,inner:0}};
+let _rc=RING_INK.slice(), _ro=1, _ri=0, _lastState='mind', _breath=0.5, _breath2=0.5;   // eased current colour / outer-ring / inner-ring opacity; held breath values
+function buildTrackSeq(){}                                     // (legacy no-op — colour now follows each clip's state, computed live)
 function fitRing(){const dpr=devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
 addEventListener('resize',()=>{if(!$('player').classList.contains('hidden'))fitRing();});
 function ringLoop(){
@@ -1071,26 +1133,33 @@ function ringLoop(){
   const W=cv.clientWidth,H=cv.clientHeight,cx=W/2,cy=H/2;g.clearRect(0,0,W,H);
   const unit=Math.min(W,H);
   const t=performance.now()/1000;
-  // ~9.6s breath cycle; frozen if reduced motion or paused
-  const phase=(playing&&!paused&&!reduce)?(Math.sin(t*0.65)*0.5+0.5):0.5;
-  const [r,gr,bl]=ringRGB();
-  const rgba=(a)=>'rgba('+r+','+gr+','+bl+','+a+')';
-  g.lineCap='round';
+  const moving=playing&&!paused&&!reduce;
+  if(moving){_breath=Math.sin(t*0.55)*0.5+0.5;_breath2=Math.sin(t*0.41+0.7)*0.5+0.5;}  // when paused/reduced, hold the last value instead of snapping to a default shape
+  const breath=_breath, breath2=_breath2;
+  // ease toward the current clip's state (a quick, deliberate shift)
+  const s=RING_STATE[finished?_lastState:(closingNow?(_lastState='closing'):(_lastState=clipState(SEQ[idx])))];
+  for(let i=0;i<3;i++)_rc[i]+=(s.col[i]-_rc[i])*0.10;
+  _ro+=(s.outer-_ro)*0.08; _ri+=(s.inner-_ri)*0.08;
   // at the end, the ring closes inward and fades, settling into the centre dot
   let e=0;
   if(finished){const ct=Math.min(1,(performance.now()-finishAt)/2200);e=1-Math.pow(1-ct,3);}
+  const [r,gr,bl]=_rc.map(Math.round);
+  const rgba=(a)=>'rgba('+r+','+gr+','+bl+','+a+')';
+  g.lineCap='round';
   const dotR=Math.max(2.5,unit*0.02);
-  // the breathing ring — a single solid stroke in the practice's colour
-  const breathR=(unit*(0.16+0.16*phase))*(1-e)+dotR*e;
+  // the migrating second ring — faint thread, outside for mindfulness / inside for defense (fades out as the session closes)
+  if(_ro>0.01){g.strokeStyle=rgba(0.5*_ro*(1-e));g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,unit*(0.30+0.13*breath2),0,Math.PI*2);g.stroke();}
+  if(_ri>0.01){g.strokeStyle=rgba(0.6*_ri*(1-e));g.lineWidth=1.6;g.beginPath();g.arc(cx,cy,unit*(0.115+0.055*breath2),0,Math.PI*2);g.stroke();}
+  // the whole breathing circle — collapsing into the dot at the very end
+  const breathR=(unit*(0.20+0.12*breath))*(1-e)+dotR*e;
   g.strokeStyle=rgba(0.9*(1-e));g.lineWidth=2.5;g.beginPath();g.arc(cx,cy,breathR,0,Math.PI*2);g.stroke();
-  // solid centre dot
-  g.fillStyle=rgba(1);g.beginPath();g.arc(cx,cy,dotR,0,Math.PI*2);g.fill();
+  // centre dot — shifts colour with the state, a touch deeper for presence
+  g.fillStyle='rgb('+Math.round(r*0.82)+','+Math.round(gr*0.82)+','+Math.round(bl*0.82)+')';
+  g.beginPath();g.arc(cx,cy,dotR,0,Math.PI*2);g.fill();
 }
 
-/* ── embedded-in-Circle awareness ──
-   If we're inside an iframe (Circle), offer a one-tap jump to the chrome-free standalone app.
-   On the standalone page itself (iOS Safari, not yet installed), hint how to add it to the home
-   screen. Both banners are CSS-hidden unless the matching body class is set. */
+/* embedded-in-Circle awareness: one-tap jump to the chrome-free standalone app; on the
+   standalone page (iOS Safari, not yet installed) hint how to add it to the home screen. */
 (function(){
   const STANDALONE='https://justinlmft.github.io/snb-guided-practice/';
   let embedded=false; try{embedded=window.self!==window.top;}catch(e){embedded=true;}
@@ -1108,7 +1177,6 @@ function ringLoop(){
 })();
 renderSetup();
 </script>
-<!-- register the service worker so the app is installable + caches clips as you play -->
 <script>
 if('serviceWorker' in navigator){
   addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
