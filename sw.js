@@ -5,7 +5,7 @@
      <audio> can seek/stream from cache → repeated sessions become offline-capable, no big
      upfront download.
    Bump SHELL_VERSION whenever index.html / sw.js change to roll the shell cache. */
-const SHELL_VERSION = 'v3-pwa-6';
+const SHELL_VERSION = 'v3-pwa-7';
 const SHELL = 'snb-shell-' + SHELL_VERSION;
 const AUDIO = 'snb-audio-v1';
 const FONTS = 'snb-fonts-v1';
@@ -53,7 +53,7 @@ self.addEventListener('fetch', e => {
     e.respondWith(staleWhileRevalidate(req, FONTS));
     return;
   }
-  // same-origin shell → cache-first, refresh in background, offline fallback to app
+  // same-origin shell → network-first (always fresh online), fall back to cache offline
   if (url.origin === self.location.origin) {
     e.respondWith(shellHandler(req));
     return;
@@ -62,16 +62,13 @@ self.addEventListener('fetch', e => {
 
 async function shellHandler(req) {
   const cache = await caches.open(SHELL);
-  const cached = await cache.match(req, { ignoreSearch: true });
-  if (cached) {
-    fetch(req).then(r => { if (r && r.status === 200) cache.put(req, r.clone()); }).catch(() => {});
-    return cached;
-  }
   try {
     const net = await fetch(req);
     if (net && net.status === 200) cache.put(req, net.clone());
     return net;
   } catch (err) {
+    const cached = await cache.match(req, { ignoreSearch: true });
+    if (cached) return cached;
     if (req.mode === 'navigate') {
       const fallback = await cache.match('index.html') || await cache.match('./');
       if (fallback) return fallback;
