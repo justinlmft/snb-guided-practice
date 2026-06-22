@@ -5,7 +5,7 @@
      <audio> can seek/stream from cache → repeated sessions become offline-capable, no big
      upfront download.
    Bump SHELL_VERSION whenever index.html / sw.js change to roll the shell cache. */
-const SHELL_VERSION = 'v3-pwa-13';
+const SHELL_VERSION = 'v3-pwa-14';
 const SHELL = 'snb-shell-' + SHELL_VERSION;
 const AUDIO = 'snb-audio-v2';   /* bumped to purge stale cached clips after the re-slice fixes */
 const FONTS = 'snb-fonts-v1';

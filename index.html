@@ -250,7 +250,11 @@ body.playing .brand{display:none}
 /* ── adjustments: two quiet, equal setting pills ── */
 /* ── settings: two equal cells on one grid row, sharing the column's edges ── */
 /* the controls live on one compact, centred bar — no full-width pills, no wasted space */
-.controlbar{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;flex-wrap:nowrap}
+/* control bar spans the page columns: silence + captions at the LEFT edge, pause/play at the
+   RIGHT edge (easy thumb reach) — both aligned to the same grid as the cards, caption and buttons. */
+.controlbar{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;flex-wrap:nowrap}
+.adjgroup{display:flex;align-items:center;gap:10px}
+.endbtn{width:100%}
 .adj{display:flex;align-items:center;justify-content:center;gap:2px;width:auto;height:54px;border:1px solid var(--hairline);border-radius:14px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
 .adj.silence{padding:0 4px 0 14px}
 .adj-stepper{display:inline-flex;align-items:center;gap:2px}
@@ -450,7 +454,7 @@ body.playing .popout,body.playing .installhint{display:none}
     <div class="controls">
       <!-- one compact bar: pause/play · silence · captions -->
       <div class="controlbar">
-      <button class="transport" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
+        <div class="adjgroup">
         <div class="adj silence">
           <span class="adj-label">silence</span>
           <span class="adj-stepper">
@@ -460,6 +464,8 @@ body.playing .popout,body.playing .installhint{display:none}
           </span>
         </div>
         <button class="adj captoggle" id="captoggle" type="button" aria-pressed="false"><span class="cc">CC</span><span class="cc-state" id="capstate">off</span></button>
+        </div>
+      <button class="transport" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
       </div>
       <!-- endings: graceful close, and a quiet escape -->
       <div class="endings">
