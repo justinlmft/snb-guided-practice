@@ -195,13 +195,16 @@ body.playing .brand{display:none}
 
 /* ───── player ───── */
 #player{align-items:center;justify-content:center;text-align:center;gap:0}
-.ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0;transition:transform .9s var(--gentle)}
-/* the breathing circle rests in the true centre of the screen; caption + controls overlay the
-   bottom (out of flow) so the top mobile chrome never crowds the ring. The ring lifts gently
-   when the controls or captions are showing, and settles back to centre when they're away. */
+/* the circle + caption form a "stage" that rests in the true centre of the screen. The controls
+   (the menu) overlay the bottom, out of flow. When the menu appears, the stage rises toward the
+   top (not all the way) and the circle shrinks, so focus shifts to the menu; when it's away, the
+   stage settles back to centre and the circle grows again. */
+.stage{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .9s var(--gentle)}
+.ringwrap{width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0;transition:transform .9s var(--gentle)}
 .pfoot{position:absolute;left:0;right:0;bottom:0;width:100%;display:flex;flex-direction:column;align-items:stretch}
-#player.show-controls .ringwrap,#player.caps-on .ringwrap{transform:translateY(-7vh)}
-@media (prefers-reduced-motion:reduce){.ringwrap{transition:none}}
+#player.show-controls .stage{transform:translateY(-12vh)}
+#player.show-controls .ringwrap{transform:scale(.7)}
+@media (prefers-reduced-motion:reduce){.stage,.ringwrap{transition:none}}
 #ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
 .phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
 /* a quiet "it's beginning" cue so the opening silence never reads as broken */
@@ -210,7 +213,7 @@ body.playing .brand{display:none}
 @keyframes startpulse{0%,100%{opacity:.4}50%{opacity:.85}}
 @media (prefers-reduced-motion:reduce){.starting.show{animation:none;opacity:.7}}
 .caption{display:flex;align-items:center;justify-content:flex-start;height:5em;font-size:17px;line-height:1.65;color:var(--ink-80);max-width:none;width:100%;margin:0 0 18px;text-align:left;text-wrap:pretty;padding:0}
-#player:not(.caps-on) .caption{visibility:hidden}
+#player:not(.caps-on) .caption{display:none}
 /* paused: the whole field dims to read as resting (not frozen); only the resume button stays full */
 #player .ringwrap,#player .caption,#player .starting,#player .adjustments,#player .endings{transition:opacity .45s var(--ease)}
 #player.paused .ringwrap,#player.paused .caption,#player.paused .adjustments,#player.paused .endings{opacity:.38}
@@ -435,10 +438,12 @@ body.playing .popout,body.playing .installhint{display:none}
 
   <!-- ───────────── PLAYER ───────────── -->
   <main id="player" class="screen hidden">
-    <div class="ringwrap"><canvas id="ring"></canvas></div>
+    <div class="stage">
+      <div class="ringwrap"><canvas id="ring"></canvas></div>
+      <p class="starting" id="starting" aria-live="polite"></p>
+      <p class="caption" id="caption"><span class="cap-text" id="captext"></span></p>
+    </div>
     <div class="pfoot">
-    <p class="starting" id="starting" aria-live="polite"></p>
-    <p class="caption" id="caption"><span class="cap-text" id="captext"></span></p>
     <div class="controls">
       <!-- primary transport: the one hero control -->
       <button class="transport" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
