@@ -115,8 +115,22 @@ body{
 .opt .sub{font-size:13px;line-height:1.3;color:var(--muted);font-weight:400}
 .chooser.picked .sub{display:none}
 /* a clear way back once a practice is chosen */
-.change-hint{display:none;font-size:12px;letter-spacing:.04em;color:var(--muted);margin-left:10px;white-space:nowrap}
-.chooser.picked .opt.on .change-hint{display:inline}
+.change-hint{display:none}
+/* a back button above the chosen option — reopens the list (replaces the inline 'change') */
+.goback{display:none;align-items:center;gap:8px;background:transparent;border:0;padding:0;margin:0 0 6px;cursor:pointer;font:inherit;font-size:15px;color:var(--ink-80);transition:color var(--ease) .2s}
+.chooser.picked .goback{display:inline-flex}
+.goback:hover{color:var(--ink)}
+.goback .ba{width:8px;height:8px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);display:inline-block}
+.goback:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+/* session picker — a vertical list, not pills */
+.medlist{display:flex;flex-direction:column;gap:8px}
+.medrow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;font:inherit;cursor:pointer;background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);padding:14px 18px;color:var(--ink-80);transition:border-color var(--ease) .2s,color var(--ease) .2s}
+.medrow:hover{border-color:var(--ink-80);color:var(--ink)}
+.medrow.on{border-color:var(--ink);color:var(--ink);font-weight:500}
+.medrow .mt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.medrow .mttl{font-size:16px;line-height:1.3}
+.medrow .mest{font-size:12px;color:var(--muted)}
+.medrow .ma{flex:none;width:8px;height:8px;border-right:1.5px solid var(--muted);border-top:1.5px solid var(--muted);transform:rotate(45deg)}
 /* tap affordance — right chevron to choose, rotates down on the chosen one (tap to change) */
 .opt-aff{flex:none;width:9px;height:9px;margin-left:14px;border-right:1.5px solid var(--muted);border-top:1.5px solid var(--muted);transform:rotate(45deg);transition:transform var(--ease) .3s,border-color var(--ease) .2s}
 .opt.on .opt-aff{border-color:var(--ink)}
@@ -361,6 +375,7 @@ body.playing .popout,body.playing .installhint{display:none}
     <div class="chooser" id="chooser">
 
       <p class="welcome" id="welcome">A few quiet minutes to find your way back to safety. Choose where to begin.</p>
+      <button class="goback" id="goback" type="button"><span class="ba" aria-hidden="true"></span> back</button>
       <div class="block">
         <div class="choices" id="exps"></div>
       </div>
@@ -377,7 +392,7 @@ body.playing .popout,body.playing .installhint{display:none}
         </div>
         <div class="block" id="medwrap" style="display:none">
           <span class="eyebrow">choose a session</span>
-          <div class="chips" id="meds"></div>
+          <div class="medlist" id="meds"></div>
         </div>
       </div>
 
@@ -840,7 +855,7 @@ function renderSetup(){
     const b=document.createElement('button');b.type='button';
     b.className='opt'+(e.key===cfg.key?' on':'')+' track-'+TRACK[e.key];
     b.setAttribute('role','radio');b.setAttribute('aria-checked',e.key===cfg.key?'true':'false');
-    b.innerHTML='<span class="opt-text"><span class="t">'+e.t+'</span><span class="sub">'+e.cue+'</span></span><span class="change-hint">change</span><span class="opt-aff" aria-hidden="true"></span>';
+    b.innerHTML='<span class="opt-text"><span class="t">'+e.t+'</span><span class="sub">'+e.cue+'</span></span><span class="opt-aff" aria-hidden="true"></span>';
     b.onclick=()=>{
       if(picked&&e.key===cfg.key){picked=false;renderSetup();return;}   // tap the chosen one again to reopen the list
       practices[active]=fresh(e.key);picked=true;renderSetup();
@@ -854,9 +869,11 @@ function renderSetup(){
     $('medwrap').style.display='block';
     const mw=$('meds');mw.innerHTML='';
     MEDS_ORDER.forEach(id=>{const m=MEDS[id];
-      const p=chip(m.title+' · '+m.est,id===cfg.pack);
-      p.onclick=()=>{cfg.pack=id;renderSetup();};
-      mw.appendChild(p);});
+      const b=document.createElement('button');b.type='button';
+      b.className='medrow'+(id===cfg.pack?' on':'');
+      b.innerHTML='<span class="mt"><span class="mttl">'+m.title+'</span><span class="mest">'+m.est+'</span></span><span class="ma" aria-hidden="true"></span>';
+      b.onclick=()=>{cfg.pack=id;renderSetup();};
+      mw.appendChild(b);});
     const sv=$('sils');sv.innerHTML='';                                  // silence still applies to a standalone
     SIL.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.silence);p.onclick=()=>{cfg.silence=v;renderSetup();};sv.appendChild(p);});
     $('summary').innerHTML = cfg.pack ? ('<b>'+MEDS[cfg.pack].cue+' · '+MEDS[cfg.pack].est+'.</b>') : 'Choose a session to begin.';
@@ -944,6 +961,7 @@ function updateTest(){
 }
 
 $('begin').onclick=startPlayer;
+$('goback').onclick=()=>{picked=false;renderSetup();};   // reopen the practice list from the chosen option
 
 /* the player opens straight into the customizer — no zero-decision front door, no planned stack */
 
