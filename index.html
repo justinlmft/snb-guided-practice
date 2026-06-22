@@ -101,9 +101,9 @@ body{
   padding:19px 22px;max-height:140px;overflow:hidden;
   transition:border-color var(--ease) .2s,border-width var(--ease) .2s,box-shadow var(--ease) .2s,max-height var(--ease) .35s,opacity var(--ease) .3s,padding var(--ease) .35s,margin var(--ease) .35s;
 }
-.opt:not(.on):hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}
-.opt.track-sky.on:hover{box-shadow:inset 0 0 0 1px var(--sky)}
-.opt.track-amber.on:hover{box-shadow:inset 0 0 0 1px var(--amber)}
+@media(hover:hover){.opt:not(.on):hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}}
+@media(hover:hover){.opt.track-sky.on:hover{box-shadow:inset 0 0 0 1px var(--sky)}}
+@media(hover:hover){.opt.track-amber.on:hover{box-shadow:inset 0 0 0 1px var(--amber)}}
 .opt.on{border-width:2px;padding:18px 21px}
 .opt.on .t{font-weight:500;color:var(--ink)}
 .opt.track-sky.on{border-color:var(--sky)}
