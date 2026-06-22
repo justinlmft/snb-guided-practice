@@ -22,6 +22,7 @@
   --leaf:#5BA070;--amber:#D29A4A;--sky:#5891C5;
   --btn-hover:#2A3040;--rbtn:10px;--rcard:14px;
   --ease:cubic-bezier(.2,.6,.2,1);
+  --gentle:cubic-bezier(.25,.46,.3,1);   /* softer, slower easing for menu transitions */
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bone)}
@@ -30,7 +31,9 @@ body{
   background:var(--bone);color:var(--ink);
   font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
   min-height:100svh;overflow-y:auto;overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;   /* no grey flash on tap (mobile) */
 }
+button{-webkit-tap-highlight-color:transparent}
 .page{width:100%;max-width:600px;margin:0 auto;min-height:100svh;padding:clamp(15px,3vh,30px) 28px clamp(16px,3vh,28px);display:flex;flex-direction:column}
 
 /* ───── brand bar ───── */
@@ -99,7 +102,7 @@ body{
   font:inherit;color:inherit;cursor:pointer;
   background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);
   padding:19px 22px;max-height:140px;overflow:hidden;
-  transition:border-color var(--ease) .2s,border-width var(--ease) .2s,box-shadow var(--ease) .2s,max-height var(--ease) .35s,opacity var(--ease) .3s,padding var(--ease) .35s,margin var(--ease) .35s;
+  transition:border-color var(--ease) .3s,border-width var(--ease) .3s,box-shadow var(--ease) .3s,max-height var(--gentle) .6s,opacity var(--gentle) .55s,padding var(--gentle) .6s,margin var(--gentle) .6s;
 }
 @media(hover:hover){.opt:not(.on):hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}}
 @media(hover:hover){.opt.track-sky.on:hover{box-shadow:inset 0 0 0 1px var(--sky)}}
@@ -142,7 +145,7 @@ body{
 .chooser:not(.picked) .surprise-all{display:none !important}
 .chooser.picked .begin-help{display:none}
 /* the customization area grows in and recedes smoothly — grid-rows 0fr<->1fr animates to natural height, both directions */
-.reveal{max-height:0;opacity:0;overflow:hidden;pointer-events:none;transition:max-height .5s var(--ease),opacity .4s var(--ease)}
+.reveal{max-height:0;opacity:0;overflow:hidden;pointer-events:none;transition:max-height .7s var(--gentle),opacity .6s var(--gentle)}
 .reveal-inner{display:flex;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
 .chooser.picked .reveal{opacity:1;pointer-events:auto}
 
@@ -192,7 +195,13 @@ body.playing .brand{display:none}
 
 /* ───── player ───── */
 #player{align-items:center;justify-content:center;text-align:center;gap:0}
-.ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
+.ringwrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0;transition:transform .9s var(--gentle)}
+/* the breathing circle rests in the true centre of the screen; caption + controls overlay the
+   bottom (out of flow) so the top mobile chrome never crowds the ring. The ring lifts gently
+   when the controls or captions are showing, and settles back to centre when they're away. */
+.pfoot{position:absolute;left:0;right:0;bottom:0;width:100%;display:flex;flex-direction:column;align-items:stretch}
+#player.show-controls .ringwrap,#player.caps-on .ringwrap{transform:translateY(-7vh)}
+@media (prefers-reduced-motion:reduce){.ringwrap{transition:none}}
 #ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
 .phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
 /* a quiet "it's beginning" cue so the opening silence never reads as broken */
@@ -428,6 +437,7 @@ body.playing .popout,body.playing .installhint{display:none}
   <main id="player" class="screen hidden">
     <div class="ringwrap"><canvas id="ring"></canvas></div>
     <p class="starting" id="starting" aria-live="polite"></p>
+    <div class="pfoot">
     <p class="caption" id="caption"><span class="cap-text" id="captext"></span></p>
     <div class="controls">
       <!-- primary transport: the one hero control -->
@@ -467,6 +477,7 @@ body.playing .popout,body.playing .installhint{display:none}
     </div>
     <!-- shown only if clips can't load -->
     <p class="conn" id="conn">having trouble connecting. hang on…</p>
+    </div>
   </main>
 </div>
 
