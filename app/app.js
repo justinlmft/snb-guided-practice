@@ -718,7 +718,10 @@
 
     const backBtn=$('#p-back'); if(backBtn) backBtn.onclick=()=>{pState.key=null;pState.med=null;renderPracticeChooser();};
     const beginBtn=$('#p-begin');
-    if(beginBtn&&canBegin)beginBtn.onclick=()=>{
+    // attach regardless of initial canBegin: for "More meditations" the button starts
+    // disabled (no session picked yet) and is enabled when a session is chosen — but the
+    // handler must already be wired, or clicking the enabled button does nothing.
+    if(beginBtn)beginBtn.onclick=()=>{
       const {key,sense,skill,silence,med}=pState;
       let src;
       if(key==='more'){
