@@ -1,0 +1,178 @@
+/* Stuck Not Broken — app prototype styles. Brand: bone surface, ink type, Inter,
+   weight 400/500, no bordered cards (except where they read as figures), no
+   gradients on UI, restrained motion. State palette is meaning-bearing only. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bone:#FAF9F5; --bone-deep:#F0EEE7; --hairline:#D8D2C2; --ink:#1A1F2A;
+  --ink-80:#3A3F4A; --muted:#5E5A4E; --link:#0645AD;
+  --sky:#5891C5; --leaf:#5BA070; --amber:#D29A4A;
+  --s-safety:#F4D58D; --s-fight:#E89B9B; --s-shutdown:#A3C0DD;
+  --s-play:#E8A871; --s-still:#9FC498; --s-freeze:#B89AC4; --s-unlit:#D8D2C2;
+  --btn-hover:#2A3040; --ease:cubic-bezier(.2,.6,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;background:#EDEAE2;color:var(--ink);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;min-height:100svh;
+}
+button{font:inherit;color:inherit}
+
+/* phone shell */
+.phone{
+  position:relative;width:min(440px,100vw);height:min(900px,100svh);
+  background:var(--bone);overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 24px 70px -24px rgba(26,31,42,.35);
+}
+@media (min-width:480px){ .phone{ border-radius:28px; height:min(880px,94svh); } }
+
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.view{min-height:100%;display:flex;flex-direction:column;padding:26px 24px 28px}
+.hidden{display:none !important}
+
+/* type */
+.eyebrow{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)}
+h1,h2,h3{font-weight:500;margin:0;letter-spacing:-.01em;text-wrap:pretty}
+h1{font-size:27px;line-height:1.2}
+h2{font-size:21px;line-height:1.25}
+h3{font-size:16px;line-height:1.3}
+p{margin:0;text-wrap:pretty}
+.muted{color:var(--muted)}
+.lede{font-size:17px;line-height:1.5;color:var(--ink-80)}
+.tag{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;
+  cursor:pointer;background:var(--ink);color:var(--bone);border:1px solid var(--ink);
+  border-radius:10px;padding:13px 22px;font-weight:500;transition:background .2s var(--ease),box-shadow .2s var(--ease)}
+.btn:hover{background:var(--btn-hover)}
+.btn.block{width:100%;padding:16px 22px;font-size:16px;border-radius:12px}
+.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.quiet:hover{background:rgba(26,31,42,.05)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.linkbtn{background:none;border:0;color:var(--link);cursor:pointer;text-decoration:underline;
+  text-decoration-color:rgba(6,69,173,.4);text-underline-offset:2px;padding:6px 2px;font-size:14px}
+.linkbtn:hover{text-decoration-color:var(--link)}
+
+/* dividers */
+.hr{height:1px;background:var(--hairline);border:0;margin:22px 0}
+
+/* ---------- auth / paywall ---------- */
+.gate{justify-content:center;gap:0;text-align:left}
+.gate .mark{height:26px;margin-bottom:auto}
+.gate-body{margin:auto 0}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:12.5px;font-weight:500;letter-spacing:.04em;color:var(--muted)}
+.field input{font:inherit;font-size:16px;padding:13px 14px;border:1px solid var(--hairline);
+  border-radius:10px;background:#fff;color:var(--ink)}
+.field input:focus{outline:none;border-color:var(--ink)}
+.plan{border:1px solid var(--hairline);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:border-color .2s var(--ease)}
+.plan:hover{border-color:var(--ink-80)}
+.plan.on{border-color:var(--ink);border-width:2px;padding:17px}
+.plan .price{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.plan .price .per{font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
+.plans{display:flex;flex-direction:column;gap:12px;margin:18px 0 22px}
+.fineprint{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.5}
+.autherr{font-size:13.5px;color:#9A3B3B;margin:4px 0 0;line-height:1.45}
+
+/* ---------- header ---------- */
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:16px 22px 10px;flex:none}
+.appbar .mark{height:18px}
+.appbar .who{font-size:12.5px;color:var(--muted)}
+
+/* ---------- today ---------- */
+.greeting{margin-bottom:18px}
+.snapshot{display:flex;flex-direction:column;align-items:center;gap:6px;margin:6px 0 8px}
+.snapshot .figure{width:100%;max-width:340px}
+.state-name{font-size:13px;font-weight:500;letter-spacing:.04em;text-transform:lowercase;color:var(--ink-80)}
+.readout{font-size:15px;line-height:1.5;color:var(--ink-80);text-align:center;max-width:30em;margin:2px auto 0}
+
+/* recommendation card (reads as a figure, light rule allowed) */
+.reco{border:1px solid var(--hairline);border-radius:14px;padding:20px;margin-top:6px;display:flex;flex-direction:column;gap:12px}
+.reco .why{font-size:15px;line-height:1.55;color:var(--ink-80)}
+.reco .head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.reco h3{font-size:18px}
+.reco .meta{font-size:13.5px;color:var(--muted);margin-top:-4px}
+.reco .adapt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--leaf)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:baseline}
+
+.section-label{margin:26px 0 12px}
+
+/* mini trend strip */
+.trendstrip{display:flex;gap:4px;align-items:flex-end;height:46px}
+.trendstrip .bar{flex:1;border-radius:3px 3px 0 0;min-height:6px;opacity:.9}
+.trend-cap{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* ---------- check-in ---------- */
+.sliders{display:flex;flex-direction:column;gap:20px;margin:8px 0 4px}
+.slider{display:flex;flex-direction:column;gap:9px}
+.slider .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.slider .nm{font-size:15px;font-weight:500}
+.slider .nm .sub{font-weight:400;color:var(--muted);font-size:13px;margin-left:7px}
+.slider .amt{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:lowercase}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px}
+.r-v::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-safety))}
+.r-sym::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-fight))}
+.r-dor::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-shutdown))}
+.r-v::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-safety))}
+.r-sym::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-fight))}
+.r-dor::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-shutdown))}
+.r-freeze::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-freeze))}
+.r-freeze::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-freeze))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--ink);margin-top:-8px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.checkin-figure{margin:18px 0 6px}
+.note-area{width:100%;font:inherit;font-size:15px;padding:13px 14px;border:1px solid var(--hairline);border-radius:10px;background:#fff;resize:none;min-height:74px;color:var(--ink)}
+.note-area:focus{outline:none;border-color:var(--ink)}
+
+/* ---------- current over time ---------- */
+.timeline-figure{margin:6px 0 2px}
+.playbar{display:flex;align-items:center;gap:14px;margin:14px 0 6px}
+.playbtn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.playbtn:hover{background:rgba(26,31,42,.05)}
+.playbtn svg{width:18px;height:18px;fill:var(--ink)}
+.scrub{flex:1}
+.scrub input{width:100%}
+.scrub input::-webkit-slider-runnable-track{background:var(--hairline)}
+.when{font-size:12.5px;color:var(--muted);min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.river{display:flex;height:34px;border-radius:6px;overflow:hidden;margin-top:6px}
+.river .seg{flex:1;min-width:3px}
+.river-cap{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:7px}
+.statelegend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:18px}
+.statelegend .it{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+
+/* empty states */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;flex:1;color:var(--muted);padding:30px 10px}
+
+/* ---------- practice (weaver) ---------- */
+.weaver-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.weaver-frame{flex:1;width:100%;border:0;min-height:0;background:var(--bone)}
+
+/* ---------- you / account ---------- */
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-bottom:1px solid var(--hairline)}
+.row:last-child{border-bottom:0}
+.row .k{font-size:14px;color:var(--muted)}
+.row .val{font-size:15px;font-weight:500}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .big{font-size:28px;font-weight:600;letter-spacing:-.02em}
+.stat .lbl{font-size:12.5px;color:var(--muted)}
+.stats{display:flex;gap:26px;margin:10px 0 8px}
+
+/* ---------- bottom tab bar ---------- */
+.tabbar{display:flex;flex:none;border-top:1px solid var(--hairline);background:var(--bone)}
+.tabbar button{flex:1;background:none;border:0;cursor:pointer;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);transition:color .2s var(--ease)}
+.tabbar button .ic{width:22px;height:22px;display:block}
+.tabbar button .ic svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.6}
+.tabbar button .lb{font-size:10.5px;letter-spacing:.02em}
+.tabbar button.on{color:var(--ink)}
+.tabbar button:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
+
+/* fade for screen transitions — transform only, so content is never hidden if
+   the renderer pauses the animation (e.g. a backgrounded tab at frame 0). */
+@keyframes viewIn{from{transform:translateY(8px)}to{transform:none}}
+.view{animation:viewIn .35s var(--ease)}
+@media (prefers-reduced-motion:reduce){.view{animation:none}}
