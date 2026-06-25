@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FAF9F5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Stuck Not Broken">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Stuck Not Broken — app</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="phone">
+    <div id="screen" style="display:flex;flex-direction:column;flex:1;min-height:0"></div>
+  </div>
+  <script src="current.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="store.js"></script>
+  <script src="from-justin.js"></script>
+  <script src="app.js?v=2"></script>
+  <script>
+  /* installable PWA: register the /app/-scoped service worker; reload once when a
+     new shell takes control so updates propagate without a manual reinstall. */
+  if('serviceWorker' in navigator){
+    let _swReloaded=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!_swReloaded){_swReloaded=true;location.reload();} });
+    addEventListener('load',()=>{
+      navigator.serviceWorker.register('sw.js').then(reg=>{ try{reg.update();}catch(e){} }).catch(()=>{});
+    });
+  }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- installable web app (add to home screen) — all inline, single file -->
+<meta name="theme-color" content="#F4F1E8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Guided Practice">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<title>A guided practice — Stuck Not Broken</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bone:#FAF9F5;--bone-deep:#F0EEE7;--hairline:#D8D2C2;--ink:#1A1F2A;--ink-80:#3A3F4A;--muted:#5E5A4E;--link:#0645AD;
+  --leaf:#5BA070;--amber:#D29A4A;--sky:#5891C5;
+  --btn-hover:#2A3040;--rbtn:10px;--rcard:14px;
+  --ease:cubic-bezier(.2,.6,.2,1);
+  --gentle:cubic-bezier(.25,.46,.3,1);   /* softer, slower easing for menu transitions */
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bone)}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bone);color:var(--ink);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  min-height:100svh;overflow-y:auto;overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;   /* no grey flash on tap (mobile) */
+  touch-action:manipulation;                 /* ignore double-tap-to-zoom (e.g. fast silence taps); pinch-zoom still works */
+}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.page{width:100%;max-width:600px;margin:0 auto;min-height:100svh;padding:clamp(15px,3vh,30px) 28px clamp(16px,3vh,28px);display:flex;flex-direction:column}
+
+/* ───── brand bar ───── */
+.brand{display:flex;align-items:center;gap:12px;margin:0 0 clamp(16px,3.6vh,30px);flex:none}
+.brand .mark{height:21px;width:auto;display:block}
+.mark path{fill:var(--ink);transition:fill .4s var(--ease)}
+.mark.mark-sky .g-heart{fill:var(--sky)}
+.mark.mark-amber .g-bolt,.mark.mark-amber .g-x{fill:var(--amber)}
+.brand-tag{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);padding-left:12px;border-left:1px solid var(--hairline)}
+.eyebrow{font-size:12.5px;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.chooser .block>.eyebrow{display:flex;align-items:center;gap:8px;color:var(--trk-ink,var(--ink-80))}
+.chooser .eyebrow::before{content:"";width:16px;height:2px;border-radius:1px;background:var(--trk,var(--muted));flex:none}
+
+/* ───── setup layout (fits one screen) ───── */
+.screen{display:flex;flex-direction:column;flex:1;min-height:0}
+#setup{justify-content:flex-end;gap:clamp(14px,2.6vh,24px)}
+.hidden{display:none !important}
+
+/* zero-decision entry */
+.entry{flex:1;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:10px;align-content:center}
+.btn.lead{flex:1 1 0;min-width:150px;padding:14px 20px;font-size:16px;border-radius:12px}
+@media (max-width:440px){
+  .entry{flex-direction:column;align-items:stretch;justify-content:center}
+  .btn.lead{flex:none;width:100%}
+}
+.choose-link{background:none;border:0;font:inherit;font-size:14px;color:var(--link);cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;text-decoration-color:rgba(6,69,173,.45);padding:6px;margin-top:8px;transition:text-decoration-color var(--ease) .2s}
+.choose-link:hover{text-decoration-color:var(--link)}
+.choose-link:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.choose-link.back{align-self:flex-start;margin:0 0 2px;color:var(--muted);text-decoration:none}
+.choose-link.back:hover{color:var(--ink)}
+/* chooser hidden until the user opts into deciding */
+.chooser{display:flex;flex:1;min-height:0;flex-direction:column;justify-content:flex-end;gap:clamp(13px,2.4vh,22px)}
+#setup.choosing .entry{display:none}
+#setup.choosing .chooser{display:flex;animation:riseIn .5s var(--ease)}
+
+/* practice tabs — quiet, only earns weight when stacking */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:none}
+.tab{font:inherit;font-size:13px;cursor:pointer;white-space:nowrap;background:transparent;color:var(--ink-80);border:1px solid var(--hairline);border-radius:8px;padding:6px 13px;display:inline-flex;align-items:center;gap:8px;transition:border-color var(--ease) .2s,color var(--ease) .2s,background var(--ease) .2s}
+.tab:hover{color:var(--ink)}
+.tab.track-sky{border-color:rgba(88,145,197,.5)}
+.tab.track-amber{border-color:rgba(210,154,74,.55)}
+.tab.on{border-width:1.5px;padding:5.5px 12.5px;color:var(--ink);font-weight:500}
+.tab.on.track-sky{border-color:var(--sky)}
+.tab.on.track-amber{border-color:var(--amber)}
+.tab.is-opt{color:var(--muted)}
+.tab.is-opt.on{color:var(--ink)}
+.tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tab.add{color:var(--muted);border-style:dashed;font-weight:500}
+.tab.add:hover{color:var(--ink);border-color:var(--ink-80)}
+.tab .x{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;margin-right:-4px;border-radius:50%;color:var(--muted);font-size:14px;line-height:1}
+.tab .x:hover{color:var(--ink)}
+/* when there's a single practice, the lone "Your practice" tab is just a quiet label */
+.tabs[data-single] .tab.on{border-color:transparent;padding-left:0;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+
+/* ───── primary choices: radio rows ───── */
+/* first-run orientation — only on the calm, unchosen view */
+.welcome{font-size:16px;line-height:1.5;color:var(--ink-80);margin:0 0 2px;max-width:23em;text-wrap:pretty}
+.chooser.picked .welcome{display:none}
+.block{margin:0}
+.block>.eyebrow{display:block;margin-bottom:11px}
+.choices{display:flex;flex-direction:column}
+.choices .opt{margin-bottom:10px}
+.choices .opt:last-child{margin-bottom:0}
+.opt{
+  display:flex;align-items:center;width:100%;text-align:left;
+  font:inherit;color:inherit;cursor:pointer;
+  background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);
+  padding:19px 22px;max-height:140px;overflow:hidden;
+  transition:border-color var(--ease) .3s,border-width var(--ease) .3s,box-shadow var(--ease) .3s,max-height var(--gentle) .6s,opacity var(--gentle) .55s,padding var(--gentle) .6s,margin var(--gentle) .6s;
+}
+@media(hover:hover){.opt:not(.on):hover{border-color:var(--ink-80);box-shadow:inset 0 0 0 1px var(--ink-80)}}
+@media(hover:hover){.opt.track-sky.on:hover{box-shadow:inset 0 0 0 1px var(--sky)}}
+@media(hover:hover){.opt.track-amber.on:hover{box-shadow:inset 0 0 0 1px var(--amber)}}
+.opt.on{border-width:2px;padding:18px 21px}
+.opt.on .t{font-weight:500;color:var(--ink)}
+.opt.track-sky.on{border-color:var(--sky)}
+.opt.track-ink.on{border-color:var(--ink)}
+.opt.track-amber.on{border-color:var(--amber)}
+.opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.opt-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.opt .t{display:block;flex:none;min-width:0;font-size:18px;line-height:1.3;font-weight:400;transition:font-weight var(--ease) .2s}
+.opt .sub{font-size:13px;line-height:1.3;color:var(--muted);font-weight:400}
+.chooser.picked .sub{display:none}
+/* a clear way back once a practice is chosen */
+.change-hint{display:none}
+/* a back button above the chosen option — reopens the list (replaces the inline 'change') */
+.goback{display:none;align-items:center;gap:8px;background:transparent;border:0;padding:0;margin:0 0 6px;cursor:pointer;font:inherit;font-size:15px;color:var(--ink-80);transition:color var(--ease) .2s}
+.chooser.picked .goback{display:inline-flex}
+.goback:hover{color:var(--ink)}
+.goback .ba{width:8px;height:8px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);display:inline-block}
+.goback:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+/* session picker — a vertical list, not pills */
+.medlist{display:flex;flex-direction:column;gap:8px}
+.medrow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;font:inherit;cursor:pointer;background:transparent;border:1px solid var(--hairline);border-radius:var(--rcard);padding:14px 18px;color:var(--ink-80);transition:border-color var(--ease) .2s,color var(--ease) .2s}
+.medrow:hover{border-color:var(--ink-80);color:var(--ink)}
+.medrow.on{border-color:var(--ink);color:var(--ink);font-weight:500}
+.medrow .mt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.medrow .mttl{font-size:16px;line-height:1.3}
+.medrow .mest{font-size:12px;color:var(--muted)}
+.medrow .ma{flex:none;width:8px;height:8px;border-right:1.5px solid var(--muted);border-top:1.5px solid var(--muted);transform:rotate(45deg)}
+/* tap affordance — right chevron to choose, rotates down on the chosen one (tap to change) */
+.opt-aff{flex:none;width:9px;height:9px;margin-left:14px;border-right:1.5px solid var(--muted);border-top:1.5px solid var(--muted);transform:rotate(45deg);transition:transform var(--ease) .3s,border-color var(--ease) .2s}
+.opt.on .opt-aff{border-color:var(--ink)}
+.chooser.picked .opt.on .opt-aff{transform:rotate(135deg)}
+/* on choosing, the other two collapse away */
+.chooser.picked .choices .opt:not(.on){max-height:0;opacity:0;margin:0;padding-top:0;padding-bottom:0;border-width:0;pointer-events:none}
+/* customization stays hidden until a practice is chosen — a calm first view */
+.chooser:not(.picked) .summary,
+.chooser:not(.picked) .surprise-all{display:none !important}
+.chooser.picked .begin-help{display:none}
+/* the customization area grows in and recedes smoothly — grid-rows 0fr<->1fr animates to natural height, both directions */
+.reveal{max-height:0;opacity:0;overflow:hidden;pointer-events:none;transition:max-height .7s var(--gentle),opacity .6s var(--gentle)}
+.reveal-inner{display:flex;flex-direction:column;gap:clamp(13px,2.4vh,22px)}
+.chooser.picked .reveal{opacity:1;pointer-events:auto}
+
+/* ───── contextual refinements ───── */
+.refine{display:flex;flex-direction:column;gap:clamp(11px,2vh,18px);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font:inherit;font-size:14px;cursor:pointer;text-transform:capitalize;white-space:nowrap;
+  background:transparent;color:var(--muted);border:1px solid var(--hairline);
+  border-radius:999px;padding:7px 15px;transition:border-color var(--ease) .2s,color var(--ease) .2s,font-weight var(--ease) .2s;
+}
+.chip:hover{border-color:var(--ink-80);color:var(--ink-80)}
+.chip.on{border-color:var(--ink);color:var(--ink);font-weight:500}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.chip.shuffle{border-style:dashed}
+.surprise-all{align-self:flex-start;white-space:nowrap;font:inherit;font-size:14px;cursor:pointer;background:transparent;color:var(--muted);border:1px dashed var(--hairline);border-radius:999px;padding:7px 16px;transition:border-color var(--ease) .2s,color var(--ease) .2s}
+.surprise-all:hover{border-color:var(--ink-80);color:var(--ink-80)}
+.surprise-all:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ───── more options ───── */
+.adjust{margin:0}
+.adjust summary{font-size:14px;color:var(--muted);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:9px;width:auto;transition:color var(--ease) .2s}
+.adjust summary:hover{color:var(--ink)}
+.adjust summary::-webkit-details-marker{display:none}
+.adjust summary .tw{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform var(--ease) .2s;margin-bottom:2px}
+.adjust[open] summary .tw{transform:rotate(-135deg);margin-bottom:-3px}
+.adjust[open] summary{margin-bottom:20px}
+.adjust summary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+.adjust-body{display:flex;flex-direction:column;gap:22px}
+
+/* ───── summary + begin (pinned low) ───── */
+.foot{display:flex;flex-direction:column;gap:14px;flex:none;padding-top:clamp(16px,3vh,26px)}
+.summary{font-size:15px;color:var(--ink-80);margin:0;min-height:1.4em;text-wrap:pretty}
+.summary b{font-weight:500;color:var(--ink)}
+.begin-help{font-size:13px;color:var(--muted);margin:0;text-align:left;text-wrap:pretty}
+.btn{
+  font:inherit;font-weight:500;white-space:nowrap;cursor:pointer;
+  background:var(--ink);color:var(--bone);border:1px solid var(--ink);
+  border-radius:var(--rbtn);padding:13px 30px;transition:box-shadow var(--ease) .25s,transform var(--ease) .2s,border-color var(--ease) .2s,color var(--ease) .2s;
+}
+.btn:hover{box-shadow:0 0 0 2px var(--bone),0 0 0 3.5px var(--ink);transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.btn.primary{width:100%;padding:18px 30px;font-size:17px;border-radius:14px}
+.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.quiet:hover{box-shadow:inset 0 0 0 1px var(--ink);transform:translateY(-1px)}
+body.playing .brand{display:none}
+
+/* ───── player ───── */
+#player{align-items:center;justify-content:center;text-align:center;gap:0}
+/* the circle + caption form a "stage" that rests in the true centre of the screen. The controls
+   (the menu) overlay the bottom, out of flow. When the menu appears, the stage rises toward the
+   top (not all the way) and the circle shrinks, so focus shifts to the menu; when it's away, the
+   stage settles back to centre and the circle grows again. */
+.stage{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .9s var(--gentle);will-change:transform}
+.ringwrap{width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
+.pfoot{position:absolute;left:0;right:0;bottom:0;width:100%;display:flex;flex-direction:column;align-items:stretch}
+/* only the vertical move is a CSS transition; the circle's SIZE is eased inside the canvas
+   animation (see _msz in ringLoop) so it stays perfectly smooth against the 60fps breathing. */
+#player.show-controls .stage{transform:translateY(-12vh)}
+@media (prefers-reduced-motion:reduce){.stage{transition:none}}
+#ring{width:min(82vw,360px);height:min(82vw,360px);max-height:48vh;display:block}
+.phase{font-size:12.5px;text-transform:lowercase;letter-spacing:.14em;color:var(--muted);min-height:1.5em;margin:0 0 22px;opacity:0;transition:opacity 1.1s var(--ease);text-wrap:pretty;max-width:24em}
+/* a quiet "it's beginning" cue so the opening silence never reads as broken */
+.starting{font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);margin:0;min-height:1.4em;text-align:center;opacity:0;transition:opacity .6s var(--ease)}
+.starting.show{opacity:1;animation:startpulse 1.9s ease-in-out infinite}
+@keyframes startpulse{0%,100%{opacity:.4}50%{opacity:.85}}
+@media (prefers-reduced-motion:reduce){.starting.show{animation:none;opacity:.7}}
+.caption{display:flex;align-items:center;justify-content:flex-start;height:5em;font-size:17px;line-height:1.65;color:var(--ink-80);max-width:none;width:100%;margin:0 0 18px;text-align:left;text-wrap:pretty;padding:0}
+#player:not(.caps-on) .caption{display:none}
+/* paused: the whole field dims to read as resting (not frozen); only the resume button stays full */
+#player .ringwrap,#player .caption,#player .starting,#player .controlbar,#player .endings{transition:opacity .45s var(--ease)}
+#player.paused .ringwrap,#player.paused .caption,#player.paused .controlbar,#player.paused .endings{opacity:.38}
+.cap-text{display:inline-block;opacity:0;transform:translateY(7px);filter:blur(2px);transition:opacity .6s var(--ease),transform .6s var(--ease),filter .6s var(--ease);will-change:opacity,transform,filter}
+.cap-text.in{opacity:1;transform:none;filter:blur(0)}
+@media (prefers-reduced-motion:reduce){.cap-text{transform:none;filter:none;transition:opacity .4s var(--ease)}}
+.controls{display:flex;flex-direction:column;gap:18px;align-items:stretch;width:100%;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
+.timeleft{font-size:12px;letter-spacing:.02em;color:var(--muted);text-align:center;margin:0;opacity:.75;min-height:1.2em}
+.timeleft:empty{display:none}
+#player.show-controls .controls{opacity:1;pointer-events:auto}
+/* the controls flow in softly, one tier after the next */
+#player.show-controls .controls>*{animation:riseIn .5s var(--ease) both}
+#player.show-controls .controls>*:nth-child(2){animation-delay:.06s}
+#player.show-controls .controls>*:nth-child(3){animation-delay:.12s}
+#player{position:relative}
+
+/* round icon button — used by the between-practices "continue" */
+.iconbtn{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s}
+.iconbtn:hover{box-shadow:0 0 0 1px var(--ink)}
+.iconbtn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.iconbtn .ico{width:25px;height:25px;display:block;fill:var(--ink);color:var(--ink)}
+
+/* ── primary transport: the one hero control ── */
+/* pause/play — a wide rounded button (not a circle, so it never echoes the breathing ring) that
+   grows to fill the row from the captions pill out to the right edge — no empty gutter. */
+.transport{flex:1 1 auto;min-width:54px;height:54px;border-radius:15px;border:1.5px solid var(--ink);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:box-shadow var(--ease) .2s,transform var(--ease) .2s}
+.transport:hover{box-shadow:0 0 0 1.5px var(--ink)}
+.transport:active{transform:scale(.96)}
+.transport:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.transport .ico{width:27px;height:27px;display:block;fill:var(--ink);color:var(--ink)}
+.transport .ico-play{display:none;margin-left:3px}
+.transport.is-paused .ico-pause{display:none}
+.transport.is-paused .ico-play{display:block}
+
+/* ── adjustments: two quiet, equal setting pills ── */
+/* ── settings: two equal cells on one grid row, sharing the column's edges ── */
+/* the controls live on one compact, centred bar — no full-width pills, no wasted space */
+/* control bar spans the page columns: silence + captions at the LEFT edge, pause/play at the
+   RIGHT edge (easy thumb reach) — both aligned to the same grid as the cards, caption and buttons. */
+.controlbar{display:flex;align-items:center;gap:10px;width:100%;flex-wrap:nowrap}
+.adjgroup{display:flex;align-items:center;gap:10px;flex:none}
+.endbtn{width:100%}
+.adj{display:flex;align-items:center;justify-content:center;gap:2px;width:auto;height:54px;border:1px solid var(--hairline);border-radius:14px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);transition:border-color var(--ease) .2s,color var(--ease) .2s,box-shadow var(--ease) .2s}
+.adj.silence{padding:0 4px 0 14px}
+.adj-stepper{display:inline-flex;align-items:center;gap:2px}
+.adj-label{color:var(--muted)}
+.adj-val{color:var(--ink-80);font-variant-numeric:tabular-nums;min-width:2.2em;text-align:center}
+.adj-step{width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:21px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease) .2s}
+.adj-step:hover{color:var(--ink)}
+.adj-step:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.captoggle{padding:0 14px;cursor:pointer}
+.captoggle .cc{font-weight:500;letter-spacing:.1em;color:var(--muted);transition:color var(--ease) .2s}
+.captoggle .cc-state{color:var(--muted);transition:color var(--ease) .2s}
+.captoggle:hover{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.captoggle:hover .cc,.captoggle:hover .cc-state{color:var(--ink-80)}
+.captoggle.on{border-color:var(--ink)}
+.captoggle.on .cc,.captoggle.on .cc-state{color:var(--ink)}
+.captoggle:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ── endings: encouraged graceful close + quiet escape ── */
+.endings{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.endings .endbtn{width:100%}
+.endnow{background:none;border:0;font:inherit;font-size:12.5px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted);cursor:pointer;padding:4px 10px;transition:color var(--ease) .2s}
+.endnow:hover{color:var(--ink);font-weight:600}
+.endnow:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+
+/* gentle completion */
+.done{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%}
+#player.finished .controls{display:none}
+#player.finished .done{display:flex;animation:riseIn .55s var(--ease)}
+.done .btn{width:100%}
+/* terminal rest — just the settled ring and a quiet way back */
+.rest{display:none;flex-direction:column;align-items:center}
+#player.rested .done{display:none}
+#player.rested .rest{display:flex;animation:riseIn .7s var(--ease)}
+
+/* rest between stacked meditations */
+.brk{display:none;flex-direction:column;align-items:center;gap:18px}
+.brk-line{font-size:13px;text-transform:lowercase;letter-spacing:.1em;color:var(--muted);margin:0;text-align:center}
+#player.breaking .controls,#player.breaking .done{display:none}
+#player.breaking .brk{display:flex;animation:riseIn .55s var(--ease)}
+.brk .iconbtn{width:80px;height:80px}
+.brk .iconbtn .ico{width:30px;height:30px;margin-left:3px}
+@media (prefers-reduced-motion:no-preference){.brk .iconbtn{animation:brkbreath 2.8s ease-in-out infinite}}
+@keyframes brkbreath{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  #player.finished .done,#player.breaking .brk,#setup.choosing .chooser,#player.show-controls .controls>*{animation:none}
+  .btn:hover,.btn.quiet:hover{transform:none}
+}
+
+/* connection trouble */
+.conn{position:absolute;left:0;right:0;bottom:clamp(40px,9vh,72px);text-align:center;font-size:13px;color:var(--muted);margin:0;letter-spacing:.04em;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+#player.conn-trouble .conn{opacity:.75}
+
+@media (max-width:520px){.page{padding:18px 20px}}
+/* short viewports: compress so setup still fits one screen */
+@media (max-height:680px){
+  #setup{gap:clamp(10px,1.8vh,16px)}
+  .opt{padding:11px 16px}
+  .opt.on{padding:10.5px 15.5px}
+}
+@media (max-height:560px){
+  .page{padding:12px 22px}
+  .brand{margin-bottom:8px}
+  #setup{gap:9px}
+  .opt{padding:9px 15px}
+  .opt.on{padding:8.5px 14.5px}
+  .choices{gap:6px}
+  .refine{gap:9px}
+  .btn.primary{padding:12px 30px}
+}
+/* very short (landscape phones): tighten everything */
+@media (max-height:560px){
+  .brand{margin-bottom:6px}
+  #setup{gap:7px}
+  .refine{gap:7px}
+  .block>.eyebrow{margin-bottom:5px}
+  .adjust[open] summary{margin-bottom:12px}
+  .adjust-body{gap:14px}
+  .foot{padding-top:8px;gap:9px}
+  .chip{padding:6px 13px}
+}
+/* embed → standalone affordance (only shows inside Circle / on installable iOS) */
+.popout,.installhint{display:none}
+/* host app (Stuck Not Broken) drives this in an iframe — never show the Circle pop-out there */
+body.embed .popout,body.embed .installhint{display:none!important}
+body.embedded .popout,body.can-install .installhint{
+  display:flex;align-items:center;gap:10px;justify-content:space-between;flex:none;
+  margin:0 0 clamp(14px,2.6vh,20px);padding:11px 8px 11px 15px;
+  border:1px solid var(--hairline);border-radius:12px;background:rgba(88,145,197,.07)}
+.popout-link{flex:1 1 auto;min-width:0;font:inherit;color:var(--link);background:none;border:0;
+  cursor:pointer;text-align:left;padding:0;display:flex;flex-direction:column;gap:1px}
+.popout-link .ttl{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px}
+.popout-link .sub{font-size:12.5px;font-weight:400;color:var(--muted)}
+.popout-link:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+.installhint .ttl{font-size:14px;color:var(--ink-80);line-height:1.4}
+.installhint .ttl b{font-weight:600;color:var(--ink)}
+.popout-x{flex:none;width:30px;height:30px;border:0;background:none;color:var(--muted);
+  font-size:19px;line-height:1;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.popout-x:hover{color:var(--ink)}
+.popout-x:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+body.playing .popout,body.playing .installhint{display:none}
+@supports(padding:max(0px)){
+  .page{
+    padding-top:max(14px,env(safe-area-inset-top));
+    padding-bottom:max(16px,env(safe-area-inset-bottom));
+    padding-left:max(22px,env(safe-area-inset-left));
+    padding-right:max(22px,env(safe-area-inset-right));
+  }
+}
+/* ── embed mode: inside the Stuck Not Broken app shell ── */
+html.embed .brand{display:none!important}
+html.embed.autostart #setup{display:none!important}
+body.embed{font-size:15px}
+body.embed .page{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+body.embed .opt{padding:16px 18px}
+body.embed .opt.on{padding:15.5px 17.5px}
+body.embed .opt .t{font-size:16px}
+body.embed .btn.primary{font-size:16px;padding:16px 30px;border-radius:12px}
+body.embed .welcome{font-size:15px}
+body.embed .foot{padding-top:clamp(10px,2vh,18px)}
+</style>
+<script>/* sync embed detection — set class on <html> before first paint */(function(){var q=new URLSearchParams(location.search);if(q.get('embed')==='1')document.documentElement.classList.add('embed');if(q.get('autostart')==='1')document.documentElement.classList.add('autostart');})();</script>
+</head>
+<body>
+<div class="page">
+  <!-- shown only when running embedded (e.g. inside Circle): a one-tap jump to the chrome-free app -->
+  <div class="popout" id="popout">
+    <button class="popout-link" id="popoutlink" type="button">
+      <span class="ttl">Open the full-screen app ↗</span>
+      <span class="sub">no menus — just the practice</span>
+    </button>
+    <button class="popout-x" id="popoutx" type="button" aria-label="dismiss">×</button>
+  </div>
+  <!-- shown only on the standalone page in iOS Safari, not yet installed -->
+  <div class="installhint" id="installhint">
+    <span class="ttl">Keep this handy: tap <b>Share</b>, then <b>Add to Home Screen</b>.</span>
+    <button class="popout-x" id="installx" type="button" aria-label="dismiss">×</button>
+  </div>
+  <header class="brand">
+    <svg class="mark" viewBox="0 0 1288 446.31" role="img" aria-label="Stuck Not Broken">
+<path class="g-heart" d="M 228.6626430999995,414.99967965948633 C 193.0931878499996,414.99967965948633 159.69623824999962,401.15528090948635 134.56332974999987,376.0223724094866 L 42.977307250000194,284.43634990948647 C 17.844398749999527,259.30344140948625 4.0,225.86389365948654 4.0,190.3370365594864 C 4.0,154.76758130948647 17.844398750000437,121.3706317094865 42.977307250000194,96.23772320948629 C 68.11021574999995,71.10481470948653 101.54976350000015,57.26041595948655 137.07662059999984,57.260415959486096 C 171.45332764999966,57.260415959486096 203.82792165000046,70.21025355948623 228.6626430999995,93.76703050948609 C 280.7175823999996,44.35317650948619 363.2727970999995,45.20513950948626 414.34797894999974,96.23772320948629 C 466.23252564999984,148.1222699094864 466.23252564999984,232.5518032094864 414.34797894999974,284.47894805948624 L 322.76195644999916,376.06497055948637 C 297.6290479499994,401.1978790594861 264.1895001999992,415.0422778094861 228.6626430999995,415.0422778094861 L 228.6626430999995,414.99967965948633 M 137.11921875000007,109.86913120948648 C 115.60715299999993,109.86913120948648 95.41562990000057,118.21836860948625 80.20809035000002,133.42590815948634 C 48.813253799999075,164.82074470948638 48.813253799999075,215.8533284094864 80.20809035000002,247.24816495948645 L 171.7941128499997,338.83418745948654 C 187.00165239999933,354.0417270094862 207.1931754999996,362.3909644094864 228.70524124999974,362.3909644094864 C 250.2173069999999,362.3909644094864 270.40883009999925,354.0417270094862 285.6163696499989,338.83418745948654 L 377.20239214999947,247.24816495948645 C 408.5546305500002,215.89592655948618 408.5546305500002,164.82074470948638 377.20239214999947,133.42590815948634 C 345.80755560000034,102.0310716094863 294.7749719000003,102.0310716094863 263.3801353500003,133.42590815948634 L 228.70524124999974,168.10080225948641 L 194.03034714999922,133.42590815948634 C 178.82280759999958,118.21836860948625 158.6312844999993,109.86913120948648 137.11921875000007,109.86913120948648"></path>
+<path class="g-bolt" d="M 673.9837031999996,442.30509380948604 C 665.0806898499995,442.30509380948604 656.092480199999,440.5585696594861 647.4876538999997,437.02292320948607 C 621.5879787000003,426.2881894094861 604.8469057499997,401.24047720948636 604.8469057499997,373.2108945094859 L 604.8469057499997,282.43423685948653 L 544.8687105499994,282.43423685948653 C 516.8391278499994,282.43423685948653 491.7914156499992,265.6931639094863 481.05668185000013,239.79348870948652 C 470.3219480500002,213.89381350948625 476.2004927499993,184.3306974094866 496.0512306499995,164.4799595094859 L 636.2417422999997,24.28944785948616 C 656.092480199999,4.438709959486374 685.6129981499989,-1.439834740514101 711.5552714999994,9.294899059486312 C 737.4549466999997,20.02963285948627 754.1960196499995,45.07734505948602 754.1960196499995,73.10692775948601 L 754.1960196499995,163.8835854094863 L 814.1742148499998,163.8835854094863 C 842.2037975499998,163.8835854094863 867.25150975,180.62465835948652 877.9862435499999,206.52433355948634 C 888.7209773499999,232.4240087594866 882.842432649999,261.98712485948624 862.9916947499996,281.8378627594865 L 722.8011830999994,422.0283744094862 C 709.5531584499995,435.27639905948615 691.9601224999997,442.30509380948604 674.0263013499998,442.30509380948604 L 673.9837031999996,442.30509380948604 M 684.6758388499993,56.57884555948604 C 681.2679868499999,56.57884555948604 677.1785644499996,57.68639745948613 673.3873291,61.47763280948621 L 533.1968174499998,201.6681444594864 C 526.168122699999,208.69683920948628 528.3832264999992,216.53489880948646 529.6185728500004,219.60196560948626 C 530.8965173500001,222.6690324094865 534.9007434500008,229.7829234594864 544.8261124,229.7829234594864 L 657.4556210000001,229.7829234594864 L 657.4556210000001,373.16829635948613 C 657.4556210000001,383.09366530948625 664.5695120499995,387.0978914094861 667.6365788499998,388.3758359094862 C 670.70364565,389.6537804094859 678.5417052499997,391.8262860594858 685.5703999999996,384.7975913094864 L 825.7609116499998,244.60707965948623 C 832.7896063999988,237.57838490948635 830.5745025999995,229.74032530948617 829.3391562500001,226.67325850948637 C 828.0612117500004,223.60619170948613 824.0569856499997,216.49230065948623 814.1316166999995,216.49230065948623 L 701.5021080999995,216.49230065948623 L 701.5021080999995,73.10692775948601 C 701.5021080999995,63.18155880948589 694.3882170499992,59.17733270948602 691.3211502499989,57.899388209486375 C 689.9154112999995,57.30301410948633 687.5299148999993,56.536247409486265 684.6758388499993,56.536247409486265 L 684.6758388499993,56.57884555948604"></path>
+<path class="g-x" d="M 988.3580501999995,417.42777420948585 C 963.5233287499996,417.42777420948585 940.1795425499995,407.75799415948575 922.6291047499999,390.20755635948615 C 905.0786669499994,372.6571185594861 895.4088868999997,349.313332359486 895.4088868999997,324.4786109094865 C 895.4088868999997,299.64388945948656 905.0786669499994,276.3001032594865 922.6291047499999,258.749665459486 L 958.2837562999994,223.09501390948608 L 922.6291047499999,187.44036235948616 C 905.0786669499994,169.8899245594861 895.4088868999997,146.5461383594865 895.4088868999997,121.71141690948608 C 895.4088868999997,96.87669545948611 905.0786669499994,73.53290925948605 922.6291047499999,55.98247145948645 C 940.1795425499995,38.43203365948639 963.5233287499996,28.762253609486294 988.3580501999995,28.762253609486294 C 1013.1927716500004,28.762253609486294 1036.5365578500005,38.43203365948639 1054.0869956499992,55.98247145948645 L 1089.7416472000004,91.63712300948637 L 1125.39629875,55.98247145948645 C 1161.6473244,19.731445809486473 1220.6031639999992,19.731445809486473 1256.811591499999,55.98247145948645 C 1293.062617149999,92.23349710948642 1293.062617149999,151.18933670948664 1256.811591499999,187.39776420948593 L 1221.1569399499995,223.0524157594863 L 1256.811591499999,258.7070673094862 C 1293.062617149999,294.9580929594862 1293.062617149999,353.9139325594864 1256.811591499999,390.12236005948614 C 1220.560565849999,426.3733857094861 1161.6047262499997,426.3733857094861 1125.39629875,390.12236005948614 L 1089.7416472000004,354.4677085094862 L 1054.0869956499992,390.12236005948614 C 1036.5365578499996,407.6727978594862 1013.1927716499995,417.3425779094863 988.3580501999995,417.3425779094863 L 988.3580501999995,417.4277742094863 M 988.3580501999995,81.49876330948646 C 977.5807182499993,81.49876330948646 967.4849567000001,85.67338200948635 959.8598878499997,93.29845085948628 C 952.2348189999993,100.92351970948621 948.0602002999985,111.01928125948635 948.0602002999995,121.79661320948608 C 948.0602002999995,132.57394515948582 952.2348189999993,142.66970670948595 959.8598878499997,150.29477555948634 L 1032.7027243499997,223.13761205948586 L 959.8598878499997,295.98044855948626 C 952.2348189999993,303.60551740948665 948.0602002999985,313.7012789594868 948.0602002999995,324.4786109094865 C 948.0602002999995,335.25594285948625 952.2348189999993,345.3517044094864 959.8598878499997,352.97677325948587 C 967.4849566999992,360.60184210948626 977.5807182499993,364.7764608094857 988.3580501999995,364.77646080948614 C 999.1353821499997,364.77646080948614 1009.2311436999998,360.6018421094867 1016.8562125499993,352.97677325948587 L 1089.6990490499993,280.13393675948635 L 1162.5418855500002,352.97677325948587 C 1178.2606029000008,368.695490609486 1203.8194929000001,368.695490609486 1219.5382102499989,352.97677325948587 C 1235.2569275999995,337.2580559094862 1235.2569275999995,311.69916590948594 1219.5382102499989,295.98044855948626 L 1146.6953737499998,223.13761205948586 L 1219.5382102499989,150.29477555948634 C 1235.2569275999995,134.5760582094862 1235.2569275999995,109.01716820948596 1219.5382102499989,93.29845085948628 C 1203.8194928999992,77.57973350948615 1178.2606028999999,77.57973350948615 1162.5418855500002,93.29845085948628 L 1089.6990490499993,166.14128735948626 L 1016.8562125499993,93.29845085948628 C 1009.2311436999998,85.67338200948635 999.1353821499988,81.49876330948646 988.3580501999995,81.49876330948646"></path></svg>
+    <span class="brand-tag" hidden></span>
+  </header>
+
+  <!-- ───────────── SETUP ───────────── -->
+  <main id="setup" class="screen">
+
+    <!-- the customizer: choose a practice, shape it, begin -->
+    <div class="chooser" id="chooser">
+
+      <p class="welcome" id="welcome">A few quiet minutes to find your way back to safety. Choose where to begin.</p>
+      <button class="goback" id="goback" type="button"><span class="ba" aria-hidden="true"></span> back</button>
+      <div class="block">
+        <div class="choices" id="exps"></div>
+      </div>
+
+      <div class="reveal" id="reveal"><div class="reveal-inner">
+      <div class="refine">
+        <div class="block" id="sensewrap">
+          <span class="eyebrow">anchor your attention with</span>
+          <div class="chips" id="senses"></div>
+        </div>
+        <div class="block" id="skillwrap">
+          <span class="eyebrow">the skill to practice</span>
+          <div class="chips" id="skills"></div>
+        </div>
+        <div class="block" id="medwrap" style="display:none">
+          <span class="eyebrow">choose a session</span>
+          <div class="medlist" id="meds"></div>
+        </div>
+      </div>
+
+      <details class="adjust" id="adjust">
+        <summary><span class="tw" aria-hidden="true"></span> more options</summary>
+        <div class="adjust-body">
+          <div class="block">
+            <span class="eyebrow">How much silence?</span>
+            <div class="chips" id="sils"></div>
+          </div>
+          <div class="block" id="descdefwrap">
+            <span class="eyebrow">describe the defense?</span>
+            <div class="chips" id="descdefs"></div>
+          </div>
+          <div class="block" id="lenwrap">
+            <span class="eyebrow">length</span>
+            <div class="chips" id="lens"></div>
+          </div>
+        </div>
+      </details>
+      </div></div>
+
+      <div class="foot">
+        <p class="summary" id="summary"></p>
+        <p class="begin-help" id="beginhelp">not sure? this is the simplest place to start.</p>
+        <button class="surprise-all" id="surprise" type="button">surprise me</button>
+        <button class="btn primary" id="begin">Begin</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ───────────── PLAYER ───────────── -->
+  <main id="player" class="screen hidden">
+    <div class="stage">
+      <div class="ringwrap"><canvas id="ring"></canvas></div>
+      <p class="starting" id="starting" aria-live="polite"></p>
+      <p class="caption" id="caption"><span class="cap-text" id="captext"></span></p>
+    </div>
+    <div class="pfoot">
+    <div class="controls">
+      <p class="timeleft" id="timeleft" aria-live="off"></p>
+      <!-- one compact bar: pause/play · silence · captions -->
+      <div class="controlbar">
+        <div class="adjgroup">
+        <div class="adj silence">
+          <span class="adj-label">silence</span>
+          <span class="adj-stepper">
+            <button class="adj-step" id="lesssil" aria-label="less silence">−</button>
+            <span class="adj-val" id="silnow"></span>
+            <button class="adj-step" id="moresil" aria-label="more silence">+</button>
+          </span>
+        </div>
+        <button class="adj captoggle" id="captoggle" type="button" aria-pressed="false"><span class="cc">CC</span><span class="cc-state" id="capstate">off</span></button>
+        </div>
+      <button class="transport" id="pause" aria-label="Pause"><svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.4" y="5" width="4.4" height="14" rx="2.2"></rect><rect x="13.2" y="5" width="4.4" height="14" rx="2.2"></rect></svg><svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
+      </div>
+      <!-- endings: graceful close, and a quiet escape -->
+      <div class="endings">
+        <button class="btn quiet endbtn" id="endbtn">Begin ease out</button>
+        <button class="endnow" id="stopbtn" aria-label="End now">end now</button>
+      </div>
+    </div>
+    <!-- gentle completion state -->
+    <div class="done" id="done">
+      <button class="btn quiet" id="againbtn">Go again</button>
+      <button class="btn quiet" id="overbtn">Choose another</button>
+      <button class="endnow" id="restbtn">end</button>
+    </div>
+    <!-- terminal rest: ending is an honored, complete choice -->
+    <div class="rest" id="rest">
+      <button class="endnow" id="restagain">begin again</button>
+    </div>
+    <!-- a rest between stacked meditations: waits for play -->
+    <div class="brk" id="brk">
+      <p class="brk-line" id="brkline"></p>
+      <button class="iconbtn" id="contbtn" aria-label="Continue"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6 L18 12 L8 18 Z" fill="currentColor" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"></path></svg></button>
+    </div>
+    <!-- shown only if clips can't load -->
+    <p class="conn" id="conn">having trouble connecting. hang on…</p>
+    </div>
+  </main>
+</div>
+
+<audio id="au"></audio>
+
+<script>
+/* ====== audio location ======
+   Where the clips live, relative to this HTML file.
+   - Local testing: "weaver-slicing/clips/"
+   - Clips sitting next to this file: ""
+   - Production CDN (recommended): the prefix that keeps the real filenames,
+     e.g. "https://cdn.jsdelivr.net/gh/USER/REPO/clips/". A bare Wix-media
+     prefix will NOT work (Wix rewrites uploads to opaque hashed URLs). */
+const BASE="https://justinlmft.github.io/snb-guided-practice/clips/";
+
+/* CAPTIONS: fetch the filename-keyed transcript once on load. On/off toggle, default OFF, nothing persisted. */
+let CAP={};
+fetch(BASE+'captions.json').then(r=>r.ok?r.json():{}).then(j=>{CAP=j||{};}).catch(()=>{});
+let capsOn=false,curFile='';
+
+/* ====== content data (manifest, order, rules, durations) ====== */
+const MAN={"INTRO-01":["INTRO-01-a.mp3","INTRO-01-b.mp3"],
+"PINTRO-ANCHORING":["PINTRO-ANCHORING-a.mp3","PINTRO-ANCHORING-b.mp3"],
+"PINTRO-IMAGERY":["PINTRO-IMAGERY-a.mp3","PINTRO-IMAGERY-b.mp3"],
+"PINTRO-OBSTACLES":["PINTRO-OBSTACLES-a.mp3","PINTRO-OBSTACLES-b.mp3"],
+"PINTRO-BALANCING":["PINTRO-BALANCING-a.mp3","PINTRO-BALANCING-b.mp3"],
+"PINTRO-PENDULATING":["PINTRO-PENDULATING-a.mp3","PINTRO-PENDULATING-b.mp3"],
+"MIND-01":["MIND-01-a.mp3","MIND-01-b.mp3"],
+"MIND-02":["MIND-02-a.mp3","MIND-02-b.mp3"],
+"MIND-03":["MIND-03-a.mp3"],
+"MIND-04":["MIND-04-a.mp3","MIND-04-b.mp3"],
+"MIND-05":["MIND-05-a.mp3"],
+"MIND-06":["MIND-06-a.mp3","MIND-06-b.mp3"],
+"MIND-07":["MIND-07-a.mp3","MIND-07-b.mp3"],
+"MIND-08":["MIND-08-a.mp3","MIND-08-b.mp3","MIND-08-c.mp3","MIND-08-d.mp3"],
+"MIND-09-CAPCHECK":["MIND-09-CAPCHECK-a.mp3","MIND-09-CAPCHECK-b.mp3"],
+"LADDER-TOUCH-01":["LADDER-TOUCH-01-a.mp3","LADDER-TOUCH-01-b.mp3"],
+"LADDER-TOUCH-02":["LADDER-TOUCH-02-a.mp3","LADDER-TOUCH-02-b.mp3","LADDER-TOUCH-02-c.mp3","LADDER-TOUCH-02-d.mp3"],
+"LADDER-TOUCH-03":["LADDER-TOUCH-03-a.mp3","LADDER-TOUCH-03-b.mp3"],
+"LADDER-TOUCH-04":["LADDER-TOUCH-04-a.mp3","LADDER-TOUCH-04-b.mp3"],
+"LADDER-TOUCH-05":["LADDER-TOUCH-05-a.mp3","LADDER-TOUCH-05-b.mp3"],
+"TAIL-01-BREATH":["TAIL-01-BREATH-a.mp3","TAIL-01-BREATH-b.mp3"],
+"TAIL-02-POSTURE":["TAIL-02-POSTURE-a.mp3","TAIL-02-POSTURE-b.mp3"],
+"TAIL-03-SMILE":["TAIL-03-SMILE-a.mp3","TAIL-03-SMILE-b.mp3"],
+"TAIL-04-CONNECT":["TAIL-04-CONNECT-a.mp3","TAIL-04-CONNECT-b.mp3"],
+"SAFETY-01-NAME":["SAFETY-01-NAME-a.mp3","SAFETY-01-NAME-b.mp3"],
+"SAFETY-02-GENERAL":["SAFETY-02-GENERAL-a.mp3","SAFETY-02-GENERAL-b.mp3"],
+"SAFETY-03-SPECIFIC":["SAFETY-03-SPECIFIC-a.mp3","SAFETY-03-SPECIFIC-b.mp3"],
+"LADDER-SIGHT-01":["LADDER-SIGHT-01-a.mp3","LADDER-SIGHT-01-b.mp3"],
+"LADDER-SIGHT-02":["LADDER-SIGHT-02-a.mp3","LADDER-SIGHT-02-b.mp3"],
+"LADDER-SIGHT-03":["LADDER-SIGHT-03-a.mp3","LADDER-SIGHT-03-b.mp3"],
+"LADDER-SOUND-01":["LADDER-SOUND-01-a.mp3","LADDER-SOUND-01-b.mp3"],
+"LADDER-SOUND-02":["LADDER-SOUND-02-a.mp3","LADDER-SOUND-02-b.mp3"],
+"LADDER-SOUND-03":["LADDER-SOUND-03-a.mp3","LADDER-SOUND-03-b.mp3"],
+"LADDER-SOUND-04":["LADDER-SOUND-04-a.mp3","LADDER-SOUND-04-b.mp3"],
+"LADDER-SOUND-05":["LADDER-SOUND-05-a.mp3","LADDER-SOUND-05-b.mp3"],
+"LADDER-SOUND-06":["LADDER-SOUND-06-a.mp3","LADDER-SOUND-06-b.mp3"],
+"LADDER-MOVEMENT-01":["LADDER-MOVEMENT-01-a.mp3","LADDER-MOVEMENT-01-b.mp3"],
+"LADDER-MOVEMENT-02":["LADDER-MOVEMENT-02-a.mp3","LADDER-MOVEMENT-02-b.mp3"],
+"LADDER-MOVEMENT-03":["LADDER-MOVEMENT-03-a.mp3","LADDER-MOVEMENT-03-b.mp3"],
+"LADDER-MOVEMENT-04":["LADDER-MOVEMENT-04-a.mp3","LADDER-MOVEMENT-04-b.mp3"],
+"LADDER-MOVEMENT-05":["LADDER-MOVEMENT-05-a.mp3","LADDER-MOVEMENT-05-b.mp3"],
+"LADDER-MOVEMENT-06":["LADDER-MOVEMENT-06-a.mp3","LADDER-MOVEMENT-06-b.mp3"],
+"LADDER-MOVEMENT-07":["LADDER-MOVEMENT-07-a.mp3","LADDER-MOVEMENT-07-b.mp3"],
+"LADDER-MOVEMENT-08":["LADDER-MOVEMENT-08-a.mp3","LADDER-MOVEMENT-08-b.mp3"],
+"LADDER-MOVEMENT-09":["LADDER-MOVEMENT-09-a.mp3","LADDER-MOVEMENT-09-b.mp3"],
+"LADDER-IMAGINATION-01":["LADDER-IMAGINATION-01-a.mp3","LADDER-IMAGINATION-01-b.mp3"],
+"LADDER-IMAGINATION-02":["LADDER-IMAGINATION-02-a.mp3","LADDER-IMAGINATION-02-b.mp3"],
+"LADDER-IMAGINATION-03":["LADDER-IMAGINATION-03-a.mp3","LADDER-IMAGINATION-03-b.mp3"],
+"LADDER-IMAGINATION-04":["LADDER-IMAGINATION-04-a.mp3","LADDER-IMAGINATION-04-b.mp3"],
+"LADDER-IMAGINATION-05":["LADDER-IMAGINATION-05-a.mp3","LADDER-IMAGINATION-05-b.mp3"],
+"LADDER-IMAGINATION-06":["LADDER-IMAGINATION-06-a.mp3","LADDER-IMAGINATION-06-b.mp3"],
+"LADDER-IMAGINATION-07":["LADDER-IMAGINATION-07-a.mp3","LADDER-IMAGINATION-07-b.mp3"],
+"LADDER-IMAGINATION-08":["LADDER-IMAGINATION-08-a.mp3","LADDER-IMAGINATION-08-b.mp3"],
+"CURIOSITY-01":["CURIOSITY-01-a.mp3","CURIOSITY-01-b.mp3","CURIOSITY-01-c.mp3","CURIOSITY-01-d.mp3"],
+"INTENT-SET":["INTENT-SET-a.mp3","INTENT-SET-b.mp3"],
+"INVITE-01":["INVITE-01-a.mp3","INVITE-01-b.mp3","INVITE-01-c.mp3"],
+"INVITE-02":["INVITE-02-a.mp3","INVITE-02-b.mp3"],
+"INVITE-03":["INVITE-03-a.mp3","INVITE-03-b.mp3"],
+"INVITE-04":["INVITE-04-a.mp3","INVITE-04-b.mp3"],
+"INVITE-05":["INVITE-05-a.mp3","INVITE-05-b.mp3"],
+"INVITE-06":["INVITE-06-a.mp3","INVITE-06-b.mp3"],
+"PEND-SAFETY":["PEND-SAFETY-a.mp3","PEND-SAFETY-b.mp3"],
+"PEND-SAFETY-Q":["PEND-SAFETY-Q-a.mp3","PEND-SAFETY-Q-b.mp3"],
+"PEND-DEFENSE":["PEND-DEFENSE-a.mp3","PEND-DEFENSE-b.mp3"],
+"PEND-DEFENSE-Q":["PEND-DEFENSE-Q-a.mp3","PEND-DEFENSE-Q-b.mp3"],
+"PEND-SAFE-REMIND":["PEND-SAFE-REMIND-a.mp3","PEND-SAFE-REMIND-b.mp3"],
+"PEND-TO-DEFENSE-BRIEF":["PEND-TO-DEFENSE-BRIEF-a.mp3","PEND-TO-DEFENSE-BRIEF-b.mp3"],
+"PEND-TO-SAFETY-BRIEF":["PEND-TO-SAFETY-BRIEF-a.mp3","PEND-TO-SAFETY-BRIEF-b.mp3"],
+"HOLD-WATCH":["HOLD-WATCH-a.mp3","HOLD-WATCH-b.mp3","HOLD-WATCH-c.mp3"],
+"IMG-01":["IMG-01-a.mp3","IMG-01-b.mp3"],
+"IMG-02":["IMG-02-a.mp3","IMG-02-b.mp3"],
+"IMG-03":["IMG-03-a.mp3","IMG-03-b.mp3"],
+"IMG-04":["IMG-04-a.mp3","IMG-04-b.mp3"],
+"IMG-05":["IMG-05-a.mp3","IMG-05-b.mp3"],
+"IMG-06":["IMG-06-a.mp3","IMG-06-b.mp3"],
+"OBST-01":["OBST-01-a.mp3","OBST-01-b.mp3"],
+"OBST-02":["OBST-02-a.mp3","OBST-02-b.mp3"],
+"OBST-03":["OBST-03-a.mp3","OBST-03-b.mp3"],
+"OBST-04":["OBST-04-a.mp3","OBST-04-b.mp3"],
+"OBST-05":["OBST-05-a.mp3","OBST-05-b.mp3"],
+"OBSTACLE-STATEMENTS":["OBSTACLE-STATEMENTS-a.mp3","OBSTACLE-STATEMENTS-b.mp3","OBSTACLE-STATEMENTS-c.mp3","OBSTACLE-STATEMENTS-d.mp3","OBSTACLE-STATEMENTS-e.mp3","OBSTACLE-STATEMENTS-f.mp3","OBSTACLE-STATEMENTS-g.mp3","OBSTACLE-STATEMENTS-h.mp3","OBSTACLE-STATEMENTS-i.mp3","OBSTACLE-STATEMENTS-j.mp3","OBSTACLE-STATEMENTS-k.mp3","OBSTACLE-STATEMENTS-l.mp3","OBSTACLE-STATEMENTS-m.mp3","OBSTACLE-STATEMENTS-n.mp3","OBSTACLE-STATEMENTS-o.mp3","OBSTACLE-STATEMENTS-p.mp3"],
+"CLOSE-01":["CLOSE-01-a.mp3","CLOSE-01-b.mp3"],
+"CLOSE-02":["CLOSE-02-a.mp3","CLOSE-02-b.mp3"],
+"CLOSE-03":["CLOSE-03-a.mp3","CLOSE-03-b.mp3"],
+"CLOSE-04":["CLOSE-04-a.mp3","CLOSE-04-b.mp3"],
+"CLOSE-05":["CLOSE-05-a.mp3","CLOSE-05-b.mp3"],
+"OUTRO":["OUTRO-a.mp3","OUTRO-b.mp3"],
+"ENDING-OPEN":["ENDING-OPEN-a.mp3","ENDING-OPEN-b.mp3"],
+"LOOP-GATE":["LOOP-GATE-a.mp3","LOOP-GATE-b.mp3"],
+"SLOW-MOVE":["SLOW-MOVE-a.mp3","SLOW-MOVE-b.mp3"],
+"STOP-OK":["STOP-OK-a.mp3","STOP-OK-b.mp3"],
+"NUMB-OK":["NUMB-OK-a.mp3","NUMB-OK-b.mp3"],
+"CAP-GATE":["CAP-GATE-a.mp3","CAP-GATE-b.mp3"],
+"DESC-OBJ-TOUCH":["DESC-OBJ-TOUCH-a.mp3"],
+"DESC-OBJ-SIGHT":["DESC-OBJ-SIGHT-a.mp3"],
+"DESC-OBJ-SOUND":["DESC-OBJ-SOUND-a.mp3"],
+"DESC-OBJ-MOVEMENT":["DESC-OBJ-MOVEMENT-a.mp3"],
+"DESC-OBJ-IMAGINATION":["DESC-OBJ-IMAGINATION-a.mp3","DESC-OBJ-IMAGINATION-b.mp3"],
+"DESC-SAFETY":["DESC-SAFETY-a.mp3","DESC-SAFETY-b.mp3"],
+"DESC-DEFENSE":["DESC-DEFENSE-a.mp3","DESC-DEFENSE-b.mp3"]},
+ORDER=["INTRO-01","PINTRO-ANCHORING","PINTRO-IMAGERY","PINTRO-OBSTACLES","PINTRO-BALANCING","PINTRO-PENDULATING","MIND-01","MIND-02","MIND-03","MIND-04","MIND-05","MIND-06","MIND-07","MIND-08","MIND-09-CAPCHECK","LADDER-TOUCH-01","LADDER-TOUCH-02","LADDER-TOUCH-03","LADDER-TOUCH-04","LADDER-TOUCH-05","TAIL-01-BREATH","TAIL-02-POSTURE","TAIL-03-SMILE","TAIL-04-CONNECT","SAFETY-01-NAME","SAFETY-02-GENERAL","SAFETY-03-SPECIFIC","LADDER-SIGHT-01","LADDER-SIGHT-02","LADDER-SIGHT-03","LADDER-SOUND-01","LADDER-SOUND-02","LADDER-SOUND-03","LADDER-SOUND-04","LADDER-SOUND-05","LADDER-SOUND-06","LADDER-MOVEMENT-01","LADDER-MOVEMENT-02","LADDER-MOVEMENT-03","LADDER-MOVEMENT-04","LADDER-MOVEMENT-05","LADDER-MOVEMENT-06","LADDER-MOVEMENT-07","LADDER-MOVEMENT-08","LADDER-MOVEMENT-09","LADDER-IMAGINATION-01","LADDER-IMAGINATION-02","LADDER-IMAGINATION-03","LADDER-IMAGINATION-04","LADDER-IMAGINATION-05","LADDER-IMAGINATION-06","LADDER-IMAGINATION-07","LADDER-IMAGINATION-08","CURIOSITY-01","INTENT-SET","INVITE-01","INVITE-02","INVITE-03","INVITE-04","INVITE-05","INVITE-06","PEND-SAFETY","PEND-SAFETY-Q","PEND-DEFENSE","PEND-DEFENSE-Q","PEND-SAFE-REMIND","PEND-TO-DEFENSE-BRIEF","PEND-TO-SAFETY-BRIEF","HOLD-WATCH","IMG-01","IMG-02","IMG-03","IMG-04","IMG-05","IMG-06","OBST-01","OBST-02","OBST-03","OBST-04","OBST-05","OBSTACLE-STATEMENTS","CLOSE-01","CLOSE-02","CLOSE-03","CLOSE-04","CLOSE-05","OUTRO","ENDING-OPEN","LOOP-GATE","SLOW-MOVE","STOP-OK","NUMB-OK","CAP-GATE","DESC-OBJ-TOUCH","DESC-OBJ-SIGHT","DESC-OBJ-SOUND","DESC-OBJ-MOVEMENT","DESC-OBJ-IMAGINATION","DESC-SAFETY","DESC-DEFENSE"],
+RULES={"exclusions":[{"drop":"INVITE-01","when_present":"LADDER-TOUCH-02","reason":"INVITE-01 and LADDER-TOUCH-02 do the same job; LADDER-TOUCH-02 preferred."}],"gaps":{"short_seconds":1.5,"short_prefixes":["PINTRO-","INVITE-","INTENT-","PEND-TO-"],"short_bases":["INTRO-01","CAP-GATE"]}},
+DUR={"INTRO-01":11.1,
+"PINTRO-ANCHORING":11.5,
+"PINTRO-IMAGERY":16.0,
+"PINTRO-OBSTACLES":16.8,
+"PINTRO-BALANCING":13.8,
+"PINTRO-PENDULATING":14.5,
+"MIND-01":6.4,
+"MIND-02":25.4,
+"MIND-03":38.0,
+"MIND-04":15.2,
+"MIND-05":65.1,
+"MIND-06":52.3,
+"MIND-07":4.2,
+"MIND-08":9.1,
+"MIND-09-CAPCHECK":9.1,
+"LADDER-TOUCH-01":6.1,
+"LADDER-TOUCH-02":10.4,
+"LADDER-TOUCH-03":3.5,
+"LADDER-TOUCH-04":7.4,
+"LADDER-TOUCH-05":27.1,
+"TAIL-01-BREATH":38.0,
+"TAIL-02-POSTURE":11.7,
+"TAIL-03-SMILE":9.2,
+"TAIL-04-CONNECT":15.4,
+"SAFETY-01-NAME":17.4,
+"SAFETY-02-GENERAL":17.6,
+"SAFETY-03-SPECIFIC":17.9,
+"LADDER-SIGHT-01":11.1,
+"LADDER-SIGHT-02":17.5,
+"LADDER-SIGHT-03":14.8,
+"LADDER-SOUND-01":9.7,
+"LADDER-SOUND-02":7.4,
+"LADDER-SOUND-03":5.7,
+"LADDER-SOUND-04":8.8,
+"LADDER-SOUND-05":8.6,
+"LADDER-SOUND-06":11.3,
+"LADDER-MOVEMENT-01":14.3,
+"LADDER-MOVEMENT-02":9.4,
+"LADDER-MOVEMENT-03":6.7,
+"LADDER-MOVEMENT-04":9.3,
+"LADDER-MOVEMENT-05":6.6,
+"LADDER-MOVEMENT-06":14.4,
+"LADDER-MOVEMENT-07":12.1,
+"LADDER-MOVEMENT-08":10.7,
+"LADDER-MOVEMENT-09":17.1,
+"LADDER-IMAGINATION-01":11.4,
+"LADDER-IMAGINATION-02":5.3,
+"LADDER-IMAGINATION-03":10.8,
+"LADDER-IMAGINATION-04":24.2,
+"LADDER-IMAGINATION-05":5.5,
+"LADDER-IMAGINATION-06":8.2,
+"LADDER-IMAGINATION-07":11.0,
+"LADDER-IMAGINATION-08":9.5,
+"CURIOSITY-01":9.9,
+"INTENT-SET":26.5,
+"INVITE-01":7.9,
+"INVITE-02":6.4,
+"INVITE-03":6.9,
+"INVITE-04":8.2,
+"INVITE-05":9.5,
+"INVITE-06":15.8,
+"PEND-SAFETY":5.4,
+"PEND-SAFETY-Q":4.8,
+"PEND-DEFENSE":4.1,
+"PEND-DEFENSE-Q":8.0,
+"PEND-SAFE-REMIND":3.7,
+"PEND-TO-DEFENSE-BRIEF":4.5,
+"PEND-TO-SAFETY-BRIEF":2.5,
+"HOLD-WATCH":15.1,
+"IMG-01":16.3,
+"IMG-02":7.3,
+"IMG-03":7.3,
+"IMG-04":10.1,
+"IMG-05":3.3,
+"IMG-06":5.6,
+"OBST-01":14.6,
+"OBST-02":5.6,
+"OBST-03":11.1,
+"OBST-04":6.8,
+"OBST-05":6.1,
+"OBSTACLE-STATEMENTS":2.8,
+"CLOSE-01":12.1,
+"CLOSE-02":12.1,
+"CLOSE-03":15.4,
+"CLOSE-04":3.6,
+"CLOSE-05":11.5,
+"OUTRO":22.2,
+"ENDING-OPEN":16.3,
+"LOOP-GATE":24.4,
+"SLOW-MOVE":25.6,
+"STOP-OK":13.0,
+"NUMB-OK":13.9,
+"CAP-GATE":22.3,
+"DESC-OBJ-TOUCH":19.1,
+"DESC-OBJ-SIGHT":16.7,
+"DESC-OBJ-SOUND":36.3,
+"DESC-OBJ-MOVEMENT":34.8,
+"DESC-OBJ-IMAGINATION":23.9,
+"DESC-SAFETY":23.3,
+"DESC-DEFENSE":42.9};
+
+/* ====== helpers ====== */
+const $=id=>document.getElementById(id);
+const au=$('au');
+au.preload='auto';
+const rand=a=>a[Math.floor(Math.random()*a.length)];
+const has=b=>MAN[b]&&MAN[b].length;
+const clipUrl=f=>BASE+f;            // resolve a clip filename to its full src
+/* ── prefetch: buffer next 1-2 segments' variants ahead of time to close network gaps ── */
+const _prefetched=new Set(),_prefetchers=[];
+function prefetch(file){
+  if(_prefetched.has(file))return;_prefetched.add(file);
+  if(_prefetchers.length>=24){const old=_prefetchers.shift();try{old.src='';}catch(e){}}
+  const a=new Audio();a.preload='auto';a.src=clipUrl(file);_prefetchers.push(a);
+}
+function prefetchAhead(){
+  for(let i=1;i<=2;i++){const b=SEQ[idx+i];if(b&&MAN[b])MAN[b].forEach(prefetch);}
+}
+/* ── tap-to-start safety net: if the browser blocks autoplay, first tap anywhere resumes ── */
+let _tapArmed=false;
+function armTapToStart(){
+  if(_tapArmed)return;_tapArmed=true;
+  document.addEventListener('pointerdown',function _t(){
+    document.removeEventListener('pointerdown',_t);
+    _tapArmed=false;
+    if(playing&&!paused){try{au.play();}catch(e){}}
+  },{once:true});
+}
+const SIL=[[4,'a little'],[8,'some'],[12,'a lot']];
+const GAPS=RULES.gaps;
+/* gap = the silence the weaver holds AFTER a clip, before the next one.
+   Default is the listener's chosen FULL silence — every witnessing / DESC beat needs it.
+   Only procedural/transition clips get the short hold; CURIOSITY is capped at 4s. */
+const SHORT_PREFIX=['PINTRO-','INTENT-','PEND-TO-'];
+const SHORT_BASE={'INTRO-01':1,'CAP-GATE':1};
+function gapAfter(b){
+  if(activePack){                                                                // standalone: tier declared per segment
+    const t=GAPTIER[b]||'full';
+    if(t==='short')return GAPS.short_seconds;                                    // procedural / transitional
+    if(t==='hold')return Math.max(cfg.silence,activePack.holdFloor||8);          // true "sit with it" beats — floored
+    return cfg.silence;                                                          // full witnessing silence
+  }
+  if(b==='CURIOSITY-01')return Math.min(cfg.silence,4);                          // never a long hold
+  if(SHORT_BASE[b]||SHORT_PREFIX.some(p=>b.indexOf(p)===0))return GAPS.short_seconds;
+  return cfg.silence;                                                            // full silence (incl. INVITE-05/06, safety general/specific, all DESC)
+}
+/* The anchor ladder = a sense-specific FRONT + a sense-agnostic shared TAIL.
+   The tail (breath, posture, smile, connect → safety name/general/specific) was only
+   recorded under Touch, so its IDs are TAIL-01-BREATH..12 — reused for EVERY sense.
+   (Renaming these to clearer TAIL / SAFETY ids is a separate synced pass incl. Descript.) */
+const TAIL_BODY=['TAIL-01-BREATH','TAIL-02-POSTURE','TAIL-03-SMILE','TAIL-04-CONNECT']; // breath, posture, smile, connect
+const TAIL_SAFETY=['SAFETY-01-NAME','SAFETY-02-GENERAL','SAFETY-03-SPECIFIC'];                 // name, general, specific
+const senseFront=s=>s==='touch'
+  ? ['LADDER-TOUCH-01','LADDER-TOUCH-02','LADDER-TOUCH-03','LADDER-TOUCH-04','LADDER-TOUCH-05'].filter(has)
+  : ORDER.filter(b=>b.startsWith('LADDER-'+s.toUpperCase()+'-')&&has(b));
+const ladder=senseFront;
+const allSenses=['touch','sound','sight','movement','imagination'].filter(s=>senseFront(s).length);
+
+/* the four practices, gentlest first. Copy in Justin's voice. */
+const TRACK={mindfulness:'ink',anchoring:'sky',most:'amber',more:'ink'};
+/* standalone guided sessions (the "More meditations" path) — fixed recordings, sliced into
+   prompts, played through the same engine but bypassing build(). Pack JSON + clips live in
+   the repo (packs/ + clips/). 'track' reuses the woven colour (anchoring=sky/heart, most=amber). */
+const PACKS_BASE=BASE.replace(/clips\/?$/,'packs/');
+const MEDS={
+ 'uye':{title:'Use Your Ears',cue:'grounding through sound',track:'anchoring',est:'~10 min',file:'uye.pack.json'},
+ 'eye':{title:'Use Your Eyes',cue:'grounding through sight',track:'anchoring',est:'~9 min',file:'eye.pack.json'},
+ 'daily-dysregulation':{title:'Daily Dysregulation',cue:'meeting a recent activation',track:'most',est:'~16 min',file:'daily-dysregulation.pack.json'},
+ 'outside-the-cave':{title:'Outside the Cave',cue:'a deeper imagery journey',track:'most',est:'~32 min',file:'outside-the-cave.pack.json'}
+};
+const MEDS_ORDER=['uye','eye','daily-dysregulation','outside-the-cave'];   // gentlest first
+/* skills offered within self-regulation (like the anchor menu) */
+const SKILLS={
+  most:[['imagery','imagery & invitation'],['obstacles','obstacles'],['balancing','balancing'],['pendulation','pendulation']]
+};
+const EXP={
+ mindfulness:{key:'mindfulness',t:'Practice simple mindfulness',cue:'the gentlest — a calm place to start',d:"",sense:'touch',silence:8,gentle:true,mind:true,tier:0,
+   sum:"We'll arrive, follow the breath, and move gently through your senses."},
+ anchoring:{key:'anchoring',t:'Connect with safety',cue:'a step in — settling into safety',d:'',sense:'touch',silence:8,gentle:true,mind:false,tier:1,
+   sum:"We'll settle into safety through your {sense}, and stay there a while."},
+ most:{key:'most',t:'Practice self-regulation',cue:'the deepest — meeting what is hard',d:"",sense:'touch',skill:'imagery',descDefense:false,silence:4,gentle:false,mind:false,tier:3,
+   sum:"We'll hold safety and not-safety, and let them take turns. This one goes deepest."},
+ more:{key:'more',t:'More meditations',cue:'standalone guided sessions',d:"",standalone:true,silence:8,mind:false,tier:9,
+   sum:"Full guided practices — pick one and begin."}
+};
+let practices=[fresh('mindfulness')];
+let active=0;
+let picked=false;   // has the user actively chosen a practice this visit? (drives the collapse + reveal)
+let cfg=practices[active];
+function fresh(k){return {...EXP[k],open:false,pack:null};}
+
+/* ====== sequence building — canonical flow (see meditation-weaver-FLOW-SPEC.md) ====== */
+function anchorBlock(c,add){
+  let first=null;
+  senseFront(c.sense).forEach((b,i)=>{add(b,'anchoring');if(i===0)first=b;});   // sense-specific front (the anchor)
+  add('DESC-OBJ-'+c.sense.toUpperCase(),'noticing the object');                   // describe the object — right after the anchor
+  TAIL_BODY.forEach(b=>add(b,'settling in the body'));                            // breath, posture, smile, connect
+  add('MIND-09-CAPCHECK','a capacity check');                                     // CAP-CHECK after connect
+  TAIL_SAFETY.forEach(b=>add(b,'finding safety'));                                // name -> general -> specific
+  add('DESC-SAFETY','describing safety');                                         // describe safety
+  return first;
+}
+function build(c){
+  const raw=[],ph=[]; const add=(b,p)=>{if(has(b)){raw.push(b);ph.push(p);}};
+  let loopBase=null;
+  add('INTRO-01','opening');
+  if(c.mind){
+    add('MIND-01','arriving');add('MIND-02','the breath');loopBase='MIND-02';
+    add('MIND-03','sound');add('MIND-04','the breath');add('MIND-05','touch');
+    add('MIND-06','sight');add('MIND-07','an emotion');add('MIND-08','an invitation');
+  }else{
+    const defense=(c.key==='most'), skill=c.skill;
+    const usesInvite=defense&&skill!=='obstacles';     // obstacles & anchoring skip intent-set / invite
+    if(usesInvite)add('INTENT-SET','setting an intention');
+    add(defense?({imagery:'PINTRO-IMAGERY',obstacles:'PINTRO-OBSTACLES',balancing:'PINTRO-BALANCING'}[skill]||'PINTRO-PENDULATING'):'PINTRO-ANCHORING','settling in');
+    add('MIND-01','arriving');
+    loopBase=anchorBlock(c,add);                        // anchor into safety (all non-mind practices)
+    if(defense){
+      add('CURIOSITY-01','staying curious');             // interest gate
+      add('CAP-GATE','going further');                   // capacity gate — AFTER safety, BEFORE any defense
+      if(usesInvite){
+        loopBase='INVITE-01';                            // open-ended loop returns here
+        add('INVITE-01','inviting what is hard');add('INVITE-02','it makes sense');add('INVITE-03','letting it be');
+        add('INVITE-04','its intensity');add('INVITE-05','where it lives');add('INVITE-06','more specifically');
+        add('NUMB-OK','permission');
+        if(c.descDefense)add('DESC-DEFENSE','describing the defense');   // optional, under 'more options'
+      }
+      if(skill==='balancing'){
+        add('PEND-SAFETY','back to safety');add('PEND-SAFETY-Q','noticing safety');
+        add('HOLD-WATCH','holding both');add('PEND-SAFETY','back to safety');
+      }else if(skill==='imagery'){
+        ['IMG-01','IMG-02','IMG-03','IMG-04','IMG-05','IMG-06'].forEach(b=>add(b,'giving it an image'));
+        add('PEND-SAFETY','back to safety');
+      }else if(skill==='obstacles'){
+        loopBase='OBST-01';
+        add('OBST-01','what gets in the way');add('MIND-09-CAPCHECK','a capacity check');
+        add('OBSTACLE-STATEMENTS','steadying words');
+        add('OBST-02','validate it');add('OBST-03','normalize it');add('OBST-04','give it an image');add('OBST-05','invite it');
+        add('PEND-SAFETY','back to safety');
+      }else{ // pendulation
+        add('PEND-SAFETY','back to safety');add('PEND-SAFETY-Q','noticing safety');
+        add('PEND-DEFENSE','toward the harder side');add('PEND-DEFENSE-Q','noticing it');add('PEND-SAFE-REMIND','you are safe');
+        add('PEND-TO-SAFETY-BRIEF','letting it come and go');add('PEND-TO-DEFENSE-BRIEF','letting it come and go');add('PEND-TO-SAFETY-BRIEF','letting it come and go');
+        add('PEND-SAFETY','back to safety');
+      }
+      if(c.open)add('LOOP-GATE','staying or closing');    // open-ended: loops back to loopBase (INVITE-01 / OBST-01)
+    }
+  }
+  ['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05'].forEach(b=>add(b,'closing'));
+  add('OUTRO','closing');
+  return {seq:raw,phase:ph,loopBase};
+}
+const CLOSES=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05','OUTRO'];
+function buildPlan(){
+  const all=practices.filter(Boolean); let seq=[],phase=[],loop=false,loopFrom=0;
+  all.forEach((c,ci)=>{let b=build(c),s=b.seq.slice(),p=b.phase.slice();
+    const isLast=ci===all.length-1;
+    const rm=x=>{const k=s.indexOf(x);if(k>=0){s.splice(k,1);p.splice(k,1);}};
+    if(ci>0)rm('INTRO-01');                                  // only the first practice opens with the welcome
+    if(isLast&&c.open){CLOSES.forEach(rm);}                  // open-ended: drop close+outro, loop instead
+    else if(!isLast){rm('OUTRO');}                           // stacked: keep the close, drop the sign-off until the end
+    if(isLast&&c.open&&b.loopBase){const li=s.indexOf(b.loopBase);loop=true;loopFrom=seq.length+(li>=0?li:0);}
+    s.forEach((b2,i)=>{seq.push(b2);phase.push(p[i]);});
+  });
+  return {seq,phase,loop,loopFrom};
+}
+function estimate(o){let t=0;o.seq.forEach((b,i)=>{t+=(DUR[b]||4);if(i<o.seq.length-1)t+=gapAfter(b);});return Math.max(1,Math.round(t/60));}
+
+/* ====== setup screen ====== */
+function renderSetup(){
+  cfg=practices[active];
+  $('chooser').classList.toggle('picked',picked);
+  // tint the brand mark + section eyebrows to the current practice's track
+  // (standalone: neutral until a session is picked, then follow that session's track — e.g. amber for defense)
+  const _trk = cfg.standalone ? (cfg.pack?TRACK[MEDS[cfg.pack].track]:'ink') : TRACK[cfg.key];
+  const mk=document.querySelector('.mark');
+  if(mk){mk.classList.remove('mark-sky','mark-amber','mark-ink');mk.classList.add('mark-'+_trk);}
+  $('chooser').style.setProperty('--trk','var(--'+_trk+')');
+  $('chooser').style.setProperty('--trk-ink',_trk==='amber'?'#8C5E1C':_trk==='ink'?'#3A3F4A':'#356291');
+  $('beginhelp').style.display='none';   // orientation now lives in the welcome line + per-option subtitles
+  // experience options — built ONCE and then updated in place, so the collapse (on pick) and the
+  // expand (on 'back') are the same CSS transition played in reverse, not a jerky DOM rebuild.
+  const ew=$('exps');
+  if(!ew.children.length){
+    Object.values(EXP).forEach(e=>{
+      const b=document.createElement('button');b.type='button';b.dataset.key=e.key;
+      b.className='opt track-'+TRACK[e.key];
+      b.setAttribute('role','radio');
+      b.innerHTML='<span class="opt-text"><span class="t">'+e.t+'</span><span class="sub">'+e.cue+'</span></span><span class="opt-aff" aria-hidden="true"></span>';
+      b.onclick=()=>{
+        if(picked&&e.key===cfg.key){picked=false;renderSetup();return;}   // tap the chosen one again to reopen the list
+        practices[active]=fresh(e.key);picked=true;renderSetup();
+      };
+      ew.appendChild(b);
+    });
+  }
+  Array.from(ew.children).forEach(b=>{const on=b.dataset.key===cfg.key;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false');});
+  // ── standalone "more meditations" path: swap the refine area for a session picker ──
+  if(cfg.standalone){
+    ['sensewrap','skillwrap','descdefwrap','lenwrap'].forEach(id=>$(id).style.display='none');
+    $('surprise').style.display='none';
+    $('medwrap').style.display='block';
+    const mw=$('meds');mw.innerHTML='';
+    MEDS_ORDER.forEach(id=>{const m=MEDS[id];
+      const b=document.createElement('button');b.type='button';
+      b.className='medrow'+(id===cfg.pack?' on':'');
+      b.innerHTML='<span class="mt"><span class="mttl">'+m.title+'</span><span class="mest">'+m.est+'</span></span><span class="ma" aria-hidden="true"></span>';
+      b.onclick=()=>{cfg.pack=id;renderSetup();};
+      mw.appendChild(b);});
+    const sv=$('sils');sv.innerHTML='';                                  // silence still applies to a standalone
+    SIL.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.silence);p.onclick=()=>{cfg.silence=v;renderSetup();};sv.appendChild(p);});
+    $('summary').innerHTML = cfg.pack ? ('<b>'+MEDS[cfg.pack].cue+' · '+MEDS[cfg.pack].est+'.</b>') : 'Choose a session to begin.';
+    const rv0=$('reveal'); if(rv0) rv0.style.maxHeight = picked ? rv0.scrollHeight+'px' : '0px';
+    return;
+  }
+  $('medwrap').style.display='none';
+  // anchor sense (only when the practice uses a chosen sense)
+  $('sensewrap').style.display=cfg.mind?'none':'block';
+  if(!cfg.mind){const sw=$('senses');sw.innerHTML='';
+    allSenses.forEach(s=>{const p=chip(s,s===cfg.sense);p.onclick=()=>{cfg.sense=s;renderSetup();};sw.appendChild(p);});}
+  // skill menu (the deeper practices)
+  const sk=SKILLS[cfg.key];
+  $('skillwrap').style.display=sk?'block':'none';
+  if(sk){const kw=$('skills');kw.innerHTML='';
+    sk.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.skill);p.onclick=()=>{cfg.skill=v;renderSetup();};kw.appendChild(p);});}
+  $('surprise').style.display=cfg.key==='most'?'inline-flex':'none';   // one shuffle for the whole self-regulation refinement
+  // describe-the-defense toggle — only for invite-based defense skills
+  const showDD=cfg.key==='most'&&['imagery','balancing','pendulation'].indexOf(cfg.skill)>=0;
+  $('descdefwrap').style.display=showDD?'block':'none';
+  if(showDD){const dw=$('descdefs');dw.innerHTML='';
+    [[true,'describe it'],[false,'skip it']].forEach(([v,lbl])=>{const p=chip(lbl,v===!!cfg.descDefense);p.onclick=()=>{cfg.descDefense=v;renderSetup();};dw.appendChild(p);});}
+  // silence
+  const sv=$('sils');sv.innerHTML='';
+  SIL.forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.silence);p.onclick=()=>{cfg.silence=v;renderSetup();};sv.appendChild(p);});
+  // length — only meaningful for the final practice
+  const isLast=active===practices.length-1;
+  $('lenwrap').style.display=isLast?'block':'none';
+  if(isLast){const lw=$('lens');lw.innerHTML='';
+    [[false,'a complete practice'],[true,'open-ended']].forEach(([v,lbl])=>{const p=chip(lbl,v===cfg.open);p.onclick=()=>{cfg.open=v;renderSetup();};lw.appendChild(p);});}
+  // summary
+  const o=buildPlan();
+  const time = o.loop ? '<b>The practice continues until you choose to stop.</b>' : '<b>About '+estimate(o)+' min.</b>';
+  const pre = practices.length>1 ? (['','','Two','Three'][practices.length]+' practices, back to back. ') : '';
+  $('summary').innerHTML = pre + time;
+  // size the reveal to its content so the customization grows in / recedes smoothly (deterministic inside the flex column)
+  const rv=$('reveal'); if(rv) rv.style.maxHeight = picked ? rv.scrollHeight+'px' : '0px';
+}
+function chip(label,on){
+  const b=document.createElement('button');b.type='button';
+  b.className='chip'+(on?' on':'');b.setAttribute('aria-pressed',on?'true':'false');
+  b.textContent=label;return b;
+}
+$('adjust').addEventListener('toggle',()=>{
+  renderSetup();
+});
+/* one 'surprise me' shuffles the whole self-regulation refinement — anchor, skill, silence, description (never length) */
+$('surprise').onclick=()=>{
+  cfg.sense=rand(allSenses);cfg.skill=rand(SKILLS.most.map(x=>x[0]));cfg.silence=rand(SIL.map(x=>x[0]));
+  cfg.descDefense=['imagery','balancing','pendulation'].indexOf(cfg.skill)>=0?rand([true,false]):false;
+  renderSetup();
+};
+
+/* ====== player — advance on the audio's REAL end, not a duration table ======
+   This removes the cutoffs (final clip was hard-paused at DUR) and the smudges
+   (a clip whose take ran longer than DUR bled into the silence). DUR is no longer
+   used to advance; we wait for `ended`, then hold the silence gap, then play next. */
+let SEQ=[],PH=[],idx=-1,LOOP=false,LOOPFROM=0;
+let activePack=null;                 // loaded standalone pack, or null in woven mode
+const SEGSTATE={},GAPTIER={},PACKCACHE={};   // standalone: id→ring state / silence tier; fetched-pack cache
+let playing=false,paused=false,finished=false,started=false,closingNow=false,playStart=0;
+let gapTimer=null,inGap=false,gapRemain=0,gapStart=0;
+
+function showScreen(id){if(id==='setup')picked=false;['setup','player'].forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('playing',id==='player');try{if(window.parent!==window)window.parent.postMessage({type:'snb-weaver',event:'screen',screen:id},'*');}catch(e){}}
+
+/* TEST-ONLY: live sequence preview so you can see what's coming. Remove for production. */
+function renderTest(){
+  const tl=$('testlist');if(!tl)return;
+  const plan=practices.map((p,i)=>{
+    let s=({mindfulness:'mindfulness',anchoring:'connect w/ safety',most:'self-regulation'})[p.key]||p.key;
+    if(p.key==='most'&&p.skill)s+=' · '+p.skill;
+    if(!p.mind)s+=' · '+p.sense;
+    if(i===practices.length-1&&p.open)s+=' · open-ended';
+    return (practices.length>1?(i+1)+'. ':'')+s;
+  }).join('    ');
+  let rows='';
+  for(let i=0;i<SEQ.length;i++)
+    rows+='<div class="row" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="b">'+SEQ[i]+'</span><span class="ph">'+(PH[i]||'')+'</span></div>';
+  tl.innerHTML='<div class="hd"><span>test view · sequence</span><span>'+SEQ.length+' clips'+(LOOP?' · loops':'')+'</span></div><div class="plan">'+plan+'</div>'+rows;
+}
+function updateTest(){
+  const tl=$('testlist');if(!tl)return;
+  tl.querySelectorAll('.row').forEach(r=>{const i=+r.dataset.i;r.classList.toggle('cur',i===idx);r.classList.toggle('done',i<idx);});
+  const cur=tl.querySelector('.row.cur');if(cur)cur.scrollIntoView({block:'nearest'});
+}
+
+$('begin').onclick=startPlayer;
+$('goback').onclick=()=>{picked=false;renderSetup();};   // reopen the practice list from the chosen option
+
+/* the player opens straight into the customizer — no zero-decision front door, no planned stack */
+
+/* keep the player as just breath; a tap brings controls back, then they fade again */
+let ctrlTimer=null;
+function revealControls(){
+  const p=$('player');p.classList.add('show-controls');
+  clearTimeout(ctrlTimer);
+  if(finished||paused)return;                                   // at the end — or while paused — leave controls up
+  ctrlTimer=setTimeout(()=>{p.classList.remove('show-controls');},4500);
+}
+$('player').addEventListener('pointerdown',()=>{if(playing||finished)revealControls();});
+/* while the pointer rests on the controls, hold them open; resume the fade once it leaves */
+(()=>{const c=document.querySelector('.controls');if(!c)return;
+  c.addEventListener('pointerenter',()=>{clearTimeout(ctrlTimer);$('player').classList.add('show-controls');});
+  c.addEventListener('pointerleave',()=>{if(playing&&!finished)revealControls();});
+})();
+
+/* safeguard: if this page is hidden (another tab/frame is in front), pause so audio never plays in the background */
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing&&!paused){$('pause').click();}});
+
+/* connection trouble: additive listeners (do not touch the timing engine). If clips keep failing,
+   say so gently instead of leaving the listener in unexplained silence. Clears on the next clip that plays. */
+let _errCount=0,_errTimer=null;
+au.addEventListener('error',()=>{if(!playing)return;_errCount++;clearTimeout(_errTimer);if(_errCount>=2)$('player').classList.add('conn-trouble');_errTimer=setTimeout(()=>{_errCount=0;},6000);});
+au.addEventListener('playing',()=>{_errCount=0;$('player').classList.remove('conn-trouble');});
+
+/* a deliberate rest between stacked meditations: the next one waits for the user to press play.
+   A thin wrapper around advance() pauses at a practice boundary — a 'closing'-phase clip followed by
+   a non-'closing' one. Clip order and within-practice timing are untouched; only a user-gated pause is inserted. */
+let inBreak=false;
+const PNAME={mindfulness:'simple mindfulness',anchoring:'connecting with safety',most:'self-regulation'};
+const _advanceCore=advance;
+advance=function(){
+  if(playing&&!inBreak&&idx>=0&&idx+1<SEQ.length&&PH[idx]==='closing'&&PH[idx+1]&&PH[idx+1]!=='closing'){
+    inBreak=true;try{au.pause();}catch(e){}clearTimeout(gapTimer);inGap=false;
+    // which meditation is coming up next?
+    let seg=0;for(let i=1;i<=idx+1;i++){if(PH[i-1]==='closing'&&PH[i]!=='closing')seg++;}
+    const nm=PNAME[(practices[seg]||{}).key]||'';
+    $('brkline').textContent='practice '+(seg+1)+' of '+practices.length+(nm?' \u00b7 '+nm:'')+' next';
+    clearTimeout(ctrlTimer);$('player').classList.remove('show-controls');$('player').classList.add('breaking');
+    return;
+  }
+  return _advanceCore();
+};
+$('contbtn').onclick=()=>{inBreak=false;$('player').classList.remove('breaking');revealControls();_advanceCore();};
+
+function startPlayer(){
+  if(cfg.standalone)return startStandalone();          // the "more meditations" path bypasses build()
+  playStart=Date.now();                                // embed: clock the session so the host can log its length
+  activePack=null;                                      // woven mode — clear any standalone state
+  const o=buildPlan();SEQ=o.seq;PH=o.phase;LOOP=o.loop;LOOPFROM=o.loopFrom;buildTrackSeq();
+  $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
+  finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
+  showScreen('player');fitRing();renderTest();showSil();
+  started=false;const _st=$('starting');if(_st){_st.textContent='beginning';_st.classList.add('show');}
+  inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested','paused');revealControls();
+  cancelAnimationFrame(rafId);ringLoop();
+  advance();
+}
+function stopAll(){playing=false;paused=false;inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}cancelAnimationFrame(rafId);}
+
+/* ── standalone playback: drive the same engine from a fixed pack (no build/weave) ── */
+function applyPack(pack){
+  activePack=pack;
+  pack.segments.forEach(s=>{MAN[s.id]=[s.file];CAP[s.file]=s.cap||'';SEGSTATE[s.id]=s.state;GAPTIER[s.id]=s.gap;});
+  SEQ=pack.segments.map(s=>s.id);
+  PH=pack.segments.map(s=>s.state==='closing'?'closing':(s.cap||s.state));   // 'closing' phase eases the ring to black at the end
+  LOOP=false;LOOPFROM=0;
+  if(pack.silenceDefault&&(cfg.silence==null))cfg.silence=pack.silenceDefault;
+}
+function startStandalone(){
+  const id=cfg.pack;if(!id)return;                                           // Begin with no session chosen → no-op
+  const begin=pack=>{
+    applyPack(pack);buildTrackSeq();
+    $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
+    finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
+    showScreen('player');fitRing();renderTest();showSil();
+    started=false;const _st=$('starting');if(_st){_st.textContent='beginning';_st.classList.add('show');}
+    inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested','paused');revealControls();
+    cancelAnimationFrame(rafId);ringLoop();
+    advance();
+  };
+  if(PACKCACHE[id])return begin(PACKCACHE[id]);
+  fetch(PACKS_BASE+MEDS[id].file).then(r=>r.json()).then(p=>{PACKCACHE[id]=p;begin(p);})
+   .catch(()=>{$('summary').innerHTML='<b>Could not load that session — check your connection.</b>';});
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CAPTIONS HOOK (not yet wired — needs transcripts from engineering).
+   When transcripts exist, host a `captions.json` next to the clips keyed BY FILENAME,
+   e.g. { "INTRO-01-a.mp3": "Welcome…", "INTRO-01-b.mp3": "Hi…", … }, fetch it once on load
+   (const CAP = await (await fetch(BASE+'captions.json')).json()), then:
+     1. In playCurrent() capture the chosen filename (see note there) and, if captions are on,
+        set a caption element's text to CAP[file] || ''.
+     2. Clear the caption on au.onended / during silence gaps (mirror the old phase-label logic).
+     3. Add a captions on/off toggle in the controls (persist nothing — no localStorage).
+   The player advances on each clip's real `ended`, so a per-clip line is enough for v1;
+   upgrade to WebVTT cues later if timed highlighting is wanted.
+   ───────────────────────────────────────────────────────────────────────────── */
+/* ---- progressive captions: one phrase at a time, paced by where we are in the clip ----
+   No per-word timestamps exist, so we split CAP[file] into phrases and reveal each across
+   the clip's playback, weighting by phrase length (a proxy for how long it takes to say).
+   Purely a renderer over CAP[file]; the sequencing/timing engine is untouched. */
+let CAP_CHUNKS=[],CAP_BOUNDS=[],capShown=-1,capFadeT=null;
+function splitCaption(txt){
+  txt=(txt||'').trim();if(!txt)return [];
+  let parts=(txt.match(/[^.!?]+[.!?]*/g)||[txt]).map(s=>s.trim()).filter(Boolean);
+  const MAX=82,out=[];                                   // ease very long sentences apart at natural breaths
+  parts.forEach(p=>{
+    if(p.length<=MAX){out.push(p);return;}
+    let buf='';
+    p.split(/(?<=[,;:\u2014])\s+/).forEach(seg=>{
+      if(buf&&(buf+' '+seg).trim().length>MAX){out.push(buf.trim());buf=seg;}
+      else buf=buf?buf+' '+seg:seg;
+    });
+    if(buf.trim())out.push(buf.trim());
+  });
+  return out;
+}
+function capStart(txt){
+  CAP_CHUNKS=splitCaption(txt);capShown=-1;
+  let total=CAP_CHUNKS.reduce((n,s)=>n+s.length,0)||1,acc=0;
+  CAP_BOUNDS=CAP_CHUNKS.map(s=>{acc+=s.length;return acc/total;});   // cumulative phrase-length fractions
+  if(CAP_CHUNKS.length){capTick();if(capShown<0)capShow(0);}else capRender('');
+}
+function capTick(){
+  if(!capsOn||paused||inGap||!CAP_CHUNKS.length)return;
+  const dur=(isFinite(au.duration)&&au.duration>0)?au.duration:(DUR[SEQ[idx]]||CAP_CHUNKS.length*3);
+  const prog=Math.min(1,au.currentTime/dur);
+  let i=0;while(i<CAP_BOUNDS.length-1&&prog>=CAP_BOUNDS[i])i++;
+  if(i!==capShown)capShow(i);
+}
+function capShow(i){capShown=i;capRender(CAP_CHUNKS[i]||'');}
+function capClear(){CAP_CHUNKS=[];CAP_BOUNDS=[];capShown=-1;capRender('');}
+function capRender(text){
+  const el=$('captext');if(!el||el.textContent===text)return;
+  el.classList.remove('in');                              // fade/blur the current phrase out
+  clearTimeout(capFadeT);
+  capFadeT=setTimeout(()=>{el.textContent=text;if(text){void el.offsetWidth;el.classList.add('in');}},260);
+}
+au.addEventListener('timeupdate',capTick);
+/* the opening "beginning" cue clears the moment real audio starts */
+au.addEventListener('playing',()=>{if(!started){started=true;const s=$('starting');if(s)s.classList.remove('show');}});
+
+function playCurrent(){
+  const b=SEQ[idx];
+  const file=rand(MAN[b]);          // CAPTIONS: this is the chosen variant filename — caption key is CAP[file]
+  curFile=file;capStart(CAP[file]||'');   // parse caption into phrases, reveal progressively (shown only when captions on)
+  try{au.src=clipUrl(file);au.currentTime=0;const pr=au.play();if(pr&&pr.catch)pr.catch(()=>{armTapToStart();});}catch(e){armTapToStart();}
+  prefetchAhead();
+}
+function advance(){
+  if(!playing)return;
+  idx++;
+  if(idx>=SEQ.length){if(LOOP){idx=LOOPFROM;}else{return finish();}}
+  inGap=false;
+  playCurrent();updateTest();showTimeLeft();
+}
+/* subtle "about N min left" — reads the same DUR/gap estimate the setup screen uses;
+   it never drives playback (display only). Hidden for open-ended and the standalone packs. */
+function remainingMins(){
+  let t=0;
+  for(let i=Math.max(idx,0);i<SEQ.length;i++){ t+=(DUR[SEQ[i]]||4); if(i<SEQ.length-1)t+=gapAfter(SEQ[i]); }
+  return t/60;
+}
+function showTimeLeft(){
+  const e=$('timeleft');if(!e)return;
+  if(!playing||finished||cfg.standalone){e.textContent='';return;}
+  if(LOOP){e.textContent='open-ended';return;}
+  const m=remainingMins();
+  e.textContent = m<1 ? 'less than a minute left' : 'about '+Math.round(m)+' min left';
+}
+au.onended=()=>{                                      // a clip finished playing, in full
+  if(!playing||paused)return;
+  if(!LOOP&&idx>=SEQ.length-1)return finish();         // last clip plays to its natural end — no cut
+  capClear();    // clear caption during the silence gap
+  gapRemain=gapAfter(SEQ[idx])*1000;gapStart=performance.now();inGap=true;
+  clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);
+};
+au.onerror=()=>{                                      // a clip failed to load — skip on, don't freeze
+  $('starting').classList.remove('show');
+  if(!playing||paused)return;
+  if(!LOOP&&idx>=SEQ.length-1)return finish();
+  inGap=true;gapRemain=300;gapStart=performance.now();
+  clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},300);
+};
+function finish(){playing=false;finished=true;finishAt=performance.now();inGap=false;clearTimeout(gapTimer);try{au.pause();}catch(e){}
+  capClear();$('starting').classList.remove('show');
+  $('pause').style.display='none';const tl=$('timeleft');if(tl)tl.textContent='';
+  clearTimeout(ctrlTimer);$('player').classList.add('finished');$('player').classList.remove('conn-trouble');
+  postToHost('complete');   // embed: tell the host the session reached its natural end
+}
+$('pause').onclick=()=>{
+  if(!playing)return;
+  if(paused){ // resume
+    paused=false;
+    if(inGap){gapStart=performance.now();clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);}
+    else{try{au.play();}catch(e){}}
+    $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');
+    $('player').classList.remove('paused');revealControls();
+  }else{ // pause
+    paused=true;
+    if(inGap){clearTimeout(gapTimer);gapRemain=Math.max(0,gapRemain-(performance.now()-gapStart));}
+    else{try{au.pause();}catch(e){}}
+    $('pause').classList.add('is-paused');$('pause').setAttribute('aria-label','Resume');
+    $('player').classList.add('paused','show-controls');clearTimeout(ctrlTimer);$('starting').classList.remove('show');
+  }
+};
+/* live silence control — adjusts the current practice's gap length on the fly */
+const SILSTEPS=[2,4,6,8,10,12,16];
+const nearestSil=v=>SILSTEPS.reduce((b,s)=>Math.abs(s-v)<Math.abs(b-v)?s:b,SILSTEPS[0]);
+function showSil(){const e=$('silnow');if(e)e.textContent=cfg.silence+'s';}
+function stepSil(d){let i=SILSTEPS.indexOf(nearestSil(cfg.silence));i=Math.max(0,Math.min(SILSTEPS.length-1,i+d));cfg.silence=SILSTEPS[i];showSil();}
+$('lesssil').onclick=()=>stepSil(-1);
+$('moresil').onclick=()=>stepSil(1);
+$('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capStart(CAP[curFile]||'');}else{capClear();}};
+
+$('stopbtn').onclick=()=>{stopAll();finished=false;postToHost('exit');showScreen('setup');};   // immediate exit, no close
+$('againbtn').onclick=()=>{startPlayer();};                                  // replay the same session from the top
+$('overbtn').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
+$('restbtn').onclick=()=>{$('player').classList.add('rested');};               // settle into a quiet close
+$('restagain').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
+$('endbtn').onclick=()=>{
+  if(finished){stopAll();showScreen('setup');return;}
+  closingNow=true;   // ease-out: the circle returns to black, confirming the close has begun
+  clearTimeout(gapTimer);inGap=false;playing=true;paused=false;LOOP=false;
+  $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');
+  $('player').classList.remove('paused');
+  // is there another meditation queued after this point? (a practice boundary further along)
+  let nextStart=-1;for(let i=idx+1;i<PH.length;i++){if(PH[i-1]==='closing'&&PH[i]!=='closing'){nextStart=i;break;}}
+  const closes=['CLOSE-01','CLOSE-02','CLOSE-03','CLOSE-04','CLOSE-05'].filter(has);
+  const played=SEQ.slice(0,Math.max(idx+1,0));
+  const playedPH=PH.slice(0,Math.max(idx+1,0));
+  if(nextStart>0){
+    // gently close THIS meditation, then break into the next one
+    SEQ=played.concat(closes,SEQ.slice(nextStart));
+    PH=playedPH.concat(closes.map(()=>'closing'),PH.slice(nextStart));
+  }else{
+    // last (or only) meditation: close, sign off, then finish
+    const tail=closes.concat(['OUTRO'].filter(has));
+    SEQ=played.concat(tail);
+    PH=playedPH.concat(tail.map(()=>'closing'));
+  }
+  buildTrackSeq();
+  idx=played.length-1;renderTest();
+  try{au.pause();}catch(e){}
+  advance();
+};
+
+/* ====== focal point — whole breathing circle, two-state colour, migrating ring, reduced-motion aware ======
+   The one bit of "decoration" in the app, and intentionally so: it is the practice's living focal point.
+   A single whole circle breathes on a slow cycle. Its colour is BLUE while the voice is in mindfulness or
+   safety and shifts to ORANGE when it turns toward the defense; the centre dot shifts with it. A faint
+   second ring sits OUTSIDE the circle in mindfulness, vanishes as you settle into safety, and reappears
+   INSIDE the circle at the defense — so the ring travels inward as the work deepens. No glow. */
+const cv=$('ring'),g=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let rafId=null,finishAt=0;
+const RING_BLUE=[88,145,197], RING_ORANGE=[210,154,74], RING_INK=[26,31,42];
+/* classify the current clip into one of three moments by its id (works the same in any practice & when stacked) */
+function clipState(b){
+  if(!b)return 'mind';
+  if(activePack&&SEGSTATE[b])return SEGSTATE[b];                                  // standalone: state declared per segment
+  if(/^(HOLD-WATCH|PEND-HOLD)/.test(b))return 'both';                                                            // holding both at once — blue outside, orange inside
+  if(/^(INVITE|IMG-|OBST|DESC-DEFENSE|NUMB-OK|PEND-DEFENSE|PEND-TO-DEFENSE)/.test(b))return 'defense';  // the harder edge
+  if(/^(CLOSE-|OUTRO)/.test(b))return 'closing';                                                                 // easing out — the circle returns to black
+  if(/^(INTRO-01|MIND-0[1-8])$/.test(b))return 'mind';                                                            // gentle noticing prompts
+  return 'safety';                                                                                                 // anchoring / resting in safety
+}
+/* 'both' = holding safety and defense at once: ink centre + ink breathing circle, with the
+   blue (safety) ring OUTSIDE and the orange (defense) ring INSIDE, both present. outerCol/innerCol
+   default to col for every other state, so the single-colour states are unchanged. */
+const RING_STATE={
+  mind:{col:RING_INK,outer:1,inner:0},
+  safety:{col:RING_BLUE,outer:0,inner:0},
+  defense:{col:RING_ORANGE,outer:0,inner:1},
+  both:{col:RING_INK,outer:1,inner:1,outerCol:RING_BLUE,innerCol:RING_ORANGE},
+  closing:{col:RING_INK,outer:0,inner:0}};
+let _rc=RING_INK.slice(), _roc=RING_INK.slice(), _ric=RING_INK.slice(), _ro=1, _ri=0, _lastState='mind', _breath=0.5, _breath2=0.5, _msz=1;   // eased main / outer-ring / inner-ring colours + outer/inner opacity; held breath values; _msz = circle size eased as the menu comes/goes
+function buildTrackSeq(){}                                     // (legacy no-op — colour now follows each clip's state, computed live)
+function fitRing(){const dpr=devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;g.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',()=>{if(!$('player').classList.contains('hidden'))fitRing();});
+function ringLoop(){
+  rafId=requestAnimationFrame(ringLoop);
+  const W=cv.clientWidth,H=cv.clientHeight,cx=W/2,cy=H/2;g.clearRect(0,0,W,H);
+  // ease the circle's size as the menu (controls) comes and goes — smaller when the menu is up,
+  // full size when it's away. Done here, in the canvas, so it blends with the breathing (no jerk).
+  const wantMsz = $('player').classList.contains('show-controls') ? 0.7 : 1;
+  _msz += (wantMsz-_msz)*0.06;
+  const unit=Math.min(W,H)*_msz;
+  const t=performance.now()/1000;
+  const moving=playing&&!paused&&!reduce;
+  if(moving){_breath=Math.sin(t*0.55)*0.5+0.5;_breath2=Math.sin(t*0.41+0.7)*0.5+0.5;}  // when paused/reduced, hold the last value instead of snapping to a default shape
+  const breath=_breath, breath2=_breath2;
+  // ease toward the current clip's state (a quick, deliberate shift)
+  const s=RING_STATE[finished?_lastState:(closingNow?(_lastState='closing'):(_lastState=clipState(SEQ[idx])))];
+  const soc=s.outerCol||s.col, sic=s.innerCol||s.col;
+  for(let i=0;i<3;i++){_rc[i]+=(s.col[i]-_rc[i])*0.10;_roc[i]+=(soc[i]-_roc[i])*0.10;_ric[i]+=(sic[i]-_ric[i])*0.10;}
+  _ro+=(s.outer-_ro)*0.08; _ri+=(s.inner-_ri)*0.08;
+  // at the end, the ring closes inward and fades, settling into the centre dot
+  let e=0;
+  if(finished){const ct=Math.min(1,(performance.now()-finishAt)/2200);e=1-Math.pow(1-ct,3);}
+  const [r,gr,bl]=_rc.map(Math.round);
+  const rgba=(a)=>'rgba('+r+','+gr+','+bl+','+a+')';
+  const oc=_roc.map(Math.round), ic=_ric.map(Math.round);                       // outer-ring (safety) + inner-ring (defense) colours, eased independently
+  const rgbaO=(a)=>'rgba('+oc[0]+','+oc[1]+','+oc[2]+','+a+')';
+  const rgbaI=(a)=>'rgba('+ic[0]+','+ic[1]+','+ic[2]+','+a+')';
+  g.lineCap='round';
+  const dotR=Math.max(2.5,unit*0.02);
+  // the migrating second ring — faint thread, outside for mindfulness/safety / inside for defense (both at once when holding)
+  if(_ro>0.01){g.strokeStyle=rgbaO(0.5*_ro*(1-e));g.lineWidth=1.5;g.beginPath();g.arc(cx,cy,unit*(0.30+0.13*breath2),0,Math.PI*2);g.stroke();}
+  if(_ri>0.01){g.strokeStyle=rgbaI(0.6*_ri*(1-e));g.lineWidth=1.6;g.beginPath();g.arc(cx,cy,unit*(0.115+0.055*breath2),0,Math.PI*2);g.stroke();}
+  // the whole breathing circle — collapsing into the dot at the very end
+  const breathR=(unit*(0.20+0.12*breath))*(1-e)+dotR*e;
+  g.strokeStyle=rgba(0.9*(1-e));g.lineWidth=2.5;g.beginPath();g.arc(cx,cy,breathR,0,Math.PI*2);g.stroke();
+  // centre dot — shifts colour with the state, a touch deeper for presence
+  g.fillStyle='rgb('+Math.round(r*0.82)+','+Math.round(gr*0.82)+','+Math.round(bl*0.82)+')';
+  g.beginPath();g.arc(cx,cy,dotR,0,Math.PI*2);g.fill();
+}
+
+/* embedded-in-Circle awareness: one-tap jump to the chrome-free standalone app; on the
+   standalone page (iOS Safari, not yet installed) hint how to add it to the home screen. */
+(function(){
+  const STANDALONE='https://justinlmft.github.io/snb-guided-practice/';
+  let embedded=false; try{embedded=window.self!==window.top;}catch(e){embedded=true;}
+  const iOS=/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  const installed=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+  if(embedded)document.body.classList.add('embedded');
+  else if(iOS&&!installed)document.body.classList.add('can-install');
+  const link=$('popoutlink');
+  if(link)link.onclick=()=>{
+    let w=null;try{w=window.open(STANDALONE,'_blank','noopener');}catch(e){}
+    if(!w){try{window.top.location.href=STANDALONE;}catch(e){location.href=STANDALONE;}}
+  };
+  const px=$('popoutx');if(px)px.onclick=()=>{$('popout').style.display='none';};
+  const ix=$('installx');if(ix)ix.onclick=()=>{$('installhint').style.display='none';};
+})();
+
+/* ====== embed handshake ======
+   Lets the Stuck Not Broken host app (index.html) drive this player inside an
+   iframe: preselect a woven practice, hide standalone chrome, auto-start, and
+   report back how the session ended. Mirrors the contract app.js speaks:
+   practice.html?embed=1&autostart=1&practice=<key>&sense=<s>&silence=<n>&skill=<k>
+   -> postMessage({type:'snb-weaver',event:'complete'|'exit',minutes}). */
+function postToHost(event){
+  try{
+    if(window.parent===window)return;
+    const minutes=playStart?Math.max(1,Math.round((Date.now()-playStart)/60000)):null;
+    window.parent.postMessage({type:'snb-weaver',event,minutes},'*');
+  }catch(e){}
+}
+(function initEmbed(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('embed')==='1')document.body.classList.add('embed');
+  // host app deep-link straight to the "More meditations" pack list
+  if(q.get('more')==='1'){practices=[fresh('more')];active=0;picked=true;cfg=practices[active];const _m=q.get('med');if(_m&&MEDS[_m])cfg.pack=_m;if(q.get('autostart')==='1'&&cfg.pack){startPlayer();return;}renderSetup();requestAnimationFrame(renderSetup);return;}
+  const pk=q.get('practice');
+  if(pk&&EXP[pk]&&!EXP[pk].standalone){                 // host only drives the woven practices, never the packs
+    const c=fresh(pk);
+    const sense=q.get('sense'); if(sense&&allSenses.indexOf(sense)>=0)c.sense=sense;
+    const skill=q.get('skill'); if(skill&&SKILLS.most&&SKILLS.most.some(x=>x[0]===skill))c.skill=skill;
+    const sil=parseInt(q.get('silence'),10); if(!isNaN(sil))c.silence=sil;
+    practices=[c];active=0;picked=true;cfg=practices[active];
+  }
+  if(q.get('autostart')==='1'){startPlayer();}else{renderSetup();}
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  /* when a new service worker takes control, reload once so the updated shell shows
+     immediately — no manual reinstall needed for future updates. */
+  let _swReloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!_swReloaded){_swReloaded=true;location.reload();} });
+  addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{ try{reg.update();}catch(e){} }).catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

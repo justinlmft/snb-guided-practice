@@ -1,0 +1,348 @@
+/* Stuck Not Broken — app prototype styles. Brand: bone surface, ink type, Inter,
+   weight 400/500, no bordered cards (except where they read as figures), no
+   gradients on UI, restrained motion. State palette is meaning-bearing only. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bone:#FAF9F5; --bone-deep:#F0EEE7; --hairline:#D8D2C2; --ink:#1A1F2A;
+  --ink-80:#3A3F4A; --muted:#5E5A4E; --link:#0645AD;
+  --sky:#5891C5; --leaf:#5BA070; --amber:#D29A4A;
+  --s-safety:#F4D58D; --s-fight:#E89B9B; --s-shutdown:#A3C0DD;
+  --s-play:#E8A871; --s-still:#9FC498; --s-freeze:#B89AC4; --s-unlit:#D8D2C2;
+  --btn-hover:#2A3040; --ease:cubic-bezier(.2,.6,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bone);color:var(--ink);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;min-height:100svh;
+}
+button{font:inherit;color:inherit}
+
+/* phone shell */
+.phone{
+  position:relative;width:min(390px,calc(100vw - 32px));height:min(844px,calc(100svh - 32px));
+  border-radius:24px;
+  background:var(--bone);overflow:hidden;display:flex;flex-direction:column;
+}
+@media (min-width:480px){ .phone{ border-radius:34px; width:auto; height:min(860px,94svh); aspect-ratio:390/844; max-width:100vw; } }
+/* on a real phone, drop the device-frame margin and go edge-to-edge so the app uses the full screen */
+@media (max-width:479px){ body{align-items:stretch;justify-content:stretch} .phone{ width:100vw; height:100svh; height:100dvh; border-radius:0; } }
+
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.view{min-height:100%;display:flex;flex-direction:column;padding:22px 22px 26px}
+/* reading screens keep a deliberately generous, book-like side margin */
+.view.read{padding-left:30px;padding-right:30px}
+.hidden{display:none !important}
+
+/* type */
+.eyebrow{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)}
+h1,h2,h3{font-weight:500;margin:0;letter-spacing:-.01em;text-wrap:pretty}
+h1{font-size:23px;line-height:1.2}
+h2{font-size:18px;line-height:1.28}
+h3{font-size:15px;line-height:1.3}
+p{margin:0;text-wrap:pretty}
+.muted{color:var(--muted)}
+.lede{font-size:15px;line-height:1.5;color:var(--ink-80)}
+.tag{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;
+  cursor:pointer;background:var(--ink);color:var(--bone);border:1px solid var(--ink);
+  border-radius:10px;padding:13px 22px;font-weight:500;transition:background .2s var(--ease),box-shadow .2s var(--ease)}
+.btn:hover{background:var(--btn-hover)}
+.btn.block{width:100%;padding:15px 20px;font-size:15px;border-radius:12px;min-height:52px}
+.btn.quiet{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.quiet:hover{border-color:var(--ink-80)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.linkbtn{background:none;border:0;color:var(--link);cursor:pointer;text-decoration:underline;
+  text-decoration-color:rgba(6,69,173,.4);text-underline-offset:2px;padding:6px 2px;font:inherit;font-size:14px}
+.linkbtn:hover{text-decoration-color:var(--link)}
+.backbtn{background:none;border:0;cursor:pointer;font:inherit;font-size:14px;color:var(--muted);padding:6px 2px;display:inline-flex;align-items:center;gap:5px;transition:color .15s var(--ease)}
+.backbtn::before{content:'';display:inline-block;width:7px;height:7px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);flex:none}
+.backbtn:hover{color:var(--ink)}
+.backbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+
+/* dividers */
+.hr{height:1px;background:var(--hairline);border:0;margin:22px 0}
+
+/* ---------- auth / paywall ---------- */
+.gate{justify-content:center;gap:0;text-align:left}
+.gate .mark{height:22px;margin-bottom:auto}
+.gate-body{margin:auto 0}
+/* session-end: quiet links, no slab */
+.endlink{display:block;margin:0 auto;background:none;border:0;cursor:pointer;color:var(--muted);font-size:15px;padding:10px 6px}
+.endlink.lead{color:var(--ink);font-weight:500;font-size:18px;margin-bottom:4px}
+.endlink:active{opacity:.55}
+.endlink:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:12.5px;font-weight:500;letter-spacing:.04em;color:var(--muted)}
+.field input{font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--hairline);
+  border-radius:10px;background:#fff;color:var(--ink)}
+.field input:focus{outline:none;border-color:var(--ink)}
+.plan{border:1px solid var(--hairline);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:border-color .2s var(--ease)}
+.plan:hover{border-color:var(--ink-80)}
+.plan.on{border-color:var(--ink);border-width:2px;padding:17px}
+.plan .price{font-size:21px;font-weight:600;letter-spacing:-.02em}
+.plan .price .per{font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
+.plans{display:flex;flex-direction:column;gap:12px;margin:18px 0 22px}
+.fineprint{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.5}
+.autherr{font-size:13.5px;color:#9A3B3B;margin:4px 0 0;line-height:1.45}
+
+/* ---------- header ---------- */
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:max(20px,env(safe-area-inset-top)) 20px 8px;flex:none}
+.appbar .mark{height:18px}
+/* .appbar .who removed — name used contextually in content */
+
+/* ---------- today: progressive stack of three daily wins ---------- */
+/* ---------- today: three cohesive win-cards (same vocabulary as the practice menu) ---------- */
+.today{height:100%;display:flex;flex-direction:column;padding:0;overflow-y:auto}
+.today-cards{margin:auto 0;width:100%;display:flex;flex-direction:column;gap:11px;padding:20px}
+.breath-zone{flex:1;display:flex;flex-direction:column}
+.bottom-cards{flex:none;display:flex;flex-direction:column;gap:16px;padding:8px 20px 22px}
+.wincard{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:transparent;border:1px solid var(--hairline);border-radius:14px;padding:17px 18px;cursor:pointer;color:inherit;transition:border-color .2s var(--ease),box-shadow .2s var(--ease),opacity .45s var(--ease),padding .45s var(--ease)}
+.wincard:active{background:var(--bone-deep)}
+@media(hover:hover){.wincard:hover{border-color:var(--ink-80)}}
+.wincard:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* the breath ring lives free (no card) and fills ~half the screen — the life of the page */
+.breathhero{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;width:100%;flex:1;background:none;border:0;cursor:pointer;color:inherit;text-align:left;padding:clamp(10px,2vh,18px) 20px 0;transition:opacity .6s var(--ease)}
+.bh-stage{flex:1;display:flex;align-items:center;justify-content:center;width:100%;position:relative}
+.bh-phase{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:lowercase;opacity:0;transition:opacity .7s var(--ease);pointer-events:none}
+.bh-phase.show{opacity:1}
+.breathhero:active{opacity:.7}
+.bh-label-row{display:flex;align-items:center;justify-content:flex-start;gap:14px;width:100%;padding:14px 18px 8px}
+.bh-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
+.bh-tick{font-size:11px;color:var(--ink);line-height:1;font-weight:500}
+.bh-tick::after{content:"\2713"}
+.breathhero:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:18px}
+.breathhero .wc-ring{width:clamp(108px,26vh,178px);height:clamp(108px,26vh,178px)}
+.breathhero .wc-ring .t-core{width:7px;height:7px}
+.bh-title{font-size:16px;font-weight:500;color:var(--ink);text-wrap:pretty;margin:0;min-height:2.6em}
+/* completed cards shrink and fade back */
+.wincard.done{opacity:.65;padding:13px 18px}
+.wc-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.wc-title{font-size:16px;font-weight:500;color:var(--ink);line-height:1.25;text-wrap:pretty}
+.wc-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:500;margin-bottom:2px}
+.wc-reason{font-size:12.5px;color:var(--muted);line-height:1.4;margin-top:4px;text-wrap:pretty}
+.wc-sub{font-size:13px;color:var(--muted);line-height:1.3;text-wrap:pretty}
+.wincard.done .wc-title{color:var(--muted);font-weight:400}
+/* right affordance: chevron (to do) → check (done) */
+.wc-aff{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--hairline)}
+.wc-check{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.wc-check::after{content:"\2713";color:var(--ink);font-size:11px;line-height:1;font-weight:500}
+/* the breath card's affordance is a living ring — stays subtly alive, calmer once taken */
+.wc-ring{flex:none;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;opacity:.6;animation:t-breathe 9s var(--ease) infinite;will-change:transform,opacity}
+.wc-ring .t-core{width:5px;height:5px;border-radius:50%;background:var(--ink);opacity:.7}
+.wincard.done .wc-ring{border-color:var(--muted);opacity:.45;animation-duration:13s}
+@keyframes t-breathe{0%,100%{transform:scale(.86);opacity:.5}50%{transform:scale(1.06);opacity:.66}}
+@media (prefers-reduced-motion:reduce){.wc-ring{animation:none;transform:scale(.96)}}
+/* state label (current-tab timeline) */
+.state-name{font-size:13px;font-weight:500;letter-spacing:.04em;text-transform:lowercase;color:var(--ink-80)}
+/* split practice card: recommended + simple option inside one card */
+.wincard.practice-split{flex-direction:column;padding:0;align-items:stretch;gap:0}
+.practice-main{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:transparent;border:0;padding:16px 18px;cursor:pointer;color:inherit;font:inherit}
+.practice-main:active{opacity:.72}
+@media(hover:hover){.practice-main:hover .wc-title{text-decoration:underline}}
+.practice-main:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;border-radius:13px 13px 0 0}
+.practice-simple-opt{background:none;border:0;width:100%;text-align:center;padding:9px 18px;font-size:12.5px;color:var(--muted);cursor:pointer;font:inherit;letter-spacing:.01em}
+.practice-simple-opt:active{opacity:.6}
+.practice-simple-opt:hover{text-decoration:underline;color:var(--ink-80)}
+.practice-simple-opt:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;border-radius:0 0 13px 13px}
+.wincard.done.practice-split .practice-main{padding:13px 18px}
+
+/* recommendation card (reads as a figure, light rule allowed) */
+.reco{border:1px solid var(--hairline);border-radius:14px;padding:20px;margin-top:6px;display:flex;flex-direction:column;gap:12px}
+.reco .why{font-size:15px;line-height:1.55;color:var(--ink-80)}
+.reco .head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.reco h3{font-size:18px}
+.reco .meta{font-size:13.5px;color:var(--muted);margin-top:-4px}
+.reco .adapt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--leaf)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:baseline}
+
+.section-label{margin:26px 0 12px}
+
+/* mini trend strip */
+.trendstrip{display:flex;gap:4px;align-items:flex-end;height:46px}
+.trendstrip .bar{flex:1;border-radius:3px 3px 0 0;min-height:6px;opacity:.9}
+.trend-cap{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* ---------- check-in ---------- */
+.sliders{display:flex;flex-direction:column;gap:16px;margin:8px 0 4px}
+.slider{display:flex;flex-direction:column;gap:8px}
+.slider .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.slider .nm{font-size:14px;font-weight:500}
+.slider .nm .sub{font-weight:400;color:var(--muted);font-size:13px;margin-left:7px}
+.slider .amt{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:lowercase}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px}
+.r-v::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-safety))}
+.r-sym::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-fight))}
+.r-dor::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-shutdown))}
+.r-v::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-safety))}
+.r-sym::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-fight))}
+.r-dor::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-shutdown))}
+.r-freeze::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-freeze))}
+.r-freeze::-moz-range-track{background:linear-gradient(90deg,var(--bone-deep),var(--s-freeze))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--ink);margin-top:-7px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+/* current / checkin figures — full-bleed, breaks out of view padding */
+.timeline-figure{flex:1;display:flex;flex-direction:column;justify-content:center;margin:18px 0 0}
+.checkin-top{flex:1;display:flex;flex-direction:column}
+.checkin-figure{flex:1;display:flex;flex-direction:column;justify-content:center;margin:36px 0 0}
+.note-area{width:100%;font:inherit;font-size:14px;padding:12px 13px;border:1px solid var(--hairline);border-radius:10px;background:#fff;resize:none;min-height:70px;color:var(--ink)}
+.note-area:focus{outline:none;border-color:var(--ink)}
+
+/* ---------- current over time ---------- */
+.timeline-figure{margin:6px 0 2px}
+.playbar{display:flex;align-items:center;gap:14px;margin:14px 0 6px}
+.period-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.period-pill{font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap;background:transparent;color:var(--muted);border:1px solid var(--hairline);border-radius:999px;padding:5px 13px;line-height:1.4;transition:border-color .2s var(--ease),color .2s var(--ease),font-weight .1s}
+.period-pill:hover{border-color:var(--ink-80);color:var(--ink-80)}
+.period-pill.on{border-color:var(--ink);color:var(--ink);font-weight:500}
+.period-pill:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:999px}
+.playbtn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+
+.playbtn svg{width:16px;height:16px;fill:var(--ink)}
+.scrub{flex:1}
+.scrub input{width:100%}
+.scrub input::-webkit-slider-runnable-track{background:var(--hairline)}
+.when{font-size:12.5px;color:var(--muted);min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.river{display:flex;height:34px;border-radius:6px;overflow:hidden;margin-top:6px}
+.river .seg{flex:1;min-width:3px}
+.river-cap{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:7px}
+.statelegend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:18px}
+.statelegend .it{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+
+/* empty states */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;flex:1;color:var(--muted);padding:30px 10px}
+
+/* ---------- practice (weaver) ---------- */
+.weaver-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.weaver-frame{flex:1;width:100%;border:0;min-height:0;background:var(--bone)}
+
+/* ---------- you / account ---------- */
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-bottom:1px solid var(--hairline)}
+.row:last-child{border-bottom:0}
+.row .k{font-size:14px;color:var(--muted)}
+.row .val{font-size:15px;font-weight:500}
+.name-input{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--hairline);padding:2px 0;flex:1;text-align:right;min-width:0}
+.name-input:focus{outline:none;border-bottom-color:var(--ink)}
+.name-input::placeholder{color:var(--hairline)}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .big{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.stat .lbl{font-size:12px;color:var(--muted)}
+.stats{display:flex;gap:22px;margin:16px 0}
+
+/* current tab layout — mirrors check-in top/bottom split */
+.curr-view{justify-content:space-between;padding:22px 0 20px}
+.curr-bottom{padding:0 22px 0}
+.curr-top{flex:1;display:flex;flex-direction:column}
+/* stats collapsible */
+.stats-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:0;cursor:pointer;font:inherit;padding:12px 0;color:inherit}
+.stats-tog-icon{font-size:18px;color:var(--muted);line-height:1;transition:transform .2s var(--ease)}
+.stats-toggle[aria-expanded="true"] .stats-tog-icon{transform:rotate(45deg)}
+.stats-body{display:none}
+.stats-body.open{display:block}
+.stat-row-tap{width:100%;text-align:left;background:none;border:0;cursor:pointer;font:inherit;color:inherit;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--bone-deep)}
+.stat-row-tap:last-child{border-bottom:0}
+.stat-row-tap:active{opacity:.6}
+
+/* ---------- current: stats section ---------- */
+.stat-rows{display:flex;flex-direction:column}
+.stat-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--bone-deep)}
+.stat-row:last-child{border-bottom:0}
+.stat-row-lbl{font-size:13px;color:var(--muted);flex:none;min-width:96px}
+.stat-row-val{font-size:13.5px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:7px;text-align:right;flex-wrap:wrap;justify-content:flex-end}
+.safety-track{display:inline-block;width:48px;height:4px;background:var(--bone-deep);border-radius:2px;overflow:hidden;vertical-align:middle;flex:none}
+.safety-fill{display:block;height:100%;background:var(--s-safety);border-radius:2px}
+.stat-trend{font-size:12px;color:var(--muted);font-weight:400}
+.tabbar{display:flex;flex:none;justify-content:space-evenly;border-top:1px solid var(--hairline);background:var(--bone);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{flex:none;background:none;border:0;cursor:pointer;padding:13px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);transition:color .2s var(--ease);position:relative} .2s var(--ease);min-height:52px;position:relative}
+.tabbar button .lb{font-size:11.5px;letter-spacing:.01em;text-transform:lowercase}
+.tabbar button.on{color:var(--ink);font-weight:500}
+.tabbar button.on::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--ink);border-radius:0 0 2px 2px}
+.tabbar button:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
+/* hidden while a guided session is playing — nothing competes with the breath */
+body.in-practice .tabbar{display:none}
+
+/* fade for screen transitions — transform only, so content is never hidden if
+   the renderer pauses the animation (e.g. a backgrounded tab at frame 0). */
+.reflect-zone{padding:14px 20px 28px}
+.reflect-eyebrow{margin-bottom:10px}
+/* inline from-justin note */
+.from-justin{padding:20px 0 6px;border-top:1px solid var(--hairline)}
+.from-justin-text{font-size:15px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin-bottom:10px}
+.from-justin-more{display:block;padding:4px 2px}
+.refl-aa-fab{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));right:22px;width:44px;height:44px;border-radius:50%;border:0;background:transparent;font:inherit;font-size:14px;font-weight:500;letter-spacing:.03em;color:var(--muted);cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;transition:color .2s var(--ease),opacity .2s var(--ease)}
+.refl-aa-fab:hover{color:var(--ink)}
+.refl-aa-fab:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:50%}
+.refl-aa-fab.hidden{opacity:0;pointer-events:none}
+/* flat settings bar — mirrors player .adj pills */
+.refl-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bone);padding:16px 22px max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .38s var(--ease);z-index:20;opacity:0;pointer-events:none}
+.refl-sheet.open{transform:translateY(0);opacity:1;pointer-events:auto}
+.refl-controlbar{display:flex;align-items:center;gap:12px}
+.refl-adjstack{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.refl-adj{display:flex;align-items:center;gap:2px;height:44px;border:1px solid var(--hairline);border-radius:12px;background:transparent;font:inherit;font-size:13px;letter-spacing:.04em;text-transform:lowercase;color:var(--muted);padding:0 4px 0 12px;transition:border-color .2s var(--ease)}
+.refl-adj-label{color:var(--muted);flex:1}
+.refl-adj-stepper{display:inline-flex;align-items:center;gap:0}
+.refl-step{width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s var(--ease);flex:none}
+.refl-step:hover{color:var(--ink)}
+.refl-step:disabled{opacity:.3;cursor:default}
+.refl-step:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:50%}
+.refl-sval{color:var(--ink-80);font-variant-numeric:tabular-nums;min-width:2.2em;text-align:center;font-size:13px}
+.refl-nav{flex:none;width:72px;align-self:stretch;border:1px solid var(--hairline);border-radius:12px;background:transparent;font:inherit;font-size:12px;letter-spacing:.06em;text-transform:lowercase;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:border-color .2s var(--ease),color .2s var(--ease)}
+.refl-nav-arrow{display:block;width:8px;height:8px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.refl-nav:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:12px}
+
+/* ---------- practice chooser ---------- */
+/* bottom-anchored for thumb reach */
+.p-view{justify-content:space-between;padding-bottom:24px}
+.p-top{padding-top:0}
+.p-bottom{display:flex;flex-direction:column}
+/* option cards: collapse animation */
+.p-opts{display:flex;flex-direction:column;gap:0;margin-bottom:8px}
+.p-opt{max-height:120px;overflow:hidden;margin-bottom:16px;
+  transition:max-height .35s var(--ease),margin .3s var(--ease),opacity .28s var(--ease),padding .28s var(--ease),border-color .2s var(--ease)}
+.p-opts.has-sel .p-opt:not(.p-sel){
+  opacity:0;max-height:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-color:transparent;pointer-events:none}
+.p-opt.p-sel{border-color:var(--ink)}
+.p-opt.p-sel .wc-title{color:var(--ink);font-weight:500}
+/* refinement area */
+@keyframes refineIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.p-refine{display:flex;flex-direction:column;gap:16px;margin-top:4px;animation:refineIn .28s .1s var(--ease) both}
+.p-rgroup{display:flex;flex-direction:column;gap:8px}
+/* eyebrow leading line — gives section labels more visual pull vs. the chip pills below */
+.p-rgroup .eyebrow::before{content:'';display:inline-block;width:16px;height:1px;background:currentColor;vertical-align:middle;margin-right:8px;opacity:.5}
+.p-chips{display:flex;flex-wrap:wrap;gap:8px}
+.p-chip{font:inherit;font-size:14px;cursor:pointer;text-transform:capitalize;white-space:nowrap;background:transparent;color:var(--muted);border:1px solid var(--hairline);border-radius:999px;padding:7px 15px;transition:border-color .2s var(--ease),color .2s var(--ease)}
+.p-chip:hover{border-color:var(--ink-80);color:var(--ink-80)}
+.p-chip.on{border-color:var(--ink);color:var(--ink);font-weight:500}
+.p-chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* more meditations: plain ruled list */
+.p-med-list{display:flex;flex-direction:column;margin-top:8px;margin-bottom:4px;border-top:1px solid var(--hairline)}
+.p-med-row{display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:0;border-bottom:1px solid var(--hairline);padding:13px 0;cursor:pointer;color:inherit;font:inherit;width:100%;transition:opacity .2s var(--ease)}
+.p-med-row:active{opacity:.6}
+@media(hover:hover){.p-med-row:hover .p-med-title{text-decoration:underline}}
+.p-med-row.on .p-med-title{font-weight:500;color:var(--ink)}
+.p-med-row.on .p-med-meta{color:var(--ink-80)}
+.p-med-title{font-size:15px;font-weight:400;color:var(--ink);line-height:1.3}
+.p-med-meta{font-size:12.5px;color:var(--muted)}
+.p-med-row:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* surprise me — thin pill button */
+.p-surprise{font:inherit;font-size:13px;color:var(--ink-80);background:none;border:1px solid var(--hairline);border-radius:999px;cursor:pointer;padding:8px 18px;text-align:center;align-self:flex-start;transition:border-color .2s var(--ease),color .2s var(--ease)}
+.p-surprise:hover{border-color:var(--ink-80);color:var(--ink)}
+.p-surprise:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:999px}
+/* check-in screen layout — figure breathes, controls hug the bottom */
+.checkin-view{justify-content:space-between;padding:22px 0 28px}
+.checkin-bottom{padding:0 22px}
+.btn[disabled]{opacity:.45;cursor:default;pointer-events:none}
+/* back affordance in practice chooser */
+.p-back{margin-bottom:6px}
+
+/* toast confirmation */
+.toast{position:absolute;bottom:max(80px,calc(env(safe-area-inset-bottom)+72px));left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--bone);font-size:14px;font-weight:500;padding:10px 20px;border-radius:10px;opacity:0;transition:opacity .28s var(--ease),transform .28s var(--ease);pointer-events:none;white-space:nowrap;z-index:100}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.view{animation:viewIn .35s var(--ease)}
+@media (prefers-reduced-motion:reduce){.view{animation:none}}
