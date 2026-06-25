@@ -754,9 +754,11 @@ function prefetchAhead(){
 let _tapArmed=false;
 function armTapToStart(){
   if(_tapArmed)return;_tapArmed=true;
+  const _s=$('starting'); if(_s){_s.textContent='tap to start';_s.classList.add('show');}   // make the needed tap explicit, not a silent "preparing"
   document.addEventListener('pointerdown',function _t(){
     document.removeEventListener('pointerdown',_t);
     _tapArmed=false;
+    const _s2=$('starting'); if(_s2)_s2.textContent='preparing your audio';
     if(playing&&!paused){try{au.play();}catch(e){}}
   },{once:true});
 }
@@ -1084,7 +1086,7 @@ function startPlayer(){
   $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
   finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
   showScreen('player');fitRing();renderTest();showSil();
-  started=false;const _st=$('starting');if(_st){_st.textContent='beginning';_st.classList.add('show');}
+  started=false;const _st=$('starting');if(_st){_st.textContent='preparing your audio';_st.classList.add('show');}
   inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested','paused');revealControls();
   cancelAnimationFrame(rafId);ringLoop();
   advance();
@@ -1107,7 +1109,7 @@ function startStandalone(){
     $('pause').classList.remove('is-paused');$('pause').setAttribute('aria-label','Pause');$('pause').style.display='';
     finished=false;paused=false;playing=true;inGap=false;idx=-1;closingNow=false;
     showScreen('player');fitRing();renderTest();showSil();
-    started=false;const _st=$('starting');if(_st){_st.textContent='beginning';_st.classList.add('show');}
+    started=false;const _st=$('starting');if(_st){_st.textContent='preparing your audio';_st.classList.add('show');}
     inBreak=false;$('player').classList.remove('finished','conn-trouble','breaking','rested','paused');revealControls();
     cancelAnimationFrame(rafId);ringLoop();
     advance();
