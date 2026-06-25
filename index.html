@@ -1073,7 +1073,14 @@ function startStandalone(){
     cancelAnimationFrame(rafId);ringLoop();
     advance();
   };
-  if(PACKCACHE[id])return begin(PACKCACHE[id]);
+  if(PACKCACHE[id])return begin(PACKCACHE[id]);   // pre-fetched → runs synchronously inside the tap
+  /* Not cached yet: the pack still has to load over the network, which means the real play()
+     happens in a .then() AFTER this user gesture ends. In iframes (e.g. the embedded preview)
+     and on iOS, autoplay policy then blocks it and the session silently never starts. So we
+     "unlock" the audio element synchronously, inside the gesture, before awaiting the fetch.
+     (The weaver path plays synchronously and was never affected — which is why only the
+     standalone "More meditations" sessions failed to play.) */
+  try{const _u=au.play();if(_u&&_u.then)_u.then(()=>{try{au.pause();}catch(e){}}).catch(()=>{});}catch(e){}
   fetch(PACKS_BASE+MEDS[id].file).then(r=>r.json()).then(p=>{PACKCACHE[id]=p;begin(p);})
    .catch(()=>{$('summary').innerHTML='<b>Could not load that session — check your connection.</b>';});
 }
@@ -1312,6 +1319,9 @@ function ringLoop(){
   const px=$('popoutx');if(px)px.onclick=()=>{$('popout').style.display='none';};
   const ix=$('installx');if(ix)ix.onclick=()=>{$('installhint').style.display='none';};
 })();
+/* Warm the standalone packs on load so pressing Begin runs synchronously inside the tap
+   (a play() deferred behind a fetch is blocked by autoplay policy in iframes / on iOS). */
+try{MEDS_ORDER.forEach(id=>{if(!PACKCACHE[id])fetch(PACKS_BASE+MEDS[id].file).then(r=>r.ok?r.json():null).then(p=>{if(p)PACKCACHE[id]=p;}).catch(()=>{});});}catch(e){}
 renderSetup();
 </script>
 <script>
