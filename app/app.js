@@ -459,59 +459,62 @@
   function screenReflectionDeep(){
     const note = FromJustin.today();
     const last = Store.lastCheckin();
-    const dom  = last ? last.dom : null;
     const cs   = Store.checkins();
     const paced = groupByDay(cs);
-    const tr   = cs.length >= 2 ? Store.trend() : null;
-    const dir  = tr ? tr.dir : null;
-    const dysregulated = ['fightflight','shutdown','freeze'].includes(dom);
 
-    const streak = (()=>{
-      if(!dom || paced.length < 2) return 0;
-      let n=0;
-      for(let i=paced.length-1;i>=0;i--){
-        if(paced[i].dom===dom) n++; else break;
-      }
-      return n;
-    })();
+    // signals over the last 7 days (fall back to all check-ins)
+    const wk = cs.filter(c => c.t >= Date.now() - 7*864e5);
+    const base = wk.length ? wk : cs;
+    let dom=null, share=null, dir=null, variance=null, streak=0;
+    if(base.length){
+      const freq={}; base.forEach(c=>{ freq[c.dom]=(freq[c.dom]||0)+1; });
+      let bestN=-1; for(const k in freq){ if(freq[k]>bestN){ bestN=freq[k]; dom=k; } }
+      share = Math.round((freq[dom]||0)/base.length*100);
+    }
+    if(!dom && last) dom = last.dom;
+    if(cs.length>=2) dir = Store.trend().dir;
+    if(base.length>=3){
+      const avgV=base.reduce((s,c)=>s+c.v,0)/base.length;
+      const sd=Math.sqrt(base.reduce((s,c)=>s+(c.v-avgV)*(c.v-avgV),0)/base.length);
+      variance = sd>0.18 ? 'shifts' : 'consistent';
+    }
+    if(dom && paced.length>=2){ for(let i=paced.length-1;i>=0;i--){ if(paced[i].dom===dom) streak++; else break; } }
 
-    const body     = dom ? FromJustin.deepBody(dom)             : '';
-    const change   = dir ? FromJustin.changeOverlay(dir)        : '';
-    const stuck    = streak>=3 ? FromJustin.stuckOverlay(streak) : '';
-    const wfKind   = dir==='rising' && !dysregulated ? 'improving' : null;
-    const watchFor = wfKind ? FromJustin.watchFor(wfKind)        : '';
-    const invite   = dom ? FromJustin.deepInvite(dom)            : '';
-    const stateLabel = dom ? FromJustin.label(dom)               : '';
+    const issue = (dom && FromJustin.blog) ? FromJustin.blog({ dom:dom, share:share, dir:dir, variance:variance, count:base.length, streak:streak }) : null;
 
-    const recentBars = paced.length >= 2 ? (()=>{
-      const recent = paced.slice(-10);
-      return `<div class="trendstrip" style="margin:14px 0 6px">${recent.map(c=>{
-        const h=16+Math.round(c.v*30);
-        return `<div class="bar" style="height:${h}px;background:${STATE_COLOR(c.dom)}"></div>`;
-      }).join('')}</div>`;
-    })() : '';
+    const recentBars = paced.length >= 2 ? `<div class="trendstrip" style="margin:6px 0 2px">${paced.slice(-10).map(c=>{ const h=16+Math.round(c.v*30); return `<div class="bar" style="height:${h}px;background:${STATE_COLOR(c.dom)}"></div>`; }).join('')}</div>` : '';
+    const P = (t)=> t ? `<p style="font-size:15px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0 0 12px">${escapeHtml(t)}</p>` : '';
+    const lead = note ? `<p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0 0 4px">${escapeHtml(note.text)}</p>` : '';
 
-    const P=(t,muted)=>t?`<p style="font-size:15px;line-height:1.7;color:var(--${muted?'muted':'ink-80'});text-wrap:pretty;margin:0">${escapeHtml(t)}</p>`:'';
+    let bodyHTML;
+    if(issue){
+      const bulletsHTML = issue.bullets.map(b=>{
+        const jump = b.jumpId ? ` <a href="#${b.jumpId}" style="color:var(--link);text-decoration:none;white-space:nowrap;font-size:12.5px">${escapeHtml(b.jumpLabel)} ↓</a>` : '';
+        return `<li style="margin:0 0 8px;line-height:1.55;color:var(--ink-80)">${escapeHtml(b.text)}${jump}</li>`;
+      }).join('');
+      const sectionsHTML = issue.sections.map(sec=>`
+        <section style="margin-top:22px">
+          <h3 id="${sec.id}" class="eyebrow" style="margin:0 0 10px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>
+          ${sec.paras.map(P).join('')}
+        </section>`).join('');
+      bodyHTML = `
+        ${lead}
+        ${recentBars}
+        <div style="margin-top:14px">
+          <p class="eyebrow" style="margin:0 0 10px">the short version</p>
+          <ul style="margin:0;padding-left:18px">${bulletsHTML}</ul>
+        </div>
+        ${sectionsHTML}`;
+    } else {
+      bodyHTML = `${lead}${P('Check in a few times and a more personal read will show up here.')}`;
+    }
 
     setHTML(`
       <header class="appbar"><button class="backbtn" id="deep-back">today</button></header>
       <div class="scroll">
-        <div class="view read" style="gap:20px">
-          ${note?`<div>
-            <p class="eyebrow" style="margin-bottom:10px">for you</p>
-            <p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0">${escapeHtml(note.text)}</p>
-          </div>`:''}
-          ${(recentBars||change)?`<div>${recentBars}${P(change,true)}</div>`:''}
-          ${stateLabel?`<p class="eyebrow" style="margin-bottom:0">${escapeHtml(stateLabel)}</p>`:''}
-          ${body?`<div style="display:flex;flex-direction:column;gap:16px">
-            ${P(body)}
-            ${stuck?P(stuck,true):''}
-            ${watchFor?P(watchFor,true):''}
-          </div>`:(!dom?P('Check in a few times and a more personal reflection will appear here.',true):'')}
-          ${invite?`<div style="border-top:1px solid var(--hairline);padding-top:18px">
-            <p class="eyebrow" style="margin-bottom:8px">one small thing</p>
-            ${P(invite)}
-          </div>`:''}
+        <div class="view read" style="gap:0">
+          <p class="eyebrow" style="margin-bottom:10px">for you</p>
+          ${bodyHTML}
         </div>
       </div>`);
     $('#deep-back').onclick = ()=>app('today');
