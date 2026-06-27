@@ -13,10 +13,9 @@
   // Loads ~4 months of sample check-ins for review/demo only. Never persisted,
   // never touches a real account's data. Enable: localStorage.snb_demo='1' or #demo.
   (function demoData(){
-    // Review build: demo data is ON by default so the app always shows populated.
-    // Use real check-ins instead with localStorage.snb_demo='0' (or #nodemo in the URL).
-    // DISABLE (flip default to false) before any production deploy.
-    let on=true; try{ if(localStorage.getItem('snb_demo')==='0' || /nodemo/.test(location.hash)) on=false; }catch(e){}
+    // Production: demo data is OFF by default. Opt in for review only via
+    // localStorage.snb_demo='1' or #demo in the URL. Never persisted.
+    let on=false; try{ if(localStorage.getItem('snb_demo')==='1' || /(^|[#&])demo\b/.test(location.hash)) on=true; }catch(e){}
     if(!on || !window.PVCurrent) return;
     const cs=[], ss=[];
     for(let d=130; d>=0; d--){
@@ -34,7 +33,7 @@
     cs.sort((a,b)=>a.t-b.t);
     Store.checkins=()=>cs.slice();
     Store.sessions=()=>ss.slice();
-    try{ if(!Store.getName()) Store.setName('Sam'); }catch(e){}
+    try{ const _rn=Store.getName(); Store.getName=()=>_rn||'Sam'; }catch(e){}   // demo name in-memory only; never persisted
   })();
 
   // ── audio autoplay unlock ─────────────────────────────────────────
