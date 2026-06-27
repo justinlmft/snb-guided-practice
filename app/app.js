@@ -446,8 +446,8 @@
       ${checkinHTML}
       ${practiceHTML}
       ${r ? (r.state !== 'neutral'
-        ? `<button class="wincard from-card" id="open-refl"><span class="wc-text"><span class="wc-kicker">from justin</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span><span class="wc-go">${CHEV}</span></button>`
-        : `<div class="wincard from-card from-card-static"><span class="wc-text"><span class="wc-kicker">from justin</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span></div>`
+        ? `<button class="wincard from-card" id="open-refl"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span><span class="wc-go">${CHEV}</span></button>`
+        : `<div class="wincard from-card from-card-static"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span></div>`
       ) : ''}
     </div>`;
     const breathBtn  = c.querySelector('[data-win="breath"]');  if(breathBtn)  breathBtn.onclick  = winAction('breath', reco);
@@ -498,7 +498,7 @@
       <div class="scroll">
         <div class="view read" style="gap:20px">
           ${note?`<div>
-            <p class="eyebrow" style="margin-bottom:10px">from Justin</p>
+            <p class="eyebrow" style="margin-bottom:10px">for you</p>
             <p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0">${escapeHtml(note.text)}</p>
           </div>`:''}
           ${(recentBars||change)?`<div>${recentBars}${P(change,true)}</div>`:''}
@@ -546,7 +546,7 @@
     return `
       <p class="eyebrow section-label">lately</p>
       <div class="trendstrip">${bars}</div>
-      <p class="trend-cap">${dirTxt} <button class="linkbtn" id="seeall" style="font-size:13px">see your current over time →</button></p>`;
+      <p class="trend-cap">${dirTxt} <button class="linkbtn" id="seeall" style="font-size:13px">see your states over time →</button></p>`;
   }
 
 // ---------------------------------------------------------------- CHECK-IN
@@ -925,12 +925,12 @@
     render();
   }
   const STATE_DETAIL = {
-    safety:      { headline:'safety',        color:'#F4D58D', about:'Ventral vagal. Your system feels open, connected, and grounded. Not the absence of difficulty — the presence of enough safety to meet it.', whenDrops: null },
-    fightflight: { headline:'fight or flight',color:'#E89B9B', about:'Sympathetic activation. Mobilized energy moving through your body. This is not a malfunction — it is ancient protection doing its job.', whenDrops:'Movement helps discharge the activation. A walk, deliberate breathing, slow shaking. The energy needs somewhere to go.', practice:{practiceKey:'anchoring',sense:'movement',silence:8} },
-    shutdown:    { headline:'shutdown',       color:'#A3C0DD', about:'Dorsal vagal. Your system has pulled the oldest brake — heavy, flat, far away. It kept you safe when nothing else could.', whenDrops:'Warmth and slow, predictable contact help. A warm drink, a blanket, a familiar voice. Co-regulation — being near someone safe — is often the most direct path back.', practice:{practiceKey:'mindfulness',sense:'touch',silence:8} },
-    play:        { headline:'play',           color:'#E8A871', about:'Ventral and sympathetic together. There is safety here with charge moving through it. Your system can be activated and regulated at the same time.', whenDrops:'If the ventral drops and the sympathetic stays, watch for the shift toward fight or flight. Anchoring through your senses helps keep the safety online.', practice:{practiceKey:'anchoring',sense:'touch',silence:8} },
-    stillness:   { headline:'stillness',      color:'#9FC498', about:'Ventral and dorsal together — resting in safety. Your system is calm enough to be still. This is a deeply regulated state.', whenDrops:'If the ventral drops and the dorsal stays, stillness can slide toward shutdown. Slow movement or gentle sensory contact helps hold the ventral online.', practice:{practiceKey:'anchoring',sense:'sound',silence:8} },
-    freeze:      { headline:'freeze',         color:'#B89AC4', about:'Sympathetic and dorsal together. A lot of activation with the brakes on at the same time. This is one of the most uncomfortable states, and one of the most common.', whenDrops:'You cannot think your way out of freeze. The body needs to complete something. Pendulation — moving attention gently between discomfort and ease — is one of the most reliable tools.', practice:{practiceKey:'most',skill:'pendulation',sense:'touch',silence:8} },
+    safety:      { headline:'safety',        color:'#F4D58D', about:"Safety is your nervous system open and online, not braced for anything. It spends its energy on rest, connection, and repair instead of defense. Safety isn't the absence of hard emotions. It's having enough capacity inside to meet them.", whenDrops: null },
+    fightflight: { headline:'fight or flight',color:'#E89B9B', about:"Fight or flight is sympathetic energy without enough safety yet. Your body picked up danger and mobilized to handle it. Flight first, the urge to escape, anxiety. Then fight, the urge to push back, anger. It's protection, not a flaw, even when it spills onto people you care about.", whenDrops:"Move a little on purpose, a short walk, shake out your hands, push your palms against a wall. Give the energy somewhere to go, then name the feeling under it. A long, slow exhale helps too.", practice:{practiceKey:'anchoring',sense:'movement',silence:8} },
+    shutdown:    { headline:'shutdown',       color:'#A3C0DD', about:"Shutdown is the oldest brake your body has, heavy, flat, far away. Your system powered down to protect you when things got to be too much. A lot of what gets called depression is the body in shutdown. It isn't weakness, and it isn't who you are.", whenDrops:"Very small, very low demand. One sip of water, a dimmer light, one thing you can see or hear right now. You don't force your way out of shutdown. You add a little safety, and the body lets some energy come back.", practice:{practiceKey:'mindfulness',sense:'touch',silence:8} },
+    play:        { headline:'play',           color:'#E8A871', about:"Play is safety and energy at the same time, the social, mobilized kind shared with people you trust. On your own, the same drive shows up as motivation. It's the same fuel as fight or flight, with safety mixed in, so it runs as creativity and drive instead of defense.", whenDrops:"If the safety thins and the energy stays, watch for the tip toward fight or flight. Keep a little safety in the mix, slow down enough to feel it, and aim the energy at one thing that matters.", practice:{practiceKey:'anchoring',sense:'touch',silence:8} },
+    stillness:   { headline:'stillness',      color:'#9FC498', about:"Stillness is the body slowed and quiet, without fear. The same powering-down as shutdown, but with safety mixed in, so it restores instead of collapses. On your own it's stillness; shared with someone safe, it's intimacy. A deeply regulated state.", whenDrops:"If the quiet starts to feel flat or heavy or scared instead of restful, that's the cue to add a small bit of safety, not to force yourself up and out.", practice:{practiceKey:'anchoring',sense:'sound',silence:8} },
+    freeze:      { headline:'freeze',         color:'#B89AC4', about:"Freeze is a mixed state, fight-or-flight energy held down by shutdown. Gas and brake at once. It isn't a deeper shutdown, it's both pedals down, which is why it can feel panicked and paralyzed at the same time. A braced, protective state, not nothing.", whenDrops:"The smallest movement, plus a cue of safety. Let your eyes go where they want, then wiggle your toes or roll your wrists, slow. Don't force it, that adds gas to a slammed brake. Get smaller and safer.", practice:{practiceKey:'most',skill:'pendulation',sense:'touch',silence:8} },
   };
 
   function screenStateDetail(key){

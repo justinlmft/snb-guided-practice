@@ -56,7 +56,7 @@
         {
           "id": "safe-rem-2",
           "type": "reminder",
-          "text": "Safety isn't the absence of hard things. It's having enough capacity inside to meet them."
+          "text": "Safety isn't the absence of hard emotions. It's having enough capacity inside to meet them."
         },
         {
           "id": "safe-ref-1",
@@ -66,7 +66,7 @@
         {
           "id": "safe-ref-2",
           "type": "reflection",
-          "text": "A lot of people skip right over these good moments, already bracing for the next hard one. You're allowed to let this one be and marinate in it for a bit. No rush."
+          "text": "It's easy to skip right over these good moments, already bracing for the next hard one. You're allowed to let this one be and sit with it for a bit. No rush."
         },
         {
           "id": "safe-ref-3",
@@ -158,7 +158,7 @@
         {
           "id": "regimm-ref-2",
           "type": "reflection",
-          "text": "Being quiet and close to someone safe, or quiet and alone, can both feel like coming home. A lot of people don't get much of either. Notice it while it's here."
+          "text": "Being quiet and close to someone safe, or quiet and alone, can both feel like coming home. Notice it while it's here."
         },
         {
           "id": "regimm-jp-1",
@@ -204,7 +204,7 @@
         {
           "id": "dysmob-ref-2",
           "type": "reflection",
-          "text": "Being wired and worn out at the same time is something many people know well. You're not alone in that."
+          "text": "Being wired and worn out at the same time is one of the harder places to be."
         },
         {
           "id": "dysmob-jp-1",
@@ -240,7 +240,7 @@
         {
           "id": "dysimm-ref-1",
           "type": "reflection",
-          "text": "Shutdown can feel like the lights dimming. Heavy, far away, hard to care. That's not you failing; that's an older part of you trying to get you through."
+          "text": "Shutdown can feel like the lights dimming. Heavy, far away, hard to care. That's not you failing. It's an old protective response, the kind that kicks in to get you through."
         },
         {
           "id": "dysimm-ref-2",
@@ -250,7 +250,7 @@
         {
           "id": "dysimm-ref-3",
           "type": "reflection",
-          "text": "Sometimes the day feels like it's happening behind glass. A lot of people know that feeling, and it does pass, even when it doesn't seem like it will."
+          "text": "Sometimes it feels like you're living behind glass. It does pass, even when it doesn't seem like it will."
         },
         {
           "id": "dysimm-jp-1",
