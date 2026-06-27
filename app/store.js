@@ -167,6 +167,48 @@
     return { v, sym, dor, dom, dir, n:cs.length };
   }
 
+  // ---- transitions: the state-change the person tends to make most ----
+  // Returns the most common ordered pair of consecutive, DIFFERENT dominant states
+  // across their check-in history, or null until there's enough of a pattern to claim.
+  function transitions(){
+    const cs = data.checkins;
+    if(cs.length < 6) return null;                              // not enough history to claim a shape
+    const pairs = {}; let total = 0;
+    for(let i=1;i<cs.length;i++){
+      const a=cs[i-1].dom, b=cs[i].dom;
+      if(!a||!b||a===b||a==='neutral'||b==='neutral') continue; // only real state changes count
+      const k=a+'>'+b; pairs[k]=(pairs[k]||0)+1; total++;
+    }
+    if(total < 3) return null;
+    let bestK=null, bestN=0;
+    for(const k in pairs){ if(pairs[k]>bestN){ bestN=pairs[k]; bestK=k; } }
+    if(!bestK || bestN < 2) return null;                        // the top pattern has to repeat
+    const i=bestK.indexOf('>');
+    return { a:bestK.slice(0,i), b:bestK.slice(i+1), count:bestN, total };
+  }
+
+  // ---- time-of-day: a daypart that skews toward one state vs the overall baseline ----
+  // Returns {seg,dom,n} for the daypart most over-represented by a single state, or null.
+  function timeOfDay(){
+    const cs = data.checkins;
+    if(cs.length < 6) return null;
+    const seg = t => { const h=new Date(t).getHours(); return h<5?'late':h<12?'morning':h<17?'afternoon':h<22?'evening':'late'; };
+    const bySeg = {}, overall = {}; let N=0;
+    cs.forEach(c=>{ if(!c.dom||c.dom==='neutral') return; const s=seg(c.t); (bySeg[s]=bySeg[s]||{})[c.dom]=(bySeg[s][c.dom]||0)+1; overall[c.dom]=(overall[c.dom]||0)+1; N++; });
+    if(N < 6) return null;
+    let best=null;
+    for(const s in bySeg){
+      const sc=bySeg[s]; let sn=0; for(const d in sc) sn+=sc[d];
+      if(sn < 3) continue;                                      // enough check-ins in this daypart
+      for(const d in sc){
+        const segShare=sc[d]/sn, baseShare=overall[d]/N, lift=segShare-baseShare;
+        if(segShare < 0.5 || lift < 0.15) continue;             // dominates the daypart AND over-represented vs baseline
+        if(!best || lift>best.lift) best={ seg:s, dom:d, n:sc[d], lift };
+      }
+    }
+    return best ? { seg:best.seg, dom:best.dom, n:best.n } : null;
+  }
+
   // ---- recommender (simulated AI) ----
   function recommend(){
     const last = lastCheckin();
@@ -251,7 +293,7 @@
   global.Store = {
     init, signUp, signIn, signOut, user, cloud,
     addCheckin, checkins, lastCheckin, addSession, sessions,
-    learned, trend, recommend, practiceLabel, reset, getName, setName,
+    learned, trend, transitions, timeOfDay, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
   };
 })(window);
