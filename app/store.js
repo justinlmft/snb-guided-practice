@@ -119,7 +119,11 @@
   // ---- check-ins ----
   function addCheckin(c){
     const dom = PVCurrent.dominantOf(c.v, c.sym, c.dor);
-    const rec = { t:Date.now(), v:c.v, sym:c.sym, dor:c.dor, fr:c.freeze||0, note:c.note||'', dom:dom.key };
+    // challenge = the level of challenge the person wants today (0..1). Tracked over
+    // time and fed to the recommender. NOTE: not yet a cloud column — it lives in the
+    // on-device record/cache; add a `challenge` column + map it in checkinToRow to sync it.
+    const rec = { t:Date.now(), v:c.v, sym:c.sym, dor:c.dor, fr:c.freeze||0, note:c.note||'', dom:dom.key,
+                  challenge:(typeof c.challenge==='number'?c.challenge:null) };
     data.checkins.push(rec);
     if(CLOUD && auth.user){ outbox.checkins.push(rec); }
     saveCache(); if(CLOUD) flush();
@@ -143,8 +147,12 @@
     const count = (arr,key)=>{const m={};arr.forEach(s=>{const k=s[key];if(k)m[k]=(m[k]||0)+1;});return m;};
     const top = (m)=>Object.keys(m).sort((a,b)=>m[b]-m[a])[0]||null;
     const earlyRate = data.sessions.length ? data.sessions.filter(s=>s.endedEarly).length/data.sessions.length : 0;
+    const chs = data.checkins.map(c=>c.challenge).filter(v=>typeof v==='number');
+    const recentCh = chs.slice(-8);
+    const challengeAvg = recentCh.length ? recentCh.reduce((s,v)=>s+v,0)/recentCh.length : null;
     return { favSense: top(count(done,'sense')), favSkill: top(count(done,'skill')), favPractice: top(count(done,'practiceKey')),
-             sessionsDone: done.length, endsEarlyOften: earlyRate >= 0.4 && data.sessions.length >= 3 };
+             sessionsDone: done.length, endsEarlyOften: earlyRate >= 0.4 && data.sessions.length >= 3,
+             challengeAvg, challengeN: chs.length };
   }
 
   // ---- trend ----
@@ -164,6 +172,10 @@
     const last = lastCheckin();
     const L = learned();
     const tr = trend();
+    // how far the person wants to go: this check-in's stated appetite, else their
+    // recent average, else a balanced default. This is the new lever the advisor reads.
+    const want = (last && typeof last.challenge==='number') ? last.challenge
+               : (L.challengeAvg!=null ? L.challengeAvg : 0.55);
     if(!last){
       return cfg('mindfulness', null, L.favSense||'touch', 8,
         'a calm place to start. when you check in, i will tune this to where your system actually is.', 'simplest place to begin');
@@ -176,23 +188,51 @@
         ? 'you are pulling toward shutdown. nothing to push against. we will just find a little safety, gently.'
         : 'a lot is held still and moving at once. we will steady, then look for safety.';
       if(tr && tr.dir==='falling') reason = 'safety has been slipping the last few check-ins. let us spend this one just building it back.';
+      else if(want>=0.78) reason += ' you asked to go further today, and we will, by settling first.';
       return cfg('anchoring', null, sense, L.endsEarlyOften?12:10, reason, 'meet you where you are');
     }
     if(dom==='fightflight' || dom==='play'){
-      const reason = dom==='play'
+      let reason = dom==='play'
         ? 'there is safety here with some charge moving. a good place to practice noticing.'
         : 'a lot of energy is moving. we will slow down and let some of it settle before anything else.';
+      if(want<=0.3) reason = dom==='play'
+        ? 'energy with safety under it. you asked to keep it gentle, so let us just enjoy the steadiness.'
+        : 'a lot of energy is moving, and you asked for gentle. we will only settle today.';
       return cfg('mindfulness', null, sense, moreSilence, reason, 'settle the charge');
     }
-    const skill = L.favSkill || 'imagery';
+    // safe / regulated — this is where the challenge appetite has the most room to act
+    if(want<=0.35){
+      return cfg('anchoring', null, sense, moreSilence,
+        'you have real safety, and you asked to keep it gentle. let us just deepen the calm and let it land.',
+        'stay gentle');
+    }
+    const skill = want>=0.78 ? 'pendulation' : (L.favSkill || 'imagery');
     let reason = 'there is real safety here right now. if you are willing, this is a chance to gently meet something harder, knowing you can come back.';
-    if(L.sessionsDone>=3 && L.favPractice==='most') reason = 'you have safety, and self-regulation is where you keep going back. let us pick that thread up again.';
-    return cfg('most', skill, sense, L.endsEarlyOften?8:4, reason, 'room to go deeper');
+    if(want>=0.78) reason = 'you have safety, and you asked to be stretched. let us use that capacity and meet something real.';
+    else if(L.sessionsDone>=3 && L.favPractice==='most') reason = 'you have safety, and self-regulation is where you keep going back. let us pick that thread up again.';
+    return cfg('most', skill, sense, want>=0.78?4:(L.endsEarlyOften?8:6), reason, 'room to go deeper');
 
     function cfg(practiceKey, skill, sense, silence, reason, tag){
-      return { practiceKey, skill, sense, silence, reason, tag, adapted: L.sessionsDone>0, domBefore: last?last.dom:null };
+      return { practiceKey, skill, sense, silence, reason, tag,
+               adapted: (L.sessionsDone>0 || L.challengeN>0), domBefore: last?last.dom:null, challenge: want };
     }
   }
+
+  // ---- challenge appetite: shared levels + label (used by check-in + advisor + you) ----
+  const CHALLENGE_LEVELS = [
+    { v:0.12, key:'settle',  label:'just settle' },
+    { v:0.40, key:'gentle',  label:'gently' },
+    { v:0.65, key:'meet',    label:'meet me' },
+    { v:0.90, key:'stretch', label:'stretch me' },
+  ];
+  function challengeLabel(v){
+    if(v==null||isNaN(v)) return null;
+    let b=CHALLENGE_LEVELS[0];
+    for(const l of CHALLENGE_LEVELS){ if(Math.abs(l.v-v)<Math.abs(b.v-v)) b=l; }
+    return b.label;
+  }
+  // post-practice: stamp how the body felt afterward onto the last session
+  function noteFeedback(val){ const s=data.sessions[data.sessions.length-1]; if(s){ s.feedback=val; saveCache(); } }
 
   const PRACTICE_LABEL = { mindfulness:'simple mindfulness', anchoring:'connect with safety', most:'self-regulation' };
   function practiceLabel(k){ return PRACTICE_LABEL[k]||k; }
@@ -212,5 +252,6 @@
     init, signUp, signIn, signOut, user, cloud,
     addCheckin, checkins, lastCheckin, addSession, sessions,
     learned, trend, recommend, practiceLabel, reset, getName, setName,
+    challengeLabel, noteFeedback, CHALLENGE_LEVELS,
   };
 })(window);
