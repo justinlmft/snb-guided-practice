@@ -904,7 +904,7 @@
                 <div class="safety-trend ${dir}">${dir==='rising'?'and rising \u2191':dir==='falling'?'and dipping \u2193':'and steady'}</div>
               </div>
               <div class="safety-meter"><span class="safety-meter-fill" style="width:${safetyPct}%"></span></div>
-              ${topState?`<div class="safety-foot"><span class="tg-host">${triGlyph(topState)}</span><span class="sf-txt">most often in <b>${STATE_NAME(topState)}</b></span></div>`:''}
+              ${topState?`<div class="safety-foot"><span class="tg-host">${triGlyph(topState)}</span><span class="sf-txt">most often in <b>${({play:'regulated mobilization',stillness:'regulated immobilization'}[topState])||STATE_NAME(topState)}</b></span></div>`:''}
               <p class="safety-range">ranged ${loPct}% to ${hiPct}% across ${cs.length} check-ins</p>
               ${rising?'<p class="bloom-line">your system is finding more safety.</p>':''}
             </section>

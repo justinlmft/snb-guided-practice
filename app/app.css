@@ -840,5 +840,7 @@ body:not(.reduce-motion) .chart.draw-gain .cline-area{animation:chartArea .85s v
 .tg-m{fill:var(--tg-dim);transition:fill .62s var(--ease)}
 body.reduce-motion .tg-m{transition:none}
 .sd-head .sd-marks .triglyph{height:46px}
-.safety-foot{display:flex;flex-direction:column;align-items:center;gap:7px}
+.safety-foot{display:flex;flex-direction:row;align-items:center;gap:10px;flex-wrap:nowrap}
+.safety-foot .tg-host{flex:none;display:inline-flex}
 .safety-foot .triglyph{height:30px}
+.safety-foot .sf-txt{flex:1}
