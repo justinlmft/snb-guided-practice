@@ -466,6 +466,7 @@
       }
       return `
         <button class="wincard" data-win="checkin">
+          <span class="win-gut" aria-hidden="true"></span>
           <span class="wc-text">
             <span class="wc-kicker">${seg+' check-in'}</span>
             <span class="wc-title">how's your ${segPoss(seg)}?</span>
@@ -475,6 +476,7 @@
     }
     return `
       <button class="wincard practice-row ${done?'done-affirm':''}" id="practice-main-btn">
+        <span class="win-gut" aria-hidden="true"></span>
         <span class="wc-text">
           <span class="wc-kicker">${done ? 'practiced · '+Store.practiceLabel(reco.practiceKey) : 'recommended practice'}</span>
           <span class="wc-title">${done ? 'notice anything shift?' : Store.practiceLabel(reco.practiceKey)}</span>
@@ -533,8 +535,8 @@
       ${checkinHTML}
       ${practiceHTML}
       ${r ? (r.state !== 'neutral'
-        ? `<button class="wincard from-card" id="open-refl"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span><span class="wc-go">${CHEV}</span></button>`
-        : `<div class="wincard from-card from-card-static"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span></div>`
+        ? `<button class="wincard from-card" id="open-refl"><span class="win-gut" aria-hidden="true"></span><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span><span class="wc-go">${CHEV}</span></button>`
+        : `<div class="wincard from-card from-card-static"><span class="win-gut" aria-hidden="true"></span><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span></div>`
       ) : ''}
     </div>`;
     const breathBtn  = c.querySelector('[data-win="breath"]');  if(breathBtn)  breathBtn.onclick  = winAction('breath', reco);
