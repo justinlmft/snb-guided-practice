@@ -308,7 +308,18 @@
     return rec;
   }
   function checkins(){ return data.checkins.slice(); }
-  function lastCheckin(){ return data.checkins[data.checkins.length-1] || null; }
+  // Most recent check-in, IGNORING any dated in the future. A device with a
+  // skewed clock can leave a future-stamped row in the cloud; because reads sort
+  // by t, that row would otherwise hijack "today" forever — lastCheckin() would
+  // never be sameDay(now), so the for-you reader, done-states, and the practice
+  // recommendation all silently fall back to their neutral/stale forms. Tolerance
+  // of 60s absorbs minor clock differences on a just-made check-in.
+  function lastCheckin(){
+    const cutoff = Date.now() + 60000;
+    let best = null;
+    for(const c of data.checkins){ if(c && typeof c.t==='number' && c.t <= cutoff && (!best || c.t > best.t)) best = c; }
+    return best || (data.checkins.length ? data.checkins[data.checkins.length-1] : null);
+  }
 
   // ---- sessions ----
   function addSession(s){
