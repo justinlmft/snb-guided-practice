@@ -131,9 +131,9 @@
   const GEAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
   // Plain-language "what to expect" so a newcomer knows what each practice is.
   const PRACTICE_ABOUT = {
-    mindfulness: ()=>'a gentle, guided sit. a calm voice helps you arrive, follow your breath, and move slowly through your senses. nothing to fix, nowhere to be \u2014 the simplest way back to yourself.',
+    mindfulness: ()=>'a gentle, guided sit. a calm voice helps you arrive, follow your breath, and move slowly through your senses. nothing to fix, nowhere to be, the simplest way back to yourself.',
     anchoring: (sense)=>`you'll use your ${sense||'senses'} as an anchor and let it lead your system toward a felt sense of safety, then rest there a while. good when things feel charged or heavy.`,
-    most: ()=>'the deepest practice. you\u2019ll gently turn toward something hard while staying connected to safety \u2014 building the capacity to meet it without being pulled under. best when there is safety to spare.',
+    most: ()=>'the deepest practice. you\u2019ll gently turn toward something hard while staying connected to safety, building the capacity to meet it without being pulled under. best when there is safety to spare.',
     more: ()=>'a full, standalone guided session, played start to finish.',
   };
   const aboutOf = (k, sense) => { const f = PRACTICE_ABOUT[k]; return f ? f(sense) : ''; };
@@ -506,7 +506,7 @@
         </div>
         ${sectionsHTML}`;
     } else {
-      bodyHTML = `${lead}${P('Check in a few times and a more personal read will show up here.')}`;
+      bodyHTML = `${lead}${P('Check in a few times and a more personal summary will show up here.')}`;
     }
 
     setHTML(`
@@ -809,9 +809,9 @@
       } else {
         const onP=Math.round(avg(on)*100), offP=Math.round(avg(off)*100), diff=onP-offP;
         let verdict, good=false;
-        if(diff>=4){ good=true; verdict=`yes \u2014 your safety runs ${diff} points higher on the days you practice.`; }
-        else if(diff<=-4){ verdict=`you tend to reach for practice on your harder days \u2014 that's the work, not a setback.`; }
-        else { verdict=`about even so far. keep going \u2014 the pattern takes time to show.`; }
+        if(diff>=4){ good=true; verdict=`yes, your safety runs ${diff} points higher on the days you practice.`; }
+        else if(diff<=-4){ verdict=`you tend to reach for practice on your harder days, that's a good thing, not a setback.`; }
+        else { verdict=`about even so far. keep going, the pattern takes time to show.`; }
         helpHTML=`
           <div class="help-bars">
             <div class="help-row"><span class="help-lbl">practice days</span><span class="help-track"><span class="help-fill" style="width:${onP}%;background:var(--s-safety)"></span></span><span class="help-pct">${onP}%</span></div>
@@ -853,7 +853,7 @@
 
             <section class="panel">
               ${shareBtn('day')}<p class="panel-title">day by day</p>
-              <p class="panel-sub">your safety over time \u2014 the line rises and deepens with more safety. tap a point to read it.</p>
+              <p class="panel-sub">your safety over time. the line rises and deepens with more safety. tap a point to see it.</p>
               ${dayByDay}
             </section>
 
@@ -869,17 +869,18 @@
           <div class="deep">
             <div class="deep-block">
               <p class="deep-h">time of day</p>
-              ${['morning','afternoon','evening','late'].map(seg=>{ const k=domOf(cs.filter(x=>segOf(x.t)===seg)); return `<div class="deep-row"><span class="deep-lbl">${segLabel(seg)}</span><span class="deep-val">${k?`${stateMarks(k)}${STATE_NAME(k)}`:'<span class="deep-none">\u2014</span>'}</span></div>`; }).join('')}
+              ${['morning','afternoon','evening','late'].map(seg=>{ const sub=cs.filter(x=>segOf(x.t)===seg); const k=domOf(sub); return `<div class="deep-row"><span class="deep-lbl">${segLabel(seg)}</span><span class="deep-val">${k?`<span class="dv-n" style="opacity:.4;font-size:11px;margin-right:6px">${sub.length}</span><span class="deep-tap" data-state-detail="${k}" style="cursor:pointer">${stateMarks(k)}</span>`:'<span class="deep-none">\u2014</span>'}</span></div>`; }).join('')}
             </div>
             <div class="deep-block">
               <p class="deep-h">at a glance</p>
-              <div class="deep-row"><span class="deep-lbl">most often</span><span class="deep-val">${topState?`${stateMarks(topState)}${STATE_NAME(topState)}`:'\u2014'}</span></div>
+              <div class="deep-row"><span class="deep-lbl">most often</span><span class="deep-val">${topState?`<span class="deep-tap" data-state-detail="${topState}" style="cursor:pointer">${stateMarks(topState)}</span>`:'\u2014'}</span></div>
               <div class="deep-row"><span class="deep-lbl">avg safety</span><span class="deep-val">${safetyPct}%</span></div>
-              <div class="deep-row"><span class="deep-lbl">challenge appetite</span><span class="deep-val">${(function(){const ca=Store.learned().challengeAvg;return ca!=null?Store.challengeLabel(ca):'\u2014';})()}</span></div>
+              <div class="deep-row"><span class="deep-lbl">challenge level</span><span class="deep-val">${(function(){const ca=Store.learned().challengeAvg;return ca!=null?Store.challengeLabel(ca):'\u2014';})()}</span></div>
               <div class="deep-row"><span class="deep-lbl">trend</span><span class="deep-val">${dir}</span></div>
               ${(function(){const L=Store.learned();let h='';if(L.favPractice)h+=`<div class="deep-row"><span class="deep-lbl">you return to</span><span class="deep-val">${Store.practiceLabel(L.favPractice)}</span></div>`;if(L.favSense)h+=`<div class="deep-row"><span class="deep-lbl">anchored through</span><span class="deep-val">${L.favSense}</span></div>`;return h;})()}
             </div>
           </div>
+          <p class="deep-hint" style="font-size:11px;opacity:.5;text-align:center;margin:6px 0 2px">tap a symbol to learn what it means</p>
           <div class="ystats">
             <div class="ystat"><span class="ys-n">${Store.checkins().length}</span><span class="ys-l">check-ins</span></div>
             <div class="ystat"><span class="ys-n">${Store.learned().sessionsDone}</span><span class="ys-l">practices</span></div>
@@ -891,8 +892,9 @@
       c.querySelectorAll('.period-pill').forEach(b=>b.addEventListener('click',()=>{ stopPlay(); const cv=$('#carousel'); const sl=cv?cv.scrollLeft:0; activePeriod=b.dataset.period; render(); const nv=$('#carousel'); if(nv){ nv.scrollLeft=sl; const i=Math.round(sl/(nv.clientWidth||1)); c.querySelectorAll('#dots .dot-i').forEach((d,j)=>d.classList.toggle('on',j===i)); } }));
       const setBtn=$('#set-btn'); if(setBtn) setBtn.onclick=screenSettings;
       const addBtn=$('#add-ci'); if(addBtn) addBtn.onclick=screenCheckin;
-      c.querySelectorAll('.panel-share').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openShare(`my nervous system, lately \u2014 ${safetyPct}% safe-and-social, most often in ${STATE_NAME(topState||'safety')}. \u2014 stuck not broken`); }));
+      c.querySelectorAll('.panel-share').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openShare(`my nervous system, lately, ${safetyPct}% safe-and-social, most often in ${STATE_NAME(topState||'safety')}. stuck not broken`); }));
       c.querySelectorAll('.distrow').forEach(b=>b.addEventListener('click',()=>screenStateDetail(b.dataset.stateDetail)));
+      c.querySelectorAll('.deep-tap').forEach(b=>b.addEventListener('click',()=>screenStateDetail(b.dataset.stateDetail)));
 
       const chartHost=$('#chart-host');
       if(chartHost && arcBuckets){
@@ -1048,9 +1050,9 @@
   }
   // ---------------------------------------------------------------- PRACTICE CHOOSER DATA
   const P_OPTS=[
-    {key:'mindfulness',title:'Simple mindfulness',       sub:'the gentlest — a calm place to start'},
+    {key:'mindfulness',title:'Simple mindfulness',       sub:'the gentlest, a calm place to start'},
     {key:'anchoring',  title:'Connect with safety',      sub:'settling into safety through your senses'},
-    {key:'most',       title:'Practice self-regulation', sub:'the deepest — meeting what is hard'},
+    {key:'most',       title:'Practice self-regulation', sub:'the deepest, meeting what is hard'},
     {key:'more',       title:'More meditations',         sub:'standalone guided sessions'},
   ];
   const P_SENSES=['touch','sound','sight','movement','imagination'];
@@ -1141,7 +1143,7 @@
       chLabel ? `meeting you at ${hl(chLabel)}` : null,
     ].filter(Boolean);
     const joinList = (a)=> a.length<=1 ? (a[0]||'') : a.slice(0,-1).join(', ')+' and '+a[a.length-1];
-    const shapedSentence = shapeBits.length ? `tuned for you — ${joinList(shapeBits)}.` : '';
+    const shapedSentence = shapeBits.length ? `tuned for you, ${joinList(shapeBits)}.` : '';
     root.innerHTML = `
       <header class="appbar"></header>
       <div class="scroll" id="content"></div>
@@ -1401,6 +1403,7 @@
     const u=Store.user();
     const ts = (localStorage.getItem('snb_textscale')||'1');
     const rm = (localStorage.getItem('snb_reduce_motion')==='1');
+    const ps = Store.prefSense(); const psil = Store.prefSilence();
     const segBtn=(group,val,lbl,on)=>`<button type="button" data-${group}="${val}"${on?' class="on"':''}>${lbl}</button>`;
     $('#content').innerHTML = `
       <div class="view settings-view">
@@ -1428,6 +1431,18 @@
             ${segBtn('rm','0','full',!rm)}${segBtn('rm','1','calm',rm)}
           </div>
         </div>
+        <div class="set-group">
+          <p class="dash-prompt">anchoring</p>
+          <div class="set-seg" id="seg-sense" style="flex-wrap:wrap">
+            ${segBtn('sense','','auto',!ps)}${P_SENSES.map(s=>segBtn('sense',s,s,ps===s)).join('')}
+          </div>
+        </div>
+        <div class="set-group">
+          <p class="dash-prompt">silence between guidance</p>
+          <div class="set-seg" id="seg-silence" style="flex-wrap:wrap">
+            ${segBtn('sil','','auto',psil==null)}${P_SILENCE.map(([v,l])=>segBtn('sil',v,l,psil===v)).join('')}
+          </div>
+        </div>
 
         <div class="hr"></div>
 
@@ -1445,6 +1460,14 @@
     const segMot=$('#seg-motion'); if(segMot) segMot.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
       localStorage.setItem('snb_reduce_motion', b.dataset.rm); applyPrefs();
       segMot.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    });
+    const segSense=$('#seg-sense'); if(segSense) segSense.querySelectorAll('[data-sense]').forEach(b=>b.onclick=()=>{
+      Store.setPrefSense(b.dataset.sense);
+      segSense.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    });
+    const segSil=$('#seg-silence'); if(segSil) segSil.querySelectorAll('[data-sil]').forEach(b=>b.onclick=()=>{
+      Store.setPrefSilence(b.dataset.sil);
+      segSil.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
     });
     $('#export').onclick = ()=>{
       const blob = new Blob([JSON.stringify(Store.checkins(),null,2)],{type:'application/json'});

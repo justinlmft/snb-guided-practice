@@ -242,7 +242,7 @@
     let want = (last && typeof last.challenge==='number') ? last.challenge
                : (L.challengeAvg!=null ? L.challengeAvg : 0.55);
     if(!last){
-      return cfg('mindfulness', null, L.favSense||'touch', 8,
+      return cfg('mindfulness', null, prefSense()||L.favSense||'touch', 8,
         'a calm place to start. when you check in, i will tune this to where your system actually is.', 'simplest place to begin');
     }
     // first few days: keep the practice gentle and build from there, unless they explicitly asked to stretch.
@@ -250,7 +250,7 @@
     const early = (_tn.stage==='start' || _tn.stage==='early') && !(typeof last.challenge==='number' && last.challenge>=0.78);
     if(early) want = Math.min(want, 0.55);
     const dom = last.dom;
-    const sense = L.favSense || 'touch';
+    const sense = prefSense() || L.favSense || 'touch';
     const moreSilence = L.endsEarlyOften ? 12 : 8;
     if(dom==='shutdown' || dom==='freeze'){
       let reason = dom==='shutdown'
@@ -265,7 +265,7 @@
         ? 'there is safety here with some charge moving. a good place to practice noticing.'
         : 'a lot of energy is moving. we will slow down and let some of it settle before anything else.';
       if(want<=0.3) reason = dom==='play'
-        ? 'energy with safety under it. you asked to keep it gentle, so let us just enjoy the steadiness.'
+        ? 'energy with safety mixed in. you asked to keep it gentle, so let us just enjoy the steadiness.'
         : 'a lot of energy is moving, and you asked for gentle. we will only settle today.';
       return cfg('mindfulness', null, sense, moreSilence, reason, 'settle the charge');
     }
@@ -283,7 +283,8 @@
     return cfg('most', skill, sense, want>=0.78?4:(L.endsEarlyOften?8:6), reason, 'room to go deeper');
 
     function cfg(practiceKey, skill, sense, silence, reason, tag){
-      return { practiceKey, skill, sense, silence, reason, tag,
+      const pSil = prefSilence();
+      return { practiceKey, skill, sense, silence: (pSil!=null?pSil:silence), reason, tag,
                adapted: (L.sessionsDone>0 || L.challengeN>0), domBefore: last?last.dom:null, challenge: want };
     }
   }
@@ -291,9 +292,9 @@
   // ---- challenge appetite: shared levels + label (used by check-in + advisor + you) ----
   const CHALLENGE_LEVELS = [
     { v:0.12, key:'settle',  label:'just settle' },
-    { v:0.40, key:'gentle',  label:'gently' },
-    { v:0.65, key:'meet',    label:'meet me' },
-    { v:0.90, key:'stretch', label:'stretch me' },
+    { v:0.40, key:'gentle',  label:'go gently' },
+    { v:0.65, key:'meet',    label:'meet it' },
+    { v:0.90, key:'stretch', label:'go deeper' },
   ];
   function challengeLabel(v){
     if(v==null||isNaN(v)) return null;
@@ -311,6 +312,12 @@
   function getName(){ try{ return localStorage.getItem('snb_name_'+(auth.user?auth.user.id:'anon'))||''; }catch(e){ return ''; } }
   function setName(n){ try{ localStorage.setItem('snb_name_'+(auth.user?auth.user.id:'anon'), String(n||'').trim()); }catch(e){} }
 
+  // ---- user-chosen practice preferences (auto-fill the customizer; null = let the app decide) ----
+  function prefSense(){ try{ return localStorage.getItem('snb_pref_sense')||null; }catch(e){ return null; } }
+  function setPrefSense(s){ try{ if(s) localStorage.setItem('snb_pref_sense', s); else localStorage.removeItem('snb_pref_sense'); }catch(e){} }
+  function prefSilence(){ try{ const v=localStorage.getItem('snb_pref_silence'); return v?+v:null; }catch(e){ return null; } }
+  function setPrefSilence(n){ try{ if(n!=null&&n!=='') localStorage.setItem('snb_pref_silence', String(n)); else localStorage.removeItem('snb_pref_silence'); }catch(e){} }
+
   async function reset(){
     if(CLOUD && auth.user){
       try{ await sb.from('checkins').delete().eq('user_id', auth.user.id); await sb.from('sessions').delete().eq('user_id', auth.user.id); }catch(e){}
@@ -323,5 +330,6 @@
     addCheckin, checkins, lastCheckin, addSession, sessions,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
+    prefSense, setPrefSense, prefSilence, setPrefSilence,
   };
 })(window);
