@@ -82,6 +82,8 @@
   }
   // long-press on chrome shouldn't pop the browser menu; inline text links keep theirs
   document.addEventListener('contextmenu', (e)=>{ const t = e.target; if(t && t.closest && t.closest('.tabbar,.fab,.breathhero,.set-seg,svg,button:not(.linkbtn)')) e.preventDefault(); }, false);
+  // no zoom: block iOS Safari pinch-zoom (it ignores user-scalable=no); double-tap zoom is killed by touch-action:manipulation
+  ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev, e=>e.preventDefault(), {passive:false}));
 
   const STATE_COLOR = (key) => (window.PVCurrent.STATES[key] ? window.PVCurrent.STATES[key].color : '#D8D2C2');
   const STATE_NAME  = (key) => (window.PVCurrent.STATES[key] ? window.PVCurrent.STATES[key].name : 'settling');
@@ -837,7 +839,7 @@
       const mixHTML=ranked.map(([key,n])=>{
         const pct=Math.round(n/total*100);
         return `<button class="distrow" data-state-detail="${key}">
-          <span class="distrow-top"><span class="distrow-name">${stateMarks(key)}${STATE_NAME(key)}</span><span class="distrow-pct">${pct}%</span></span>
+          <span class="distrow-top"><span class="distrow-name">${stateMarks(key)}${({play:'regulated mobility',stillness:'regulated immobility'}[key])||STATE_NAME(key)}</span><span class="distrow-pct">${pct}%</span></span>
           <span class="distrow-track"><span class="distrow-fill" style="width:${Math.max(pct,2)}%;background:${STATE_COLOR(key)}"></span></span>
         </button>`;
       }).join('');
@@ -918,7 +920,6 @@
               </div>
               <div class="safety-meter"><span class="safety-meter-fill" style="width:${safetyPct}%"></span></div>
               ${topState?`<div class="safety-foot"><span class="tg-host">${triGlyph(topState)}</span><span class="sf-txt">most often in <b>${({play:'regulated mobilization',stillness:'regulated immobilization'}[topState])||STATE_NAME(topState)}</b></span></div>`:''}
-              <p class="safety-range">ranged ${loPct}% to ${hiPct}% across ${cs.length} check-ins</p>
               ${rising?'<p class="bloom-line">your system is finding more safety.</p>':''}
             </section>
 

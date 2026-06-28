@@ -15,7 +15,7 @@
   --btn-hover:#2A3040; --ease:cubic-bezier(.2,.6,.2,1); --type-scale:1;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
+html,body{margin:0;height:100%;touch-action:manipulation}
 body{
   font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bone);color:var(--ink);
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
