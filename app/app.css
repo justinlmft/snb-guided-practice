@@ -819,3 +819,10 @@ body.reduce-motion .settle-ico{transition:none}
   --backdrop:#0D0E10; --press:#2C2E33; --scale-lo:#3A3C42; --scale-hi:#C5C3BC; --link-soft:rgba(143,182,238,.45);
   --track-mind:#E7E5DE;
 }
+
+
+/* gentle update toast: persistent "a new version is ready" prompt (var-driven; themes in dark) */
+.update-toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,8px);display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--bone);font-size:13.5px;padding:8px 10px 8px 17px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s var(--ease),transform .25s var(--ease);z-index:61;box-shadow:0 8px 24px rgba(0,0,0,.16);max-width:calc(100% - 32px)}
+.update-toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.update-toast button{font:inherit;font-size:13px;font-weight:500;color:var(--ink);background:var(--bone);border:0;border-radius:999px;padding:6px 13px;cursor:pointer;flex:none}
+@media (prefers-reduced-motion:reduce){.update-toast{transition:opacity .25s var(--ease)}}

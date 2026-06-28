@@ -32,8 +32,20 @@
   if('serviceWorker' in navigator){
     let _swReloaded=false;
     navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!_swReloaded){_swReloaded=true;location.reload();} });
+    function showUpdateToast(reg){
+      if(document.getElementById('update-toast')) return;
+      var b=document.createElement('div'); b.id='update-toast'; b.className='update-toast';
+      b.innerHTML='<span>a new version is ready.</span><button type="button">refresh</button>';
+      document.body.appendChild(b);
+      requestAnimationFrame(function(){ b.classList.add('on'); });
+      b.querySelector('button').onclick=function(){ var w=reg.waiting; if(w){ w.postMessage({type:'SKIP_WAITING'}); } else { location.reload(); } b.classList.remove('on'); };
+    }
     addEventListener('load',()=>{
-      navigator.serviceWorker.register('sw.js').then(reg=>{ try{reg.update();}catch(e){} }).catch(()=>{});
+      navigator.serviceWorker.register('sw.js').then(function(reg){
+        if(reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg);
+        reg.addEventListener('updatefound',function(){ var w=reg.installing; if(!w) return; w.addEventListener('statechange',function(){ if(w.state==='installed' && navigator.serviceWorker.controller) showUpdateToast(reg); }); });
+        try{reg.update();}catch(e){}
+      }).catch(function(){});
     });
   }
   </script>

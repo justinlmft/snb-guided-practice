@@ -3,7 +3,7 @@
    cache (and to the cached index.html for navigations). Audio lives OUTSIDE this
    scope (/clips, /packs at the repo root) and streams from the network — we never
    intercept it. Bump SHELL_VERSION on any shell change to roll the cache. */
-const SHELL_VERSION = 'snb-app-shell-v84';
+const SHELL_VERSION = 'snb-app-shell-v85';
 
 const SHELL = [
   './',
@@ -24,8 +24,12 @@ const SHELL = [
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 
 self.addEventListener('install', (e) => {
-  self.skipWaiting();
+  // do NOT skipWaiting here — wait until the user taps "refresh" (gentle update), via the message below
   e.waitUntil(caches.open(SHELL_VERSION).then((c) => c.addAll(SHELL).catch(() => {})));
+});
+
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
