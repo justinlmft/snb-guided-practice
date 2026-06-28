@@ -372,7 +372,8 @@
         ring.style.transition = 'transform 1.8s ease, opacity 1.8s';
         ring.style.transform  = 'scale(.96)'; ring.style.opacity = '.6';
         const hero = document.querySelector('.breathhero');
-        if(hero){ hero.classList.add('is-done'); hero.style.transition='opacity 1s ease'; hero.style.opacity='0.48'; }
+        if(hero){ hero.style.transition=''; hero.style.opacity=''; }
+        { const hh=document.getElementById('breathhint'); if(hh) hh.textContent='take another?'; }
         setTimeout(()=>{ ring.style.transition=''; ring.style.transform=''; ring.style.opacity=''; ring.style.animation=''; }, 1900);
       };
       if(reduce){ if(phase){phase.textContent='in';phase.classList.add('show');} setTimeout(finish,1200); return; }
@@ -417,23 +418,33 @@
     // player); from there the user can Begin or customize.
     return ()=>renderPlan(reco);
   }
+  const CHECKIN_DONE_LINE = {
+    safety:     "settled and online. worth noticing while it's here.",
+    play:       "energized, with safety in the mix. good fuel.",
+    stillness:  "quiet and safe. rest that actually restores.",
+    fightflight:"revved up and real. it can settle.",
+    shutdown:   "heavy and far away. your body protecting you, not a failing.",
+    freeze:     "a lot held at once. safety is what lets it move.",
+    neutral:    "checked in. that already counts."
+  };
   function renderWin(k, s){
     const { done, last, reco } = s;
     if(k==='breath'){
-      const faded = done && !repeatBreath;
-      const title = faded ? 'one breath taken' : (Store.getName() ? 'take one intentional breath, '+escapeHtml(Store.getName())+'.' : 'take one intentional breath.');
+      const isDone = done && !repeatBreath;
+      const title = isDone ? 'one breath taken' : (Store.getName() ? 'take one intentional breath, '+escapeHtml(Store.getName())+'.' : 'take one intentional breath.');
+      const hint = isDone ? 'take another?' : 'tap the ring to begin';
       return `
-        <button class="breathhero${faded?' is-done':''}" data-win="breath"${faded ? ' style="opacity:.5"' : ''}>
+        <button class="breathhero" data-win="breath">
+          <span class="bh-phase" id="bh-phase" aria-live="polite"></span>
           <span class="bh-stage">
             <span class="wc-ring" id="tring" aria-hidden="true"><span class="t-core"></span></span>
           </span>
           <span class="bh-rowwrap">
-            <span class="bh-phase" id="bh-phase" aria-live="polite"></span>
             <span class="bh-row">
               <span class="wc-text">
                 <span class="wc-kicker">one breath</span>
                 <span class="bh-title" id="breathlabel">${title}</span>
-                <span class="bh-hint" id="breathhint" style="${faded?'opacity:0':'opacity:1'}">tap the ring to begin</span>
+                <span class="bh-hint" id="breathhint" style="opacity:1">${hint}</span>
               </span>
             </span>
           </span>
@@ -441,20 +452,32 @@
     }
     if(k==='checkin'){
       const seg = segOf(Date.now());
-      return `
-        <button class="wincard ${done?'done':''}" data-win="checkin">
+      if(done){
+        return `
+        <button class="wincard done-rich" data-win="checkin">
+          <span class="dr-logo">${triGlyph(last.dom)}</span>
           <span class="wc-text">
-            <span class="wc-kicker">${done ? 'checked in' : seg+' check-in'}</span>
-            <span class="wc-title">${done ? `${STATE_NAME(last.dom)} · this ${segLabel(segOf(last.t))}` : `how's your ${segPoss(seg)}?`}</span>
+            <span class="wc-kicker">checked in · this ${segLabel(segOf(last.t))}</span>
+            <span class="wc-title">${STATE_NAME(last.dom)}</span>
+            <span class="dr-line">${CHECKIN_DONE_LINE[last.dom]||CHECKIN_DONE_LINE.neutral}</span>
+          </span>
+          <span class="wc-go">${CHEV}</span>
+        </button>`;
+      }
+      return `
+        <button class="wincard" data-win="checkin">
+          <span class="wc-text">
+            <span class="wc-kicker">${seg+' check-in'}</span>
+            <span class="wc-title">how's your ${segPoss(seg)}?</span>
           </span>
           <span class="wc-go">${CHEV}</span>
         </button>`;
     }
     return `
-      <button class="wincard practice-row ${done?'done':''}" id="practice-main-btn">
+      <button class="wincard practice-row ${done?'done-affirm':''}" id="practice-main-btn">
         <span class="wc-text">
-          <span class="wc-kicker">recommended practice</span>
-          <span class="wc-title">${Store.practiceLabel(reco.practiceKey)}</span>
+          <span class="wc-kicker">${done ? 'practiced · '+Store.practiceLabel(reco.practiceKey) : 'recommended practice'}</span>
+          <span class="wc-title">${done ? 'notice anything shift?' : Store.practiceLabel(reco.practiceKey)}</span>
           ${!done && reco.reason ? '<span class="wc-reason">'+escapeHtml(reco.reason)+'</span>' : ''}
         </span>
         <span class="wc-go">${CHEV}</span>
