@@ -232,6 +232,66 @@
     return { count, days, windowCount, sinceLast, returning, stage: _stageFor({count, days, windowCount}) };
   }
 
+  // ---- richer for-you signals (read by the blog; all self-gating on min data) ----
+  const _REG = { safety:1, play:1, stillness:1 };          // regulated dominants
+  const _DYS = { fightflight:1, shutdown:1, freeze:1 };     // dysregulated / defensive dominants
+  const _RANK = { shutdown:0, freeze:0, fightflight:1, play:2, stillness:2, safety:3 }; // "steadier" ladder
+
+  // weekMix: the window's state distribution — the 2nd-most-common state and the
+  // regulated:dysregulated balance. Powers section 1's secondary-state + balance lines.
+  // Computed the same way the reader picks its window-dominant, so `second` never equals it.
+  function weekMix(days){
+    days = days || 7;
+    const cut = Date.now() - days*86400000;
+    const cs = data.checkins.filter(c => c.t >= cut && c.dom && c.dom !== 'neutral');
+    const n = cs.length;
+    if(n < 6) return null;                                  // too few in-window to claim a mix
+    const cnt = {}; cs.forEach(c => { cnt[c.dom] = (cnt[c.dom]||0) + 1; });
+    const order = Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a]);
+    const dom = order[0], second = order[1] || null;
+    let reg=0, dys=0; cs.forEach(c => { if(_REG[c.dom]) reg++; else if(_DYS[c.dom]) dys++; });
+    const lean = reg>dys ? 'regulated' : dys>reg ? 'dysregulated' : 'even';
+    return { n, dom, domShare:Math.round(cnt[dom]/n*100), second,
+             secondShare: second ? Math.round(cnt[second]/n*100) : 0,
+             reg, dys, regShare:Math.round(reg/n*100), lean, distinct:order.length,
+             defenseStates: order.filter(d => _DYS[d]) };       // actual non-safety states present, by frequency
+  }
+
+  // recovery: after a dip out of a regulated state, how many check-ins until a regulated
+  // one returns. The hope signal — only trustworthy with real history + several round-trips.
+  function recovery(){
+    const cs = data.checkins.filter(c => c.dom && c.dom !== 'neutral');
+    if(cs.length < 12) return null;
+    const gaps = []; let i = 0;
+    while(i < cs.length){
+      if(!_REG[cs[i].dom]){                                 // entered a harder state
+        let j = i, steps = 0, found = false;
+        while(j < cs.length){ if(_REG[cs[j].dom]){ found = true; break; } j++; steps++; }
+        if(found) gaps.push(steps);                         // check-ins in the dip before steadier ground
+        i = j;
+      } else i++;
+    }
+    if(gaps.length < 3) return null;                         // need several completed recoveries
+    return { avg: gaps.reduce((a,b)=>a+b,0)/gaps.length, n: gaps.length };
+  }
+
+  // practiceEffect: of the check-ins that follow a practice session, how often the next one
+  // reads steadier than the state they went in with. Closes the read->practice->steadier loop.
+  function practiceEffect(){
+    const ss = data.sessions.filter(s => s.domBefore && _RANK[s.domBefore] != null);
+    if(!ss.length) return null;
+    const cs = data.checkins;
+    let moved=0, total=0;
+    ss.forEach(s => {
+      const next = cs.find(c => c.t > s.t && c.dom && _RANK[c.dom] != null);
+      if(!next) return;
+      total++;
+      if(_RANK[next.dom] > _RANK[s.domBefore]) moved++;
+    });
+    if(total < 6) return null;                               // enough paired session->check-in
+    return { moved, total, rate: moved/total };
+  }
+
   // ---- recommender (simulated AI) ----
   function recommend(){
     const last = lastCheckin();
@@ -328,7 +388,7 @@
   global.Store = {
     init, signUp, signIn, signOut, user, cloud,
     addCheckin, checkins, lastCheckin, addSession, sessions,
-    learned, trend, transitions, timeOfDay, tenure, _stageFor, recommend, practiceLabel, reset, getName, setName,
+    learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
     prefSense, setPrefSense, prefSilence, setPrefSilence,
   };

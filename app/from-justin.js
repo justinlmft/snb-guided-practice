@@ -620,6 +620,37 @@
       ]
     }
   };
+  // ---- richer per-user signals layered onto the for-you blog (additive; each self-gates on data) ----
+  // secondary state + regulated:dysregulated balance (section 1), recovery speed (section 3,
+  // established only), and the practice payoff (section 5). All read from Store with ctx overrides.
+  const BLOG_SIGNALS = {
+    secondary: [
+      "Close behind it, {SECOND}.",
+      "{SECOND} showed up close behind."
+    ],
+    balance: {
+      regulated: [
+        "And most of your check-ins this week had safety in them."
+      ],
+      dysregulated: [
+        "And most of your check-ins this week were in {DEFENSE_STATES}. Safety is still there to come back to."
+      ],
+      even: [
+        "Your check-ins this week split about evenly between safety and {DEFENSE_STATES}, with plenty of safety in the mix."
+      ]
+    },
+    recovery: {
+      framing: [
+        "And there's a pattern in how you come back.",
+        "There's also a pattern in how you get out of defense."
+      ],
+      template: "When your body drops into defense, it tends to get back to safety within {N}. You've done it before, more than once."
+    },
+    practice_effect: [
+      "The check-ins right after a practice session tend to have a little more safety in them, about {PCT}% of the time.",
+      "About {PCT}% of the time, the check-in right after a practice session has a little more safety in it."
+    ]
+  };
   const STATE_NAMES = { safety:'safety', play:'regulated mobilization (play and motivation)', stillness:'regulated immobilization (stillness and intimacy)', fightflight:'fight or flight', shutdown:'shutdown', freeze:'freeze' };
   function _fill(t, ctx){ return String(t==null?'':t).replace(/\{STATE\}/g, ctx.stateName||'').replace(/\{SHARE\}/g, ctx.share!=null?ctx.share+'%':'').replace(/\{N\}/g, ctx.count!=null?String(ctx.count):''); }
   function _bullet(raw, ctx){ const m=String(raw).match(/^(.*?)\s*\u2192\s*\[([^\]]+)\]\(#([^)]+)\)\s*$/); if(m) return { text:_fill(m[1].trim(),ctx), jumpLabel:m[2], jumpId:'blog-'+m[3] }; return { text:_fill(raw,ctx) }; }
@@ -628,6 +659,12 @@
   function _fillTrans(t, tr){ return String(t==null?'':t).replace(/\{STATE_A\}/g, _feltName(tr.a)).replace(/\{STATE_B\}/g, _feltName(tr.b)); }
   const SEG_PHRASE = { morning:'mornings', afternoon:'afternoons', evening:'evenings', late:'late nights' };
   function _fillTod(t, tod){ return String(t==null?'':t).replace(/\{SEG\}/g, SEG_PHRASE[tod.seg]||tod.seg).replace(/\{STATE\}/g, _feltName(tod.dom)); }
+  function _fillSecond(t, mix){ return String(t==null?'':t).replace(/\{SECOND\}/g, _feltName(mix.second)); }
+  function _recoveryPhrase(rec){ return rec.avg<=1.5 ? 'a check-in or two' : 'about '+Math.round(rec.avg)+' check-ins'; }
+  function _fillRecovery(t, rec){ return String(t==null?'':t).replace(/\{N\}/g, _recoveryPhrase(rec)); }
+  function _joinFelt(arr){ const a=(arr||[]).map(_feltName); if(a.length<=1) return a[0]||''; if(a.length===2) return a[0]+' and '+a[1]; return a.slice(0,-1).join(', ')+', and '+a[a.length-1]; }
+  function _fillDefense(t, mix){ return String(t==null?'':t).replace(/\{DEFENSE_STATES\}/g, _joinFelt(mix.defenseStates)); }
+  function _fillPct(t, pe){ return String(t==null?'':t).replace(/\{PCT\}/g, String(Math.round(pe.rate*20)*5)); } // nearest 5%
   function rundown(dom){ const r=RUNDOWNS[dom]; if(!r) return null; return { label_precise:r.label_precise, label_felt:r.label_felt, short:cycle('rd-tldr:'+dom,r.tldr), what:cycle('rd-what:'+dom,r.what_this_is), why:(r.why_your_body&&r.why_your_body[0])||'', how:r.how_it_shows_up||'', helps:cycle('rd-helps:'+dom,r.one_thing_that_helps), practice:r.door_inward||'' }; }
   function blog(ctx0){
     ctx0 = ctx0 || {};
@@ -662,7 +699,22 @@
     bullets.push(_bullet(P('helpsb', BLOG.tldr_bullets.helps), ctx));
 
     const rd = RUNDOWNS[dom], sec=[];
-    sec.push({ id:'blog-1', heading:"where you've been", paras:[ _fill(stageOr('s1', BLOG_STAGE.section1_where[stage], BLOG.section1_where), ctx) ]});
+    const s1paras = [ _fill(stageOr('s1', BLOG_STAGE.section1_where[stage], BLOG.section1_where), ctx) ];
+    // secondary state + safety:defense balance — week+ only, so "this week" is honest, and weekMix self-gates >=6 in-window.
+    if(stage==='week' || stage==='established'){
+      const mix = ctx0.mix || ((global.Store&&Store.weekMix)?Store.weekMix():null);
+      if(mix){
+        if(mix.second && mix.second!==dom && mix.secondShare>=25 && RUNDOWNS[mix.second])
+          s1paras.push(_fillSecond(P('s1second', BLOG_SIGNALS.secondary), mix));
+        if(mix.lean==='regulated' && dom!=='safety')
+          s1paras.push(P('s1balreg', BLOG_SIGNALS.balance.regulated));                       // safety side; skip when dom is already safety (no new info)
+        else if(mix.lean==='dysregulated' && mix.defenseStates && mix.defenseStates.length>=2)
+          s1paras.push(_fillDefense(P('s1baldys', BLOG_SIGNALS.balance.dysregulated), mix));  // name the actual states; skip if only one (dom already said it)
+        else if(mix.lean==='even' && mix.defenseStates && mix.defenseStates.length)
+          s1paras.push(_fillDefense(P('s1baleven', BLOG_SIGNALS.balance.even), mix));
+      }
+    }
+    sec.push({ id:'blog-1', heading:"where you've been", paras:s1paras });
     sec.push({ id:'blog-2', heading:"what that state is", paras:[ cycle('s2what:'+dom, rd.what_this_is), rd.how_it_shows_up ]});
 
     // movement: suppressed on thin data; 'building' uses lighter "lately" copy; week+ uses the approved copy.
@@ -683,6 +735,14 @@
         mv.push(P('s3todframe', BLOG.section3_movement.timeofday.framing));
         mv.push(_fillTod(BLOG.section3_movement.timeofday.template, tod));
       }
+      // recovery speed: the hope signal. Only at 'established', where there's real round-trip history.
+      if(stage==='established'){
+        const rec = ctx0.recovery || ((global.Store&&Store.recovery)?Store.recovery():null);
+        if(rec && rec.avg!=null){
+          mv.push(P('s3recframe', BLOG_SIGNALS.recovery.framing));
+          mv.push(_fillRecovery(BLOG_SIGNALS.recovery.template, rec));
+        }
+      }
     }
     if(mv.length) sec.push({ id:'blog-3', heading:"your movement", paras:mv });
 
@@ -695,7 +755,13 @@
       sec.push({ id:'blog-4', heading:"the fork ahead", paras:fkParas.filter(Boolean) });
     }
 
-    sec.push({ id:'blog-5', heading:"what tends to help", paras:[ _fill(P('s5', BLOG.section5_helps.frame), ctx), _fill(P('s5d', BLOG.section5_helps.practice_door), ctx) ]});
+    const s5paras = [ _fill(P('s5', BLOG.section5_helps.frame), ctx), _fill(P('s5d', BLOG.section5_helps.practice_door), ctx) ];
+    // practice payoff: lead with the user's own evidence when the practice has been moving the needle.
+    if(stage!=='start' && stage!=='early'){
+      const pe = ctx0.practiceEffect || ((global.Store&&Store.practiceEffect)?Store.practiceEffect():null);
+      if(pe && pe.rate>=0.5) s5paras.unshift(_fillPct(P('s5pe', BLOG_SIGNALS.practice_effect), pe));
+    }
+    sec.push({ id:'blog-5', heading:"what tends to help", paras:s5paras });
 
     // one last thing: returning > day-7 milestone > stage note > approved week copy.
     let s6arr;
