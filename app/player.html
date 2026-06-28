@@ -1033,22 +1033,23 @@ function updateTest(){
    Same-origin iframe shares localStorage, so it honors the same snb_haptics setting (on by
    default; '0' mutes). Android uses the Vibration API; iOS Safari has none, so we toggle a
    hidden <input switch> for a light tap (must run inside the Begin tap = a user gesture). */
-var _hapEl=null;
-function _hapSwitch(){
-  if(_hapEl) return _hapEl;
+function _hapIsIOS(){
+  try{ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }catch(e){ return false; }
+}
+function _hapTap(){
   try{
     var label=document.createElement('label'); label.setAttribute('aria-hidden','true');
-    label.style.cssText='position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none';
+    label.style.cssText='position:fixed;top:0;left:0;width:6px;height:6px;opacity:0.0001;border:0;margin:0;padding:0;pointer-events:none;z-index:-1';
     var input=document.createElement('input'); input.type='checkbox'; input.setAttribute('switch','');
-    label.appendChild(input); (document.body||document.documentElement).appendChild(label); _hapEl=label;
+    label.appendChild(input); (document.body||document.documentElement).appendChild(label);
+    label.click(); setTimeout(function(){ try{label.remove();}catch(e){} },200);
   }catch(e){}
-  return _hapEl;
 }
 function haptic(){
   try{
     if(localStorage.getItem('snb_haptics')==='0') return;
-    if(typeof navigator!=='undefined' && navigator.vibrate){ navigator.vibrate(12); return; }
-    var el=_hapSwitch(); if(el) el.click();
+    if(_hapIsIOS()){ try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){} _hapTap(); return; }
+    if(navigator.vibrate) navigator.vibrate(12);
   }catch(e){}
 }
 $('begin').onclick=()=>{haptic();startPlayer();};

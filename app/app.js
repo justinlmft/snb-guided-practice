@@ -12,31 +12,31 @@
   // NOT, so there we toggle a hidden iOS <input switch>, which emits a light tap
   // (iOS 17.4+). Both paths need a real user gesture, so haptic() must be called
   // straight from a tap handler. On by default; Settings > haptics writes '0' to mute.
-  let _hapEl = null;
-  function _hapSwitch(){
-    if(_hapEl || typeof document==='undefined') return _hapEl;
+  function _hapIsIOS(){
+    try{ return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }catch(e){ return false; }
+  }
+  function _hapTap(){   // iOS web-haptic: create+toggle an <input switch> (rendered, not display:none/opacity:0)
     try{
       const label = document.createElement('label');
       label.setAttribute('aria-hidden','true');
-      label.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none';
+      label.style.cssText = 'position:fixed;top:0;left:0;width:6px;height:6px;opacity:0.0001;border:0;margin:0;padding:0;pointer-events:none;z-index:-1';
       const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.setAttribute('switch','');             // Safari/iOS native switch -> haptic tap on toggle
+      input.type = 'checkbox'; input.setAttribute('switch','');
       label.appendChild(input);
       (document.body || document.documentElement).appendChild(label);
-      _hapEl = label;
+      label.click();
+      setTimeout(()=>{ try{ label.remove(); }catch(e){} }, 200);
     }catch(e){}
-    return _hapEl;
   }
   function haptic(kind){
     try{
-      if(localStorage.getItem('snb_haptics') === '0') return;          // on by default; explicit '0' mutes
-      if(typeof navigator !== 'undefined' && navigator.vibrate){       // Android / Chrome
-        navigator.vibrate(kind === 'complete' ? [16,80,16] : 12);
+      if(localStorage.getItem('snb_haptics') === '0') return;       // on by default; '0' mutes
+      if(_hapIsIOS()){
+        try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}   // some iOS builds expose it
+        _hapTap();                                                       // the <input switch> path
         return;
       }
-      const el = _hapSwitch();                                         // iOS Safari fallback (no Vibration API)
-      if(el) el.click();
+      if(navigator.vibrate) navigator.vibrate(kind === 'complete' ? [16,80,16] : 12);   // Android / Chrome
     }catch(e){}
   }
   const MARK = '../assets/logo/snb-mark-ink.svg';
