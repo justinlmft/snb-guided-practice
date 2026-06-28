@@ -51,6 +51,29 @@
     document.addEventListener('pointerdown',unlock,true);
   })();
 
+  // ── installable PWA: capture the browser's install prompt + small helpers ──
+  let _deferredInstall = null;
+  const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  const isiOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  const canInstall = () => !!_deferredInstall;
+  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); _deferredInstall = e; updateInstallUI(); });
+  window.addEventListener('appinstalled', ()=>{ _deferredInstall = null; try{ localStorage.setItem('snb_installed','1'); }catch(_){} updateInstallUI(); showToast('installed'); });
+  function promptInstall(){
+    if(!_deferredInstall) return;
+    const dp = _deferredInstall;
+    dp.prompt();
+    Promise.resolve(dp.userChoice).then(()=>{ _deferredInstall = null; updateInstallUI(); }).catch(()=>{});
+  }
+  // refresh any visible install UI when availability changes (settings row + today nudge)
+  function updateInstallUI(){
+    const row = document.getElementById('install-row');
+    if(row){ row.innerHTML = installRowInner(); const g = row.querySelector('.in-go'); if(g) g.onclick = promptInstall; }
+    if(isStandalone() || !canInstall()){ const n = document.getElementById('install-nudge'); if(n) n.remove(); }
+    else if(currentTab === 'today') maybeInstallNudge();
+  }
+  // long-press on chrome shouldn't pop the browser menu; inline text links keep theirs
+  document.addEventListener('contextmenu', (e)=>{ const t = e.target; if(t && t.closest && t.closest('.tabbar,.fab,.breathhero,.set-seg,svg,button:not(.linkbtn)')) e.preventDefault(); }, false);
+
   const STATE_COLOR = (key) => (window.PVCurrent.STATES[key] ? window.PVCurrent.STATES[key].color : '#D8D2C2');
   const STATE_NAME  = (key) => (window.PVCurrent.STATES[key] ? window.PVCurrent.STATES[key].name : 'settling');
 
@@ -261,7 +284,24 @@
       </nav>`);
     $('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>app(b.dataset.t));
     ({ today:tabToday, current:tabCurrent, practice:tabPractice }[tab] || tabToday)();
+    if(tab === 'today') maybeInstallNudge();
     document.body.classList.remove('show-fab');
+  }
+  // install affordances: a quiet settings row + an optional dismissable today nudge
+  function installRowInner(){
+    if(isStandalone()) return '<span class="val" style="font-weight:400">installed</span>';
+    if(canInstall()) return '<button class="set-quiet in-go" type="button">install this app</button>';
+    if(isiOS()) return '<span class="ios-hint">to install: tap the share icon, then choose add to home screen.</span>';
+    return '<span class="ios-hint">to install: open your browser menu and choose install or add to home screen.</span>';
+  }
+  function maybeInstallNudge(){
+    try{ if(isStandalone() || !canInstall()) return; if(localStorage.getItem('snb_install_nudge') === 'dismissed') return; }catch(_){ return; }
+    const c = content(); if(!c || document.getElementById('install-nudge')) return;
+    const b = document.createElement('div'); b.className = 'install-nudge'; b.id = 'install-nudge';
+    b.innerHTML = '<span class="in-txt">add stuck not broken to your home screen.</span><span class="in-actions"><button type="button" class="in-go">install</button><button type="button" class="in-x" aria-label="dismiss">\u00d7</button></span>';
+    c.insertBefore(b, c.firstChild);
+    const g = b.querySelector('.in-go'); if(g) g.onclick = promptInstall;
+    const x = b.querySelector('.in-x'); if(x) x.onclick = ()=>{ try{ localStorage.setItem('snb_install_nudge','dismissed'); }catch(_){} b.remove(); };
   }
   function tabBtn(t,label){ return `<button data-t="${t}" class="${currentTab===t?'on':''}"><span class="lb">${label}</span></button>`; }
   const content = () => $('#content');
@@ -1443,6 +1483,11 @@
           </div>
         </div>
 
+        <div class="set-group">
+          <p class="dash-prompt">app</p>
+          <div class="set-row-inline" id="install-row">${installRowInner()}</div>
+        </div>
+
         <div class="hr"></div>
 
         <div class="set-actions">
@@ -1468,6 +1513,7 @@
       Store.setPrefSilence(b.dataset.sil);
       segSil.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
     });
+    const irow = $('#install-row'); if(irow){ const ig = irow.querySelector('.in-go'); if(ig) ig.onclick = promptInstall; }
     $('#export').onclick = ()=>{
       const blob = new Blob([JSON.stringify(Store.checkins(),null,2)],{type:'application/json'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='my-checkins.json'; a.click();

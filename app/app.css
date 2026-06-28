@@ -780,3 +780,20 @@ body.reduce-motion .slider-ico{transition:none}
 /* calm mode + reduced-motion: skip the transition, land on the settled end-state */
 body.reduce-motion .settle-ico{transition:none}
 @media (prefers-reduced-motion:reduce){.settle-ico{transition:none}}
+
+
+/* ── PWA native-feel: install affordances + chrome polish ────────────── */
+.set-row-inline{display:flex;align-items:center;min-height:22px}
+.ios-hint{font-size:13px;color:var(--muted);line-height:1.45}
+.install-nudge{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--bone-deep);border:1px solid var(--hairline);border-radius:12px;padding:10px 12px;margin:0 0 14px;animation:nudgeIn .4s var(--ease)}
+.install-nudge .in-txt{font-size:13px;color:var(--ink-80);line-height:1.4}
+.install-nudge .in-actions{display:flex;align-items:center;gap:6px;flex:none}
+.install-nudge .in-go{font:inherit;font-size:13px;font-weight:500;border:0;border-radius:8px;padding:7px 12px;background:var(--ink);color:var(--bone);cursor:pointer}
+.install-nudge .in-x{font-size:18px;line-height:1;border:0;background:none;color:var(--muted);cursor:pointer;padding:2px 6px}
+@keyframes nudgeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.install-nudge{animation:none}}
+/* non-selectable chrome; reader/blog prose + inputs stay selectable */
+.phone{-webkit-user-select:none;user-select:none}
+.view.read,.view.read *,input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
+/* drop pull-to-refresh / rubberband only in the installed app */
+@media (display-mode:standalone){html,body{overscroll-behavior:none}}
