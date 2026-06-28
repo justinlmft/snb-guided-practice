@@ -685,6 +685,7 @@
     root.querySelectorAll('.change-row').forEach(b=>b.onclick=()=>screenCheckin(recent[+b.dataset.i]));
   }
   function screenCheckin(editRec){
+    if(editRec && typeof editRec.t!=='number') editRec = null;   // the today-card onclick passes its click EVENT as editRec; an event is not a check-in to edit -> start a fresh check-in (fixes "change your check-in" / "NaNd ago" / silent no-save)
     clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
     root.innerHTML = `
       <header class="appbar"></header>
