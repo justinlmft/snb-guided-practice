@@ -877,10 +877,3 @@ body.reduce-motion .tg-m{transition:none}
 .wincard.done-affirm{opacity:1}
 .wincard.done-affirm .wc-title{color:var(--ink);font-weight:500}
 .wincard.done-rich .wc-go,.wincard.done-affirm .wc-go{color:var(--muted)}
-
-
-/* today: uniform left gutter -> all card text lines up on one axis; bigger breath card + ring */
-.today > .breathhero{padding:24px 18px;gap:14px;align-items:center}
-.today > .wincard{padding:18px;gap:14px;align-items:center}
-.today .bh-stage,.today .dr-logo,.today .win-gut{flex:0 0 64px;display:flex;align-items:center;justify-content:flex-start}
-.breathhero .wc-ring{width:clamp(58px,13vh,64px);height:clamp(58px,13vh,64px)}
