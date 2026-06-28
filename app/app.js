@@ -634,7 +634,34 @@
   // short labels for the segmented control (the nuance lives in the caption below)
   const CH_SHORT = { settle:'settle', gentle:'gentle', meet:'meet', stretch:'stretch' };
 
-  function screenCheckin(){
+  let _snackT=null;
+  function actionSnack(msg, label, fn){
+    let s=document.getElementById('action-snack'); if(s) s.remove();
+    s=document.createElement('div'); s.id='action-snack'; s.className='update-toast';
+    const sp=document.createElement('span'); sp.textContent=msg;
+    const b=document.createElement('button'); b.type='button'; b.textContent=label;
+    s.appendChild(sp); s.appendChild(b); document.body.appendChild(s);
+    requestAnimationFrame(()=>s.classList.add('on'));
+    const close=()=>{ s.classList.remove('on'); setTimeout(()=>{ if(s.parentNode) s.remove(); }, 260); };
+    b.onclick=()=>{ close(); fn&&fn(); };
+    clearTimeout(_snackT); _snackT=setTimeout(close, 6000);
+  }
+  // change a recent check-in: pick from the last few, then edit it in place
+  function screenChangeCheckin(){
+    const recent = Store.checkins().slice(-6).reverse();
+    clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
+    const rows = recent.length ? recent.map((c,i)=>`<button class="change-row" data-i="${i}" type="button"><span class="change-when">${relTime(c.t)}</span><span class="change-mark">${stateMarks(c.dom)}<span class="change-state">${STATE_NAME(c.dom)}</span></span><span class="wc-go">${CHEV}</span></button>`).join('') : '<p class="panel-empty">no check-ins to change yet.</p>';
+    setHTML(`
+      <header class="appbar"><button class="backbtn" id="cc-back">back</button></header>
+      <div class="scroll"><div class="view" style="gap:14px">
+        <div class="scr-head"><p class="eyebrow"></p><h2 class="scr-h">change a check-in</h2></div>
+        <p class="map-sub" style="margin:0">pick one of your recent check-ins to adjust.</p>
+        <div class="change-list">${rows}</div>
+      </div></div>`);
+    $('#cc-back').onclick=()=>app('current');
+    root.querySelectorAll('.change-row').forEach(b=>b.onclick=()=>screenCheckin(recent[+b.dataset.i]));
+  }
+  function screenCheckin(editRec){
     clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
     root.innerHTML = `
       <header class="appbar"></header>
@@ -645,12 +672,14 @@
     $('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>app(b.dataset.t));
 
     let v=18, s=14, d=12, ch=0.65;
-    const seg = segPoss(segOf(Date.now()));
+    if(editRec){ v=Math.round((editRec.v||0)*100); s=Math.round((editRec.sym||0)*100); d=Math.round((editRec.dor||0)*100); if(typeof editRec.challenge==='number') ch=editRec.challenge; }
+    const seg = segPoss(segOf(editRec?editRec.t:Date.now()));
     $('#content').innerHTML = `<div class="view checkin2">
 
         <div class="scr-head">
           <p class="eyebrow"></p>
-          <h2 class="scr-h">how is your system showing up this ${seg}?</h2>
+          <h2 class="scr-h">${editRec?'change your check-in':'how is your system showing up this '+seg+'?'}</h2>
+          ${editRec?`<p class="ci-when">${relTime(editRec.t)}</p>`:''}
         </div>
 
         <div class="ci-block">
@@ -670,7 +699,7 @@
           <p class="ch-cap" id="ch-cap"></p>
         </div>
 
-        <div class="actionbar"><button class="btn block" id="save">Save check-in</button></div>
+        <div class="actionbar"><button class="btn block" id="save">${editRec?'Save changes':'Save check-in'}</button></div>
       </div>`;
 
     const amt = x => x<12?'barely':x<35?'a little':x<65?'some':x<88?'a lot':'fully';
@@ -694,7 +723,7 @@
 
     const cap = $('#ch-cap');
     function setCap(key){ if(cap) cap.textContent = CH_CAP[key] || ''; }
-    setCap('meet');
+    setCap((CH_LEVELS.find(l=>l.v===ch)||{key:'meet'}).key);
     $('#ch-seg').querySelectorAll('.ch-opt').forEach(b=>b.onclick=()=>{
       ch = +b.dataset.ch;
       $('#ch-seg').querySelectorAll('.ch-opt').forEach(x=>x.classList.toggle('on', x===b));
@@ -702,10 +731,13 @@
     });
 
     $('#save').onclick = ()=>{
-      Store.addCheckin({ v:v/100, sym:s/100, dor:d/100, challenge:ch });
+      const vals = { v:v/100, sym:s/100, dor:d/100, challenge:ch };
+      if(editRec){ Store.updateCheckin(editRec.t, vals); haptic('save'); FromJustin.refresh(); app('current'); showToast('check-in updated'); return; }
+      const rec = Store.addCheckin(vals);
       haptic('save');
       FromJustin.refresh();
       app('current');
+      actionSnack('checked in', 'change', ()=>screenCheckin(rec));
     };
   }
   function sliderHTML(key,name,sub,cls,val){
@@ -959,12 +991,14 @@
             </div>
           </div>
           <p class="deep-hint" style="font-size:11px;opacity:.5;text-align:center;margin:6px 0 2px">tap a symbol to learn what it means</p>
+          <button class="change-link" id="change-ci" type="button">change a recent check-in</button>
         </div>`;
 
       function stopPlay(){ if(playTimer){ clearInterval(playTimer); playTimer=null; } const p=$('#ot-play'); if(p) p.innerHTML='<svg viewBox="0 0 24 24"><path d="M8 6 L18 12 L8 18 Z"/></svg>'; }
 
       c.querySelectorAll('.period-pill').forEach(b=>b.addEventListener('click',()=>{ stopPlay(); const cv=$('#carousel'); const sl=cv?cv.scrollLeft:0; activePeriod=b.dataset.period; render(); const nv=$('#carousel'); if(nv){ nv.scrollLeft=sl; const i=Math.round(sl/(nv.clientWidth||1)); c.querySelectorAll('#dots .dot-i').forEach((d,j)=>d.classList.toggle('on',j===i)); } }));
       const setBtn=$('#set-btn'); if(setBtn) setBtn.onclick=screenSettings;
+      const chgBtn=$('#change-ci'); if(chgBtn) chgBtn.onclick=screenChangeCheckin;
       const addBtn=$('#add-ci'); if(addBtn) addBtn.onclick=screenCheckin;
       c.querySelectorAll('.panel-share').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openShare(`my nervous system, lately, ${safetyPct}% safe-and-social, most often in ${STATE_NAME(topState||'safety')}. stuck not broken`); }));
       c.querySelectorAll('.distrow').forEach(b=>b.addEventListener('click',()=>screenStateDetail(b.dataset.stateDetail)));

@@ -129,6 +129,23 @@
     saveCache(); if(CLOUD) flush();
     return rec;
   }
+  // edit an existing check-in in place (by timestamp): local + cloud. challenge stays local-only (no cloud column yet).
+  function updateCheckin(t, c){
+    const i = data.checkins.findIndex(x=>x.t===t);
+    if(i<0) return null;
+    const old = data.checkins[i];
+    const dom = PVCurrent.dominantOf(c.v, c.sym, c.dor);
+    const rec = Object.assign({}, old, { v:c.v, sym:c.sym, dor:c.dor, fr:(c.freeze!=null?c.freeze:old.fr)||0, dom:dom.key,
+                challenge:(typeof c.challenge==='number'?c.challenge:old.challenge) });
+    data.checkins[i] = rec;
+    const oi = outbox.checkins.findIndex(x=>x.t===t);
+    if(oi>=0) outbox.checkins[oi] = rec;
+    saveCache();
+    if(CLOUD && auth.user && oi<0){
+      try{ sb.from('checkins').update({ v:rec.v, sym:rec.sym, dor:rec.dor, fr:rec.fr, dom:rec.dom }).eq('user_id', auth.user.id).eq('t', t); }catch(e){}
+    }
+    return rec;
+  }
   function checkins(){ return data.checkins.slice(); }
   function lastCheckin(){ return data.checkins[data.checkins.length-1] || null; }
 
@@ -387,7 +404,7 @@
 
   global.Store = {
     init, signUp, signIn, signOut, user, cloud,
-    addCheckin, checkins, lastCheckin, addSession, sessions,
+    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
     prefSense, setPrefSense, prefSilence, setPrefSilence,
