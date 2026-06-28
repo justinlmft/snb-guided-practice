@@ -84,7 +84,7 @@
       [['dorsal',150],['sympathetic',450],['ventral',750]].forEach(([t,x])=>{
         const tx=el('text',{x,y:285});tx.textContent=t;
         tx.setAttribute('font-size','13');tx.setAttribute('letter-spacing','0.12em');
-        tx.setAttribute('fill','#5E5A4E');tx.style.textTransform='uppercase';
+        tx.setAttribute('fill',(getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#5E5A4E'));tx.style.textTransform='uppercase';
         lg.appendChild(tx);
       });
       svg.appendChild(lg);

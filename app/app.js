@@ -1442,6 +1442,7 @@
     const u=Store.user();
     const ts = (localStorage.getItem('snb_textscale')||'1');
     const rm = (localStorage.getItem('snb_reduce_motion')==='1');
+    const th = (localStorage.getItem('snb_theme')||'');
     const ps = Store.prefSense(); const psil = Store.prefSilence();
     const segBtn=(group,val,lbl,on)=>`<button type="button" data-${group}="${val}"${on?' class="on"':''}>${lbl}</button>`;
     $('#content').innerHTML = `
@@ -1468,6 +1469,12 @@
           <p class="dash-prompt">motion</p>
           <div class="set-seg" id="seg-motion">
             ${segBtn('rm','0','full',!rm)}${segBtn('rm','1','calm',rm)}
+          </div>
+        </div>
+        <div class="set-group">
+          <p class="dash-prompt">appearance</p>
+          <div class="set-seg" id="seg-theme">
+            ${segBtn('th','','auto',th==='')}${segBtn('th','light','light',th==='light')}${segBtn('th','dark','dark',th==='dark')}
           </div>
         </div>
         <div class="set-group">
@@ -1505,6 +1512,10 @@
       localStorage.setItem('snb_reduce_motion', b.dataset.rm); applyPrefs();
       segMot.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
     });
+    const segTh=$('#seg-theme'); if(segTh) segTh.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{
+      localStorage.setItem('snb_theme', b.dataset.th); applyPrefs();
+      segTh.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    });
     const segSense=$('#seg-sense'); if(segSense) segSense.querySelectorAll('[data-sense]').forEach(b=>b.onclick=()=>{
       Store.setPrefSense(b.dataset.sense);
       segSense.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
@@ -1533,11 +1544,18 @@
       const ts = parseFloat(localStorage.getItem('snb_textscale')||'1') || 1;
       document.documentElement.style.setProperty('--type-scale', String(ts));
       document.body.classList.toggle('reduce-motion', localStorage.getItem('snb_reduce_motion')==='1');
+      const theme = localStorage.getItem('snb_theme') || '';            // '', 'light', 'dark' ('' follows the system)
+      const de = document.documentElement;
+      de.classList.toggle('theme-dark', theme==='dark');
+      de.classList.toggle('theme-light', theme==='light');
+      const dark = theme==='dark' || (theme!=='light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      const tcm = document.querySelector('meta[name="theme-color"]'); if(tcm) tcm.setAttribute('content', dark ? '#1B1C1E' : '#FAF9F5');
     }catch(e){}
   }
   function relTime(t){ const m=Math.round((Date.now()-t)/60000); if(m<1)return 'just now'; if(m<60)return m+' min ago'; const h=Math.round(m/60); if(h<24)return h+'h ago'; const d=Math.round(h/24); return d+'d ago'; }
 
   (function(){ const fab=document.getElementById('fab-checkin'); if(fab) fab.addEventListener('click',()=>{ if(Store.user()) screenCheckin(); }); })();
   applyPrefs();
+  try{ if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyPrefs); }catch(_){}
   Store.init(route);
 })();
