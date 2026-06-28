@@ -13,17 +13,143 @@
    writes are write-through (memory + cache now, cloud in the background).
    ========================================================================== */
 (function (global) {
-  const sb = global.sb;                 // supabase client or null
+  // ----------------------------------------------------------------------------
+  // WebKit / iOS hardening for the Supabase auth client.
+  // config.js builds window.sb with createClient(url, key) and ALL-DEFAULT auth
+  // options. On iOS WebKit those defaults bite us:
+  //   • the default cross-tab lock (navigator.locks) can wedge per-request token
+  //     resolution, so authenticated calls silently go out WITHOUT a JWT — RLS
+  //     then rejects the write (insert -> 42501) while a cached read masks it.
+  //     This is why even a fresh iOS sign-in fails to persist.
+  //   • a single localStorage access that throws (private mode / storage
+  //     partitioning) can knock out session persistence entirely.
+  // We rebuild the client here — same project, default storageKey, so any
+  // session already on the device is reused — with a serial in-memory lock and a
+  // never-throw storage shim. config.js is left untouched. If anything goes
+  // wrong we fall back to the original client, so desktop behaviour is unchanged.
+  // ----------------------------------------------------------------------------
+  function buildClient(){
+    const orig = global.sb;
+    const cfg = global.SNB_CONFIG || {};
+    if(!orig || !global.supabase || !cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) return orig;
+    try{
+      // serial, deadlock-proof lock (the auth-js processLock shape): each call
+      // waits for the previous to settle, so token refreshes never overlap and
+      // we never depend on navigator.locks (which misbehaves under iOS WebKit).
+      let chain = Promise.resolve();
+      const serialLock = (_name, _acquireTimeout, fn) => {
+        const run = chain.then(() => fn());
+        chain = run.then(() => {}, () => {});      // advance on settle, swallow errors
+        return run;
+      };
+      // storage that can never throw: real localStorage when reachable, else a
+      // memory map, so one WebKit access error can't kill the whole session.
+      const mem = {};
+      const safeStorage = {
+        getItem(k){ try{ return global.localStorage.getItem(k); }catch(e){ return (k in mem) ? mem[k] : null; } },
+        setItem(k, v){ try{ global.localStorage.setItem(k, v); }catch(e){ mem[k] = String(v); } },
+        removeItem(k){ try{ global.localStorage.removeItem(k); }catch(e){ delete mem[k]; } },
+      };
+      const client = global.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          storage: safeStorage,
+          lock: serialLock,
+          // storageKey defaults to sb-<ref>-auth-token — identical to the
+          // config.js client, so the device's existing session is picked up.
+        },
+      });
+      try{ orig.auth.stopAutoRefresh(); }catch(e){}   // retire config.js's refresher (avoid two)
+      global.sb = client;                              // keep console/diagnostic `sb` on the live client
+      return client;
+    }catch(e){ console.warn('[store] hardened client build failed, using default', e); return orig; }
+  }
+
+  const sb = buildClient();             // supabase client or null
   const CLOUD = !!sb;
   const PROFILE_KEY = 'snb_profile';    // local-mode current profile pointer
 
   let auth = { user: null };            // {id, email}
   let data = { checkins: [], sessions: [] };
   let outbox = { checkins: [], sessions: [] };
+  let onChange = null;                  // app re-render hook (set in init)
+  let sync = { state: 'idle', pending: 0, error: null };  // 'idle' | 'syncing' | 'error'
 
   const cacheKey = () => 'snb_cache_' + (auth.user ? auth.user.id : 'anon');
   function saveCache(){ try { localStorage.setItem(cacheKey(), JSON.stringify({ data, outbox })); } catch(e){} }
   function loadCache(){ try { const o = JSON.parse(localStorage.getItem(cacheKey())); if(o){ data = o.data||{checkins:[],sessions:[]}; outbox = o.outbox||{checkins:[],sessions:[]}; } else { data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } } catch(e){ data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } }
+
+  // ---- sync plumbing (merge, live-session gating, loud failure) ----
+  function notify(){ try{ onChange && onChange(); }catch(e){} }
+  function setSync(state, error){
+    sync.state = state;
+    sync.error = error || null;
+    sync.pending = outbox.checkins.length + outbox.sessions.length;
+    renderSyncToast();
+  }
+
+  // union check-in / session lists by timestamp. Later args win on shared
+  // fields (cloud is authoritative for v/sym/dor/dom/...), but local-only fields
+  // (e.g. `challenge`, which has no cloud column yet) are preserved. This is what
+  // keeps an un-synced check-in visible instead of being wiped by a cloud read.
+  function unionByT(...lists){
+    const m = new Map();
+    for(const list of lists){ if(!list) continue; for(const r of list){ if(r && r.t!=null){ m.set(r.t, Object.assign({}, m.get(r.t), r)); } } }
+    return Array.from(m.values()).sort((a,b)=>a.t-b.t);
+  }
+
+  // a "your token isn't valid" failure (vs a transient network blip)?
+  function isAuthError(err){
+    if(!err) return false;
+    const code = String(err.code||'');
+    const status = err.status || err.statusCode;
+    const msg = String(err.message||'').toLowerCase();
+    return code==='42501' || code==='PGRST301' || status===401 || status===403 ||
+           msg.includes('jwt') || msg.includes('row-level security') || msg.includes('not authorized');
+  }
+
+  // Return a live, non-expired session, refreshing if it is about to lapse;
+  // null if there is no usable session. Authenticated reads/writes gate on this
+  // so we never silently act on a stale or missing token (the iOS failure mode).
+  async function ensureSession(){
+    if(!CLOUD) return null;
+    try{
+      const { data:{ session } } = await sb.auth.getSession();
+      if(!session) return null;
+      const now = Math.floor(Date.now()/1000);
+      if(session.expires_at && session.expires_at - now < 60){
+        const { data:r, error } = await sb.auth.refreshSession();
+        if(error) return session;                    // refresh failed — hand back what we have
+        return (r && r.session) || session;
+      }
+      return session;
+    }catch(e){ return null; }
+  }
+
+  // ---- loud failure: a small, self-contained "couldn't sync" toast.
+  // Lives entirely in store.js (no app.css / app.js dependency) so the whole fix
+  // ships as one identical file to both repos.
+  function renderSyncToast(){
+    try{
+      if(typeof document==='undefined' || !document.body) return;
+      const id='snb-sync-toast';
+      const existing=document.getElementById(id);
+      if(sync.state!=='error'){ if(existing) existing.remove(); return; }
+      if(existing) return;
+      const el=document.createElement('div');
+      el.id=id; el.setAttribute('role','status');
+      el.style.cssText='position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:99999;max-width:88%;display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:14px;background:#3a2a2a;color:#fff;font:500 13px/1.35 -apple-system,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.28)';
+      el.appendChild(document.createTextNode('your last check-in hasn’t synced yet.'));
+      const b=document.createElement('button');
+      b.type='button'; b.textContent='retry';
+      b.style.cssText='appearance:none;border:0;background:rgba(255,255,255,.18);color:#fff;font:600 13px/1 inherit;padding:7px 12px;border-radius:9px;cursor:pointer';
+      b.onclick=()=>{ setSync('syncing'); hydrate(); };
+      el.appendChild(b);
+      document.body.appendChild(el);
+    }catch(e){}
+  }
 
   // ---- row mappers (cloud columns are snake_case) ----
   const rowToCheckin = r => ({ t:r.t, v:r.v, sym:r.sym, dor:r.dor, fr:r.fr, note:r.note, dom:r.dom });
@@ -33,9 +159,24 @@
 
   // ---- lifecycle ----
   async function init(cb){
+    onChange = cb || null;
     if(CLOUD){
       try{
-        const { data:{ session } } = await sb.auth.getSession();
+        // React to background token refreshes / sign-in elsewhere: keep auth.user
+        // current and re-sync + re-render when a valid session (re)appears. This
+        // is what recovers the UI on iOS once the session plumbing settles.
+        sb.auth.onAuthStateChange((event, session)=>{
+          if(event==='INITIAL_SESSION') return;          // handled by the explicit load below
+          if(session && session.user){
+            const was = auth.user && auth.user.id;
+            auth.user = { id:session.user.id, email:session.user.email };
+            if(was !== auth.user.id) loadCache();
+            if(event==='SIGNED_IN' || event==='TOKEN_REFRESHED' || was !== auth.user.id) hydrate();
+          } else if(event==='SIGNED_OUT'){
+            auth.user = null;
+          }
+        });
+        const session = await ensureSession();           // live, refreshed-if-needed session — not a cached pointer
         if(session && session.user){ auth.user = { id:session.user.id, email:session.user.email }; loadCache(); await hydrate(); }
       }catch(e){ console.warn('session check failed', e); }
     } else {
@@ -50,16 +191,24 @@
 
   async function hydrate(){
     if(!CLOUD || !auth.user) return;
+    setSync('syncing');
     await flush();                                   // push anything queued offline first
     try{
+      const session = await ensureSession();         // a real GET, not the local cache, must be authenticated
+      if(!session){ setSync((outbox.checkins.length||outbox.sessions.length) ? 'error' : 'idle', 'no session'); return; }
       const [cs, ss] = await Promise.all([
         sb.from('checkins').select('*').order('t', { ascending:true }),
         sb.from('sessions').select('*').order('t', { ascending:true }),
       ]);
-      if(!cs.error) data.checkins = (cs.data||[]).map(rowToCheckin);
-      if(!ss.error) data.sessions = (ss.data||[]).map(rowToSession);
+      let changed = false;
+      // MERGE (union by t), never overwrite: local + still-queued outbox + cloud.
+      // An un-synced check-in stays visible and is never lost to a cloud read.
+      if(!cs.error){ data.checkins = unionByT(data.checkins, outbox.checkins, (cs.data||[]).map(rowToCheckin)); changed = true; }
+      if(!ss.error){ data.sessions = unionByT(data.sessions, outbox.sessions, (ss.data||[]).map(rowToSession)); changed = true; }
       saveCache();
-    }catch(e){ console.warn('hydrate failed (using cache)', e); }
+      setSync((outbox.checkins.length||outbox.sessions.length) ? 'error' : 'idle', (cs.error||ss.error)||null);
+      if(changed) notify();                          // re-render once fresh data lands (post-init / post-refresh)
+    }catch(e){ console.warn('hydrate failed (using cache)', e); setSync((outbox.checkins.length||outbox.sessions.length) ? 'error' : 'idle', e); }
   }
 
   let flushing = false;
@@ -67,22 +216,32 @@
     if(!CLOUD || !auth.user) return;
     if(flushing) return;                 // a flush is already in flight; it will drain the outbox
     flushing = true;
+    let ok = true;
     try{
-      if(outbox.checkins.length){
-        const batch = outbox.checkins.slice();
-        const { error } = await sb.from('checkins').insert(batch.map(checkinToRow));
-        if(!error){ outbox.checkins.splice(0, batch.length); saveCache(); } else { return; }
-      }
-      if(outbox.sessions.length){
-        const batch = outbox.sessions.slice();
-        const { error } = await sb.from('sessions').insert(batch.map(sessionToRow));
-        if(!error){ outbox.sessions.splice(0, batch.length); saveCache(); }
-      }
+      if(outbox.checkins.length) ok = await flushTable('checkins', outbox.checkins, checkinToRow);
+      if(ok && outbox.sessions.length) ok = await flushTable('sessions', outbox.sessions, sessionToRow);
     } finally {
       flushing = false;
     }
-    // if more was queued while we were flushing, drain it
-    if(outbox.checkins.length || outbox.sessions.length) return flush();
+    // drained cleanly but more arrived mid-flush? keep going. otherwise surface state.
+    if(ok && (outbox.checkins.length || outbox.sessions.length)){ setSync('syncing'); return flush(); }
+    setSync(ok ? 'idle' : 'error');
+  }
+  // Push one table's outbox. On an auth failure (no/expired JWT — the iOS case),
+  // refresh the session once and retry before giving up. Returns true if the
+  // queue drained, false if it is stuck (items stay queued; nothing is dropped).
+  async function flushTable(table, queue, toRow){
+    if(!queue.length) return true;
+    const batch = queue.slice();
+    let { error } = await sb.from(table).insert(batch.map(toRow));
+    if(error && isAuthError(error)){
+      try{ await sb.auth.refreshSession(); }catch(e){}
+      const live = await ensureSession();
+      if(live){ ({ error } = await sb.from(table).insert(batch.map(toRow))); }
+    }
+    if(!error){ queue.splice(0, batch.length); saveCache(); return true; }
+    console.warn('[store] sync failed for', table, error);
+    return false;
   }
 
   // ---- auth ----
@@ -112,9 +271,11 @@
   async function signOut(){
     if(CLOUD){ try{ await sb.auth.signOut(); }catch(e){} } else { clearProfile(); }
     auth.user = null; data = { checkins:[], sessions:[] }; outbox = { checkins:[], sessions:[] };
+    setSync('idle');
   }
   function user(){ return auth.user; }
   function cloud(){ return CLOUD; }
+  function syncStatus(){ return { state: sync.state, pending: sync.pending }; }   // {state:'idle'|'syncing'|'error', pending}
 
   // ---- check-ins ----
   function addCheckin(c){
@@ -125,7 +286,7 @@
     const rec = { t:Date.now(), v:c.v, sym:c.sym, dor:c.dor, fr:c.freeze||0, note:c.note||'', dom:dom.key,
                   challenge:(typeof c.challenge==='number'?c.challenge:null) };
     data.checkins.push(rec);
-    if(CLOUD && auth.user){ outbox.checkins.push(rec); }
+    if(CLOUD && auth.user){ outbox.checkins.push(rec); setSync('syncing'); }
     saveCache(); if(CLOUD) flush();
     return rec;
   }
@@ -153,7 +314,7 @@
   function addSession(s){
     const rec = Object.assign({ t:Date.now() }, s);
     data.sessions.push(rec);
-    if(CLOUD && auth.user){ outbox.sessions.push(rec); }
+    if(CLOUD && auth.user){ outbox.sessions.push(rec); setSync('syncing'); }
     saveCache(); if(CLOUD) flush();
   }
   function sessions(){ return data.sessions.slice(); }
@@ -403,7 +564,7 @@
   }
 
   global.Store = {
-    init, signUp, signIn, signOut, user, cloud,
+    init, signUp, signIn, signOut, user, cloud, syncStatus,
     addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
