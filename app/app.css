@@ -596,6 +596,7 @@ body.in-practice .tabbar{display:none}
 .plan-title{font-size:22px;font-weight:500;line-height:1.24;letter-spacing:-.01em;color:var(--ink);margin:0;text-wrap:pretty}
 .plan-sec{margin-bottom:20px}
 .plan-sec .dash-prompt{margin:0 0 10px}
+.plan-sec .dash-prompt::before{display:none}
 .plan-why{font-size:15px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0}
 .plan-about{font-size:15px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0}
 .plan-shaped{margin-top:10px}
