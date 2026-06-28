@@ -1029,7 +1029,29 @@ function updateTest(){
   const cur=tl.querySelector('.row.cur');if(cur)cur.scrollIntoView({block:'nearest'});
 }
 
-$('begin').onclick=startPlayer;
+/* soft haptic when a session begins from the customizer — mirrors the app's haptic.
+   Same-origin iframe shares localStorage, so it honors the same snb_haptics setting (on by
+   default; '0' mutes). Android uses the Vibration API; iOS Safari has none, so we toggle a
+   hidden <input switch> for a light tap (must run inside the Begin tap = a user gesture). */
+var _hapEl=null;
+function _hapSwitch(){
+  if(_hapEl) return _hapEl;
+  try{
+    var label=document.createElement('label'); label.setAttribute('aria-hidden','true');
+    label.style.cssText='position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none';
+    var input=document.createElement('input'); input.type='checkbox'; input.setAttribute('switch','');
+    label.appendChild(input); (document.body||document.documentElement).appendChild(label); _hapEl=label;
+  }catch(e){}
+  return _hapEl;
+}
+function haptic(){
+  try{
+    if(localStorage.getItem('snb_haptics')==='0') return;
+    if(typeof navigator!=='undefined' && navigator.vibrate){ navigator.vibrate(12); return; }
+    var el=_hapSwitch(); if(el) el.click();
+  }catch(e){}
+}
+$('begin').onclick=()=>{haptic();startPlayer();};
 $('goback').onclick=()=>{picked=false;renderSetup();};   // reopen the practice list from the chosen option
 
 /* the player opens straight into the customizer — no zero-decision front door, no planned stack */
@@ -1250,7 +1272,7 @@ $('moresil').onclick=()=>stepSil(1);
 $('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capStart(CAP[curFile]||'');}else{capClear();}};
 
 $('stopbtn').onclick=()=>{stopAll();finished=false;postToHost('exit');showScreen('setup');};   // immediate exit, no close
-$('againbtn').onclick=()=>{startPlayer();};                                  // replay the same session from the top
+$('againbtn').onclick=()=>{haptic();startPlayer();};                                  // replay the same session from the top
 $('overbtn').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
 $('restbtn').onclick=()=>{$('player').classList.add('rested');};               // settle into a quiet close
 $('restagain').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
