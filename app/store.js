@@ -209,6 +209,29 @@
     return best ? { seg:best.seg, dom:best.dom, n:best.n } : null;
   }
 
+  // ---- tenure: how long they've been here + how much data exists, as an honest "stage" ----
+  // Drives the for-you blog's time-framing and depth (and the daily card + practice rec) so
+  // nothing claims more than the data shows. Pure stage table is split out for testing.
+  function _stageFor(m){
+    const count=m.count, days=m.days, windowCount=m.windowCount;
+    if(count <= 1)                                  return 'start';      // just arrived: no pattern to claim
+    if(count <= 4 && days <= 3)                      return 'early';      // first few check-ins: "so far"
+    if(days >= 21 && count >= 16 && windowCount >= 4) return 'established'; // long-running + still active
+    if(days >= 7 && windowCount >= 4)               return 'week';        // a real week of real data
+    return 'building';                                                    // some history, but not a full honest week
+  }
+  function tenure(){
+    const cs = data.checkins, count = cs.length;
+    if(!count) return { count:0, days:0, windowCount:0, sinceLast:null, returning:false, stage:'start' };
+    const now = Date.now(), DAY = 86400000;
+    const sd = t => { const d=new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+    const days = Math.round((sd(now) - sd(cs[0].t)) / DAY);          // calendar days since the first check-in
+    const windowCount = cs.filter(c => now - c.t <= 7*DAY).length;   // check-ins inside the last 7 days
+    const sinceLast = Math.floor((now - cs[count-1].t) / DAY);       // whole days since the most recent check-in
+    const returning = count >= 5 && sinceLast >= 4 && windowCount <= 2; // has history but just back from a gap
+    return { count, days, windowCount, sinceLast, returning, stage: _stageFor({count, days, windowCount}) };
+  }
+
   // ---- recommender (simulated AI) ----
   function recommend(){
     const last = lastCheckin();
@@ -216,12 +239,16 @@
     const tr = trend();
     // how far the person wants to go: this check-in's stated appetite, else their
     // recent average, else a balanced default. This is the new lever the advisor reads.
-    const want = (last && typeof last.challenge==='number') ? last.challenge
+    let want = (last && typeof last.challenge==='number') ? last.challenge
                : (L.challengeAvg!=null ? L.challengeAvg : 0.55);
     if(!last){
       return cfg('mindfulness', null, L.favSense||'touch', 8,
         'a calm place to start. when you check in, i will tune this to where your system actually is.', 'simplest place to begin');
     }
+    // first few days: keep the practice gentle and build from there, unless they explicitly asked to stretch.
+    const _tn = tenure();
+    const early = (_tn.stage==='start' || _tn.stage==='early') && !(typeof last.challenge==='number' && last.challenge>=0.78);
+    if(early) want = Math.min(want, 0.55);
     const dom = last.dom;
     const sense = L.favSense || 'touch';
     const moreSilence = L.endsEarlyOften ? 12 : 8;
@@ -243,10 +270,11 @@
       return cfg('mindfulness', null, sense, moreSilence, reason, 'settle the charge');
     }
     // safe / regulated — this is where the challenge appetite has the most room to act
-    if(want<=0.35){
-      return cfg('anchoring', null, sense, moreSilence,
-        'you have real safety, and you asked to keep it gentle. let us just deepen the calm and let it land.',
-        'stay gentle');
+    if(want<=0.35 || early){
+      const reason = early
+        ? 'you have real safety here. you are just getting started, so let us keep these first few gentle and let the calm land.'
+        : 'you have real safety, and you asked to keep it gentle. let us just deepen the calm and let it land.';
+      return cfg('anchoring', null, sense, moreSilence, reason, early ? 'gentle start' : 'stay gentle');
     }
     const skill = want>=0.78 ? 'pendulation' : (L.favSkill || 'imagery');
     let reason = 'there is real safety here right now. if you are willing, this is a chance to gently meet something harder, knowing you can come back.';
@@ -293,7 +321,7 @@
   global.Store = {
     init, signUp, signIn, signOut, user, cloud,
     addCheckin, checkins, lastCheckin, addSession, sessions,
-    learned, trend, transitions, timeOfDay, recommend, practiceLabel, reset, getName, setName,
+    learned, trend, transitions, timeOfDay, tenure, _stageFor, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
   };
 })(window);
