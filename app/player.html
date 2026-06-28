@@ -1248,6 +1248,7 @@ function finish(){playing=false;finished=true;finishAt=performance.now();inGap=f
 }
 $('pause').onclick=()=>{
   if(!playing)return;
+  haptic();
   if(paused){ // resume
     paused=false;
     if(inGap){gapStart=performance.now();clearTimeout(gapTimer);gapTimer=setTimeout(()=>{inGap=false;advance();},gapRemain);}
@@ -1271,12 +1272,13 @@ $('lesssil').onclick=()=>stepSil(-1);
 $('moresil').onclick=()=>stepSil(1);
 $('captoggle').onclick=()=>{capsOn=!capsOn;const t=$('captoggle');$('capstate').textContent=capsOn?'on':'off';t.classList.toggle('on',capsOn);t.setAttribute('aria-pressed',capsOn?'true':'false');$('player').classList.toggle('caps-on',capsOn);if(capsOn&&curFile){capStart(CAP[curFile]||'');}else{capClear();}};
 
-$('stopbtn').onclick=()=>{stopAll();finished=false;postToHost('exit');showScreen('setup');};   // immediate exit, no close
+$('stopbtn').onclick=()=>{haptic();stopAll();finished=false;postToHost('exit');showScreen('setup');};   // immediate exit, no close
 $('againbtn').onclick=()=>{haptic();startPlayer();};                                  // replay the same session from the top
 $('overbtn').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
 $('restbtn').onclick=()=>{$('player').classList.add('rested');};               // settle into a quiet close
 $('restagain').onclick=()=>{stopAll();finished=false;$('player').classList.remove('finished','breaking','conn-trouble','rested');$('setup').classList.remove('choosing');showScreen('setup');};
 $('endbtn').onclick=()=>{
+  haptic();
   if(finished){stopAll();showScreen('setup');return;}
   closingNow=true;   // ease-out: the circle returns to black, confirming the close has begun
   clearTimeout(gapTimer);inGap=false;playing=true;paused=false;LOOP=false;
