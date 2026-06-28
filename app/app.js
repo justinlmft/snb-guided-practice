@@ -1123,12 +1123,14 @@
 
   // Plan reader: a calm, full read of the recommended practice before it starts —
   // what it is, its shape, why it was chosen — with Begin / change.
+  // sentence-case a lowercase advisor string for the blog-styled plan screen
+  function properCase(s){ return String(s==null?'':s).replace(/(^|[.!?]\s+)([a-z])/g,(m,p,c)=>p+c.toUpperCase()).replace(/\bi\b/g,'I').replace(/\bi(['’])/g,'I$1'); }
   function renderPlan(reco){
     clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
     currentTab = 'practice';
     const tk = trackOf(reco.practiceKey);
     const planNm = Store.getName();
-    const planTitle = planNm ? `${escapeHtml(planNm)}’s custom practice` : 'your custom practice';
+    const planTitle = planNm ? `${escapeHtml(planNm)}’s custom practice` : 'Your custom practice';
     const chLabel = reco.challenge!=null ? Store.challengeLabel(reco.challenge) : null;
     // the customized items used to be a separate key/value list; they now live inside
     // "what to expect" as track-colored tokens woven into the sentence.
@@ -1140,7 +1142,7 @@
       chLabel ? `meeting you at ${hl(chLabel)}` : null,
     ].filter(Boolean);
     const joinList = (a)=> a.length<=1 ? (a[0]||'') : a.slice(0,-1).join(', ')+' and '+a[a.length-1];
-    const shapedSentence = shapeBits.length ? `tuned for you, ${joinList(shapeBits)}.` : '';
+    const shapedSentence = shapeBits.length ? `Tuned for you, ${joinList(shapeBits)}.` : '';
     root.innerHTML = `
       <header class="appbar"></header>
       <div class="scroll" id="content"></div>
@@ -1157,16 +1159,16 @@
         </div>
       </div>
       <div class="plan-sec">
-        <p class="dash-prompt">why this, for you</p>
-        <p class="plan-why">${escapeHtml(reco.reason)}</p>
+        <p class="dash-prompt">Why this, for you</p>
+        <p class="plan-why">${escapeHtml(properCase(reco.reason))}</p>
       </div>
       <div class="plan-sec">
-        <p class="dash-prompt">what to expect</p>
-        <p class="plan-about">${escapeHtml(aboutOf(reco.practiceKey, reco.sense))}</p>
+        <p class="dash-prompt">What to expect</p>
+        <p class="plan-about">${escapeHtml(properCase(aboutOf(reco.practiceKey, reco.sense)))}</p>
         ${shapedSentence?`<p class="plan-about plan-shaped">${shapedSentence}</p>`:''}
       </div>
       <div class="plan-actions">
-        <button class="set-quiet actionbar-aux" id="plan-change">change this practice</button>
+        <button class="set-quiet actionbar-aux" id="plan-change">Change this practice</button>
         <button class="btn block" id="plan-begin">Begin</button>
       </div>
     </div>`;
