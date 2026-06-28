@@ -424,6 +424,7 @@
   const WINS = ['breath','checkin','practice'];
   function winAction(k, reco){
     if(k==='breath') return ()=>{
+      haptic('start');               // soft tap when the one-breath ring is triggered
       if(winsDone().breath && !repeatBreath){
         repeatBreath = true;
         const hero = document.querySelector('.breathhero');
