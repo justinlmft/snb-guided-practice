@@ -7,13 +7,36 @@
   const root = $('#screen');
   let _toastT=null;
   function showToast(msg){ let t=document.getElementById('app-toast'); if(!t){ t=document.createElement('div'); t.id='app-toast'; t.className='app-toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('on'); clearTimeout(_toastT); _toastT=setTimeout(()=>t.classList.remove('on'),1900); }
-  // opt-in haptics (default off; Android only — iOS Safari has no Vibration API, so this no-ops there).
-  // Sparing, calm: a soft tap to confirm a saved action, a gentle double for a completed session.
+  // Haptics — a soft, sparing confirmation when you act (check-in saved, practice
+  // started, session complete). Android exposes the Vibration API; iOS Safari does
+  // NOT, so there we toggle a hidden iOS <input switch>, which emits a light tap
+  // (iOS 17.4+). Both paths need a real user gesture, so haptic() must be called
+  // straight from a tap handler. On by default; Settings > haptics writes '0' to mute.
+  let _hapEl = null;
+  function _hapSwitch(){
+    if(_hapEl || typeof document==='undefined') return _hapEl;
+    try{
+      const label = document.createElement('label');
+      label.setAttribute('aria-hidden','true');
+      label.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch','');             // Safari/iOS native switch -> haptic tap on toggle
+      label.appendChild(input);
+      (document.body || document.documentElement).appendChild(label);
+      _hapEl = label;
+    }catch(e){}
+    return _hapEl;
+  }
   function haptic(kind){
     try{
-      if(localStorage.getItem('snb_haptics')!=='1') return;
-      if(!('vibrate' in navigator)) return;
-      navigator.vibrate(kind==='complete' ? [16,80,16] : 12);
+      if(localStorage.getItem('snb_haptics') === '0') return;          // on by default; explicit '0' mutes
+      if(typeof navigator !== 'undefined' && navigator.vibrate){       // Android / Chrome
+        navigator.vibrate(kind === 'complete' ? [16,80,16] : 12);
+        return;
+      }
+      const el = _hapSwitch();                                         // iOS Safari fallback (no Vibration API)
+      if(el) el.click();
     }catch(e){}
   }
   const MARK = '../assets/logo/snb-mark-ink.svg';
@@ -1172,6 +1195,7 @@
   // tab bar is the only navigation, and it hides once a session is playing. The
   // practice tab opens the player's own 4-option chooser (incl. "More meditations").
   function practiceShell(src, reco){
+    haptic('start');               // soft tap as the practice begins (Begin tap = user gesture)
     currentTab = 'practice';
     setHTML(`
       <div class="weaver-wrap"><iframe class="weaver-frame" id="weaver" src="${src}" title="Guided practice" allow="autoplay"></iframe></div>
@@ -1539,7 +1563,7 @@
     const ts = (localStorage.getItem('snb_textscale')||'1');
     const rm = (localStorage.getItem('snb_reduce_motion')==='1');
     const th = (localStorage.getItem('snb_theme')||'');
-    const hp = (localStorage.getItem('snb_haptics')==='1');
+    const hp = (localStorage.getItem('snb_haptics')!=='0');   // on by default
     const ps = Store.prefSense(); const psil = Store.prefSilence();
     const segBtn=(group,val,lbl,on)=>`<button type="button" data-${group}="${val}"${on?' class="on"':''}>${lbl}</button>`;
     $('#content').innerHTML = `
