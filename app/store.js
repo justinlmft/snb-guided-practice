@@ -217,7 +217,7 @@
     if(count <= 1)                                  return 'start';      // just arrived: no pattern to claim
     if(count <= 4 && days <= 3)                      return 'early';      // first few check-ins: "so far"
     if(days >= 21 && count >= 16 && windowCount >= 4) return 'established'; // long-running + still active
-    if(days >= 7 && windowCount >= 4)               return 'week';        // a real week of real data
+    if(days >= 7 && windowCount >= 4 && count >= 7)  return 'week';        // a real week: 7+ days AND a week's worth of check-ins (not a sparse old account)
     return 'building';                                                    // some history, but not a full honest week
   }
   function tenure(){

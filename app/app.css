@@ -844,3 +844,11 @@ body.reduce-motion .tg-m{transition:none}
 .safety-foot .tg-host{flex:none;display:inline-flex}
 .safety-foot .triglyph{height:30px}
 .safety-foot .sf-txt{flex:1}
+
+
+/* 'your growth' card headline */
+.growth-head{display:flex;flex-direction:column;gap:3px;margin:4px 0 14px}
+.growth-num{font-size:30px;font-weight:500;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+.growth-num.up{color:var(--leaf)}
+.growth-num.down{color:var(--muted)}
+.growth-cap{font-size:13.5px;color:var(--ink-80);line-height:1.4;text-wrap:pretty}

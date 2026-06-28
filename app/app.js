@@ -807,6 +807,9 @@
     const domOf = arr => { const m={}; arr.forEach(x=>{m[x.dom]=(m[x.dom]||0)+1;}); const e=Object.entries(m).sort((a,b)=>b[1]-a[1])[0]; return e?e[0]:null; };
 
     function render(){
+      const _span = Store.tenure().days;
+      const visPer = PERIODS.filter(p=>p.days==null || p.days<=_span);   // only windows the data actually spans
+      if(!visPer.some(p=>p.key===activePeriod)) activePeriod='all';
       const days = PERIODS.find(p=>p.key===activePeriod)?.days||null;
       const cs = filterByPeriod(allCs, days);
       const paced = groupByDay(cs);
@@ -883,14 +886,24 @@
           </div>`;
       }
 
+      // ---- growth headline: safety now vs when you started (all-time, not period-filtered) ----
+      let growthHead='';
+      (function(){
+        const tn=Store.tenure();
+        if(allCs.length>=8 && tn.days>=5 && tn.stage!=='start' && tn.stage!=='early'){
+          const k=Math.max(2,Math.floor(allCs.length/4));
+          const startV=avg(allCs.slice(0,k).map(x=>x.v)), recentV=avg(allCs.slice(-k).map(x=>x.v));
+          const g=Math.round((recentV-startV)*100), up=g>=3, down=g<=-3;
+          const cap=up?'higher than when you started. the reps add up.':down?'safety moves in waves, and this is a dip. it tends to come back.':'about steady since you started, and steady counts.';
+          growthHead=`<p class="growth-head"><span class="growth-num ${up?'up':down?'down':'flat'}">${g>0?'+':''}${g} pts</span><span class="growth-cap">${cap}</span></p>`;
+        }
+      })();
       const SHARE_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V4"/><path d="M8.5 7.5 12 4l3.5 3.5"/><path d="M5 12v7h14v-7"/></svg>';
       const shareBtn=(k)=>`<button class="panel-share" type="button" data-share="${k}" aria-label="Share this card">${SHARE_ICON}</button>`;
       c.innerHTML=`
         <div class="view play-view">
           <div class="filter-bar">
-            <div class="play-filter seg">
-              ${PERIODS.map(p=>`<button class="period-pill${activePeriod===p.key?' on':''}" data-period="${p.key}">${p.label}</button>`).join('')}
-            </div>
+            ${visPer.length>1?`<div class="play-filter seg">${visPer.map(p=>`<button class="period-pill${activePeriod===p.key?' on':''}" data-period="${p.key}">${p.label}</button>`).join('')}</div>`:''}
             <button class="set-gear ci-add" id="add-ci" type="button" aria-label="new check in" title="new check in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
             <button class="set-gear" id="set-btn" type="button" aria-label="settings" title="settings">${GEAR_SVG}</button>
           </div>
@@ -916,9 +929,9 @@
             </section>
 
             <section class="panel">
-              ${shareBtn('day')}<p class="panel-title">day by day</p>
-              <p class="panel-sub">your safety over time. the line rises and deepens with more safety. tap a point to see it.</p>
-              ${dayByDay}
+              ${shareBtn('day')}<p class="panel-title">your growth</p>
+              <p class="panel-sub">your safety over time, and how far you've come since you started.</p>
+              ${growthHead}${dayByDay}
             </section>
 
             <section class="panel">
