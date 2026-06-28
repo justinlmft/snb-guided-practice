@@ -7,6 +7,15 @@
   const root = $('#screen');
   let _toastT=null;
   function showToast(msg){ let t=document.getElementById('app-toast'); if(!t){ t=document.createElement('div'); t.id='app-toast'; t.className='app-toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('on'); clearTimeout(_toastT); _toastT=setTimeout(()=>t.classList.remove('on'),1900); }
+  // opt-in haptics (default off; Android only — iOS Safari has no Vibration API, so this no-ops there).
+  // Sparing, calm: a soft tap to confirm a saved action, a gentle double for a completed session.
+  function haptic(kind){
+    try{
+      if(localStorage.getItem('snb_haptics')!=='1') return;
+      if(!('vibrate' in navigator)) return;
+      navigator.vibrate(kind==='complete' ? [16,80,16] : 12);
+    }catch(e){}
+  }
   const MARK = '../assets/logo/snb-mark-ink.svg';
 
   // ── demo mode ─────────────────────────────────────────────────────
@@ -679,6 +688,7 @@
 
     $('#save').onclick = ()=>{
       Store.addCheckin({ v:v/100, sym:s/100, dor:d/100, challenge:ch });
+      haptic('save');
       FromJustin.refresh();
       app('current');
     };
@@ -1360,7 +1370,7 @@
     if(m.event === 'screen'){ document.body.classList.toggle('in-practice', m.screen==='player'); return; }
     const reco = window._pendingReco;
     if(!reco) return;
-    if(m.event === 'complete'){ logSession(reco, true, false, m.minutes); renderFeedback(reco); }
+    if(m.event === 'complete'){ haptic('complete'); logSession(reco, true, false, m.minutes); renderFeedback(reco); }
     else if(m.event === 'exit'){ logSession(reco, false, true, m.minutes); app('today'); }
   });
   function logSession(reco, completed, endedEarly, minutes){
@@ -1443,6 +1453,7 @@
     const ts = (localStorage.getItem('snb_textscale')||'1');
     const rm = (localStorage.getItem('snb_reduce_motion')==='1');
     const th = (localStorage.getItem('snb_theme')||'');
+    const hp = (localStorage.getItem('snb_haptics')==='1');
     const ps = Store.prefSense(); const psil = Store.prefSilence();
     const segBtn=(group,val,lbl,on)=>`<button type="button" data-${group}="${val}"${on?' class="on"':''}>${lbl}</button>`;
     $('#content').innerHTML = `
@@ -1469,6 +1480,12 @@
           <p class="dash-prompt">motion</p>
           <div class="set-seg" id="seg-motion">
             ${segBtn('rm','0','full',!rm)}${segBtn('rm','1','calm',rm)}
+          </div>
+        </div>
+        <div class="set-group">
+          <p class="dash-prompt">haptics</p>
+          <div class="set-seg" id="seg-haptics">
+            ${segBtn('hp','0','off',!hp)}${segBtn('hp','1','on',hp)}
           </div>
         </div>
         <div class="set-group">
@@ -1515,6 +1532,10 @@
     const segTh=$('#seg-theme'); if(segTh) segTh.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{
       localStorage.setItem('snb_theme', b.dataset.th); applyPrefs();
       segTh.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    });
+    const segHp=$('#seg-haptics'); if(segHp) segHp.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{
+      localStorage.setItem('snb_haptics', b.dataset.hp); haptic('save');
+      segHp.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
     });
     const segSense=$('#seg-sense'); if(segSense) segSense.querySelectorAll('[data-sense]').forEach(b=>b.onclick=()=>{
       Store.setPrefSense(b.dataset.sense);
