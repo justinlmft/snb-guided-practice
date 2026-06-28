@@ -207,15 +207,15 @@ body.breathing .breathhero .bh-row{opacity:0}
 .slider .nm{font-size:14px;font-weight:500}
 .slider .nm .sub{font-weight:400;color:var(--muted);font-size:13px;margin-left:7px}
 .slider .amt{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:lowercase}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;cursor:pointer;margin:0;touch-action:pan-y}
 input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--bone-deep),var(--rail,var(--bone-deep)));transition:background .3s var(--ease)}
 input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--bone-deep),var(--rail,var(--bone-deep)));transition:background .3s var(--ease)}
 .r-v{--rail:var(--s-safety)}
 .r-sym{--rail:var(--s-fight)}
 .r-dor{--rail:var(--s-shutdown)}
 .r-freeze{--rail:var(--s-freeze)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--knob);border:2px solid var(--ink);margin-top:-7px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--knob);border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:var(--knob);border:2px solid var(--ink);margin-top:-11px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--knob);border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 /* current / checkin figures — full-bleed, breaks out of view padding */
 .timeline-figure{flex:1;display:flex;flex-direction:column;justify-content:center;margin:18px 0 0}
 .checkin-top{flex:1;display:flex;flex-direction:column}
