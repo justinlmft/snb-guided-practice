@@ -110,6 +110,19 @@
   const STATE_CORE = { safety:['v'], fightflight:['sym'], shutdown:['dor'],
                        play:['v','sym'], stillness:['v','dor'], freeze:['sym','dor'] };
   const AXIS_OWN = () => ({ v:STATE_COLOR('safety'), sym:STATE_COLOR('fightflight'), dor:STATE_COLOR('shutdown') });
+  // The brand logo as a live state read: heart, bolt, x in one fixed lockup (size + spacing
+  // never change) — only fill color moves. Active axis(es) take the state color, the rest sit in
+  // a neutral tone; color eases in on mount (MutationObserver near boot). Reduce-motion safe.
+  const TRI_ORDER = ['heart','bolt','x'];
+  const TRI_VB = (function(){ const I=window.SNB_ICONS||{}; let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    TRI_ORDER.forEach(k=>{ const v=((I[k]&&I[k].vb)||'0 0 1 1').trim().split(/\s+/).map(Number); x0=Math.min(x0,v[0]); y0=Math.min(y0,v[1]); x1=Math.max(x1,v[0]+v[2]); y1=Math.max(y1,v[1]+v[3]); });
+    return x0+' '+y0+' '+(x1-x0)+' '+(y1-y0); })();
+  function triGlyph(key){
+    const col = STATE_COLOR(key), I = window.SNB_ICONS||{};
+    const active = (STATE_AXES[key]||[]).map(a=>a[0]);
+    const paths = TRI_ORDER.map(m=>`<path class="tg-m" data-m="${m}"${active.indexOf(m)>=0?` data-col="${col}"`:''} d="${(I[m]&&I[m].d)||''}"></path>`).join('');
+    return `<svg class="triglyph" viewBox="${TRI_VB}" aria-hidden="true">${paths}</svg>`;
+  }
   function stateMarks(key){
     const ax = STATE_AXES[key];
     if(!ax) return `<span class="st-dot" style="background:${STATE_COLOR(key)}"></span>`;
@@ -741,7 +754,7 @@
     const last=B[N-1];
     const stops=pts.map(p=>`<stop offset="${N===1?0:(p.i/(N-1)).toFixed(3)}" stop-color="${mode==='safety'?ramp(p.b.avg):STATE_COLOR(p.b.dom)}"></stop>`).join('');
     defs=`<defs><linearGradient id="cline" x1="${padL}" y1="0" x2="${padL+plotW}" y2="0" gradientUnits="userSpaceOnUse">${stops}</linearGradient></defs>`;
-    lineSvg=`<path d="${areaPath}" fill="url(#cline)" opacity=".1"></path><path d="${linePath}" fill="none" stroke="url(#cline)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path>`;
+    lineSvg=`<path class="cline-area" d="${areaPath}" fill="url(#cline)" opacity=".1"></path><path class="cline-path" pathLength="1" d="${linePath}" fill="none" stroke="url(#cline)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path>`;
     if(mode==='safety'){
       footer=`<div class="arc-scale"><span>less safety</span><span class="arc-scale-bar"></span><span>more</span></div>`;
       readoutTxt=`${last.label} \u00b7 ${Math.round(last.avg*100)}% safety`;
@@ -750,7 +763,8 @@
       footer=`<div class="legend">${states.map(k=>`<span class="lg-it">${stateMarks(k)}${STATE_NAME(k)}</span>`).join('')}</div>`;
       readoutTxt=`${last.label} \u00b7 ${STATE_NAME(last.dom)}`;
     }
-    return `<div class="arc-readout" id="chart-readout">${readoutTxt}</div><svg viewBox="0 0 ${W} ${H}" class="chart" preserveAspectRatio="xMidYMid meet">${defs}${lineSvg}${dots}${labs.join('')}</svg>${footer}`;
+    const gain = mode==='safety' && N>=2 && (B[N-1].avg - B[0].avg) > 0.04;   // a real safety rise -> the line draws itself as a payoff
+    return `<div class="arc-readout" id="chart-readout">${readoutTxt}</div><svg viewBox="0 0 ${W} ${H}" class="chart${gain?' draw-gain':''}" preserveAspectRatio="xMidYMid meet">${defs}${lineSvg}${dots}${labs.join('')}</svg>${footer}`;
   }
   function openShare(txt){
     const url=location.href;
@@ -890,7 +904,7 @@
                 <div class="safety-trend ${dir}">${dir==='rising'?'and rising \u2191':dir==='falling'?'and dipping \u2193':'and steady'}</div>
               </div>
               <div class="safety-meter"><span class="safety-meter-fill" style="width:${safetyPct}%"></span></div>
-              ${topState?`<p class="safety-foot">most often in ${stateMarks(topState)}<b>${STATE_NAME(topState)}</b></p>`:''}
+              ${topState?`<div class="safety-foot"><span class="tg-host">${triGlyph(topState)}</span><span class="sf-txt">most often in <b>${STATE_NAME(topState)}</b></span></div>`:''}
               <p class="safety-range">ranged ${loPct}% to ${hiPct}% across ${cs.length} check-ins</p>
               ${rising?'<p class="bloom-line">your system is finding more safety.</p>':''}
             </section>
@@ -997,7 +1011,7 @@
     $('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>app(b.dataset.t));
     $('#content').innerHTML = `<div class="view read sd-view">
         <div class="scr-head sd-head">
-          <span class="sd-marks">${stateMarks(key)}</span>
+          <span class="sd-marks">${triGlyph(key)}</span>
           <h2 class="scr-h">${escapeHtml(d.headline)}</h2>
         </div>
         ${d.sub ? `<p class="sd-sub" style="font-size:13px;opacity:.55;margin:-2px 0 14px;letter-spacing:.02em">${escapeHtml(d.sub)}</p>` : ''}
@@ -1577,6 +1591,12 @@
 
   (function(){ const fab=document.getElementById('fab-checkin'); if(fab) fab.addEventListener('click',()=>{ if(Store.user()) screenCheckin(); }); })();
   applyPrefs();
+  // light up any triglyph as it enters the DOM: fill eases from the neutral tone into the active
+  // axis color(s), so the brand mark settles into your state on each render. Reduce-motion -> instant.
+  try{
+    const _litTri = ()=>requestAnimationFrame(()=>{ document.querySelectorAll('.triglyph .tg-m[data-col]').forEach(p=>{ if(!p.style.fill) p.style.fill=p.getAttribute('data-col'); }); });
+    new MutationObserver((muts)=>{ for(const m of muts){ if(m.addedNodes){ for(const n of m.addedNodes){ if(n.nodeType===1 && (n.classList&&n.classList.contains('triglyph') || (n.querySelector&&n.querySelector('.triglyph')))){ _litTri(); return; } } } } }).observe(document.body,{childList:true,subtree:true});
+  }catch(e){}
   try{ if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyPrefs); }catch(_){}
   Store.init(route);
 })();

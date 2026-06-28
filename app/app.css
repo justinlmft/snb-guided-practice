@@ -11,7 +11,7 @@
   --s-play:#E8A871; --s-still:#9FC498; --s-freeze:#B89AC4; --s-unlit:#D8D2C2;
   /* practice track colors: mindfulness = ink, connect-with-safety = sky/blue, self-regulation = amber */
   --track-mind:#1A1F2A; --track-safety:#5891C5; --track-self:#D29A4A;
-  --field:#fff; --knob:#fff; --danger:#9A3B3B; --raised:#FAF9F5; --backdrop:#E7E3DA; --press:#EAE7DE; --scale-lo:#CEC8BB; --scale-hi:#3A3730; --link-soft:rgba(6,69,173,.4);
+  --field:#fff; --knob:#fff; --danger:#9A3B3B; --raised:#FAF9F5; --backdrop:#E7E3DA; --press:#EAE7DE; --scale-lo:#CEC8BB; --scale-hi:#3A3730; --link-soft:rgba(6,69,173,.4); --tg-dim:#C9C3B4;
   --btn-hover:#2A3040; --ease:cubic-bezier(.2,.6,.2,1); --type-scale:1;
 }
 *{box-sizing:border-box}
@@ -807,7 +807,7 @@ body.reduce-motion .settle-ico{transition:none}
   --ink-80:#C5C3BC; --muted:#928F87; --link:#8FB6EE;
   --btn-hover:#D7D5CE;
   --field:#27292E; --knob:#ECEAE3; --danger:#E8A0A0; --raised:#2F3137;
-  --backdrop:#0D0E10; --press:#2C2E33; --scale-lo:#3A3C42; --scale-hi:#C5C3BC; --link-soft:rgba(143,182,238,.45);
+  --backdrop:#0D0E10; --press:#2C2E33; --scale-lo:#3A3C42; --scale-hi:#C5C3BC; --link-soft:rgba(143,182,238,.45); --tg-dim:#565961;
   --track-mind:#E7E5DE;
   }
 }
@@ -816,7 +816,7 @@ body.reduce-motion .settle-ico{transition:none}
   --ink-80:#C5C3BC; --muted:#928F87; --link:#8FB6EE;
   --btn-hover:#D7D5CE;
   --field:#27292E; --knob:#ECEAE3; --danger:#E8A0A0; --raised:#2F3137;
-  --backdrop:#0D0E10; --press:#2C2E33; --scale-lo:#3A3C42; --scale-hi:#C5C3BC; --link-soft:rgba(143,182,238,.45);
+  --backdrop:#0D0E10; --press:#2C2E33; --scale-lo:#3A3C42; --scale-hi:#C5C3BC; --link-soft:rgba(143,182,238,.45); --tg-dim:#565961;
   --track-mind:#E7E5DE;
 }
 
@@ -826,3 +826,19 @@ body.reduce-motion .settle-ico{transition:none}
 .update-toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .update-toast button{font:inherit;font-size:13px;font-weight:500;color:var(--ink);background:var(--bone);border:0;border-radius:999px;padding:6px 13px;cursor:pointer;flex:none}
 @media (prefers-reduced-motion:reduce){.update-toast{transition:opacity .25s var(--ease)}}
+
+
+/* delight: the safety line draws itself on a gain (a payoff); reduce-motion safe, gains only */
+@keyframes chartDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes chartArea{from{opacity:0}to{opacity:.1}}
+body:not(.reduce-motion) .chart.draw-gain .cline-path{stroke-dasharray:1;animation:chartDraw 1.05s var(--ease) forwards}
+body:not(.reduce-motion) .chart.draw-gain .cline-area{animation:chartArea .85s var(--ease) .2s both}
+
+
+/* brand logo as a live state read — color only, lockup fixed (added 2026-06-27) */
+.triglyph{height:1em;width:auto;display:inline-block;vertical-align:middle;overflow:visible}
+.tg-m{fill:var(--tg-dim);transition:fill .62s var(--ease)}
+body.reduce-motion .tg-m{transition:none}
+.sd-head .sd-marks .triglyph{height:46px}
+.safety-foot{display:flex;flex-direction:column;align-items:center;gap:7px}
+.safety-foot .triglyph{height:30px}
