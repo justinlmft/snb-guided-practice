@@ -409,74 +409,94 @@
   }
   function refresh(){ _cache = null; }
 
-  // ---- daily reflection (the reflections system, moment altitude) -------------
-  // Data-driven replacement for the static LIBRARY note. Reads Store.today() and
-  // narrates the day's moments as an arc: name what's here, point once. Scales to
-  // signal — one moment just reports that one; an arc names movement; a practice
-  // that raised safety is credited as a safety moment. Voice rules apply (proper
-  // case, no em dash, no state-agency, dips resolve to hope, moments not days).
+  // ---- daily reflection ("for you" daily card, reflections DAILY tier) --------
+  // Justin's VERBATIM §17 copy (all-app-copy.md). Assembly per his spec: one Meet
+  // line (names the felt experience, never the precise state) + one Point or Ask
+  // (Ask gated by policy: open/sparing/withhold). A 2nd+ same-day check-in adds a
+  // shared Arc line; a post-practice check-in swaps in a shared Delta line. Arrays
+  // cycle no-repeat. State keys map dom -> his sections (play=safe & mobile,
+  // stillness=safe & immobile, neutral=present/neutral).
   const DAILY = {
-    empty: [
-      "This is where your day takes shape, moment by moment. Your first check-in starts it.",
-      "Check in whenever you are ready, and the day fills in from your own moments."
-    ],
-    none: [
-      "A new day, a fresh page. Check in whenever it fits, and this fills in from your own moments.",
-      "Today is open so far. Your first check-in starts the shape of it.",
-      "Nothing logged yet today. Check in when you are ready, and the day builds from there."
-    ],
-    one: [
-      "One moment so far today, in {DOM}. Noticing it is already the rep.",
-      "Just one check-in today so far. Come back later and the shape of the day fills in.",
-      "One moment in, sitting in {DOM}. That is enough for now."
-    ],
-    arc_up: [
-      "{N} moments today, and your system moved. It opened in {FIRST} and was easing toward safe by the latest one. The shift itself is worth noticing.",
-      "{N} check-ins so far, and there is movement in them. {FIRST} earlier, something calmer now. A system that can move is doing its job.",
-      "Across {N} moments today, things rose toward safe. Worth noticing what was different about the one that helped."
-    ],
-    arc_down: [
-      "{N} moments today, and it dipped from where it started. That is the goes part, and the comes part tends to follow. Nothing to fix this second.",
-      "{N} check-ins, and the day slid a little from {FIRST}. A dip is information, not the truth about your day. Be a little gentler with the next moment.",
-      "Across {N} moments, things eased off toward {LAST}. States move, including this one, and showing up to notice it already counts."
-    ],
-    arc_steady: [
-      "{N} moments today, holding about level. Even can be its own kind of okay.",
-      "{N} check-ins so far, and the day has stayed in about the same place. Sometimes that is exactly what the body needs.",
-      "Across {N} moments, not much shift today, and you still showed up to track it."
-    ],
-    safety_moment: [
-      "One of those moments came right after a practice, and the next check-in sat a little calmer. That is a safety moment, small and real, and it counts over time.",
-      "A practice sat in the day, and what came after it was a touch more settled. That lift is a safety moment."
-    ],
-    held: [
-      "You stayed with a practice today even though nothing has shifted yet. That staying is the rep, whether or not it shows up today.",
-      "A practice in there today, and the change has not landed yet. That is allowed. Doing it is the part that builds capacity."
-    ]
+    safety: { policy:'open',
+      meet:["You're grounded in the here and now.","You're connected with the present moment.","Present and connected. (enough, at least.)"],
+      point:["Worth staying with for a moment, before the next thing pulls at you. (Which it probably will.)","A good opportunity to get familiar with this state, so it's easier to find again.","Rest in it for a moment. Take it in."],
+      ask:["What helped you arrive here, even a little?","What feels possible right now that doesn't always?","How is your body naturally breathing right now?"] },
+    play: { policy:'open',
+      meet:["Charged up but connected.","Energy moving, and it feels more like fuel than pressure.","Wound up but in a good way, with some ease in the mix."],
+      point:["Point it at one thing that matters.","If it wants company, spend it with someone who has earned your trust.","Keep a little safety in the mix, and it stays energized without the crash."],
+      ask:["What do you most want to put this toward right now?","What's one thing worth starting today?","What's something you've been putting off that you have the energy for now?","How is your body naturally breathing right now?"] },
+    stillness: { policy:'open',
+      meet:["Quiet, and okay being quiet.","Slowed all the way down, and okay with the slowness.","Settled and soft right now.","Stillness internally. And ability to connect with stillness externally."],
+      point:["This is an opportunity for real rest.","Nowhere to be for a minute. Let yourself marinate in it."],
+      ask:["When it's this quiet, what's been waiting for your attention?","What's easier to hear now than when things are loud?","An opportunity to connect with your inner world.","How is your body naturally breathing right now?"] },
+    fightflight: { policy:'sparing',
+      meet:["Wound up and hard to settle.","A lot of charge moving, looking for somewhere to go.","Maybe irritable. Maybe anxious. Maybe both?"],
+      point:["The internal activation is real, and the discomfort that it brings.","This kind of charge needs somewhere to go. A little movement on purpose helps more than holding still."],
+      ask:["What type of movement would your system love right now? Would you rather go for a run or lift weights? Use your legs or your arms?","What's the feeling underneath the internal activation?","How is your body naturally breathing right now?"] },
+    shutdown: { policy:'withhold',
+      meet:["Heavy, far-off, low on energy.","Flat and slowed down right now.","Little energy to care. Yet, you're showing up here."],
+      point:["You don't force your way out of this. One small, low-demand thing is plenty: a sip of tea, a look out the window, a toe wiggle.","It can feel permanent from the inside, even though it isn't. And yeah, maybe it's been this way for a long while."],
+      ask:["What's one sound you can hear without trying?","What's one color in front of you right now?","How is your body naturally breathing right now?"] },
+    freeze: { policy:'sparing',
+      meet:["Braced. Wanting to move yet stuck at the same time.","Immobile on the outside, but a lot is going on inside.","Holding your breath without meaning to, huh?"],
+      point:["The way through isn't forced. A wiggle of the toes, a neck rotation, one big breath into the chest.","Pushing hard tends to lock it tighter. Smaller and slower is better for the system when you can."],
+      ask:["Can you roll your wrists or wiggle your toes? If so, a little movement just opened up.","Can you let the feeling be here without pushing it away? If not, that's okay for now.","Can you take one intentional breath and let it out slower? And then, can you stretch one part of your body?","How is your body naturally breathing right now?"] },
+    neutral: { policy:'open',
+      meet:["Hard to pin down right now, and that's fine.","Somewhere in between, nothing too obvious."],
+      point:["Nothing to change. Noticing is enough.","Check in whenever you're ready, or let it be for now."],
+      ask:["If you had to guess, what's one word for how this moment sits in your body?","How is your body naturally breathing right now?"] }
   };
-  function _fillDaily(s, o){
-    return String(s||'').replace(/\{N\}/g,String(o.N)).replace(/\{FIRST\}/g,o.FIRST).replace(/\{LAST\}/g,o.LAST).replace(/\{DOM\}/g,o.DOM);
+  // Shared Arc line — 2nd+ same-day check-in, keyed to within-day movement.
+  const DAILY_ARC = {
+    eased:   ["A couple of check-ins in today, and things have eased since this morning. Worth noticing the shift."],
+    charged: ["You started more grounded, and there's more energy now. Pay attention to that feeling and what it might want."],
+    mixed:   ["You've moved through a few different places today. That's range (and you're still showing up), not instability."],
+    steady:  ["Today has held pretty steady so far."]
+  };
+  // Shared Delta line — post-practice check-in, keyed to the shift (the safety moment).
+  const DAILY_DELTA = {
+    eased:    ["You did a practice, and you're more grounded now than before. These little practices add up over time."],
+    held:     ["The practice didn't shift much this time, which is okay. Showing up for the practice is the rep that builds, whether or not it moves obviously. An imperfect rep is still a rep."],
+    struggled:["That was a tough one to stay with, and you stayed anyway. That's the rep, even when it doesn't feel like one. It's something to learn from and adapt to next time."]
+  };
+  function _dailySecond(key, st){
+    // pick Point or Ask: open -> alternate Ask/Point; sparing -> Ask ~1 in 4; withhold -> Point only
+    let useAsk = false;
+    if(st.policy === 'open')        useAsk = (Math.random() < 0.5);
+    else if(st.policy === 'sparing') useAsk = (_promptTick++ % 4 === 0);
+    if(useAsk && st.ask && st.ask.length) return cycle('daily-ask:'+key, st.ask);
+    return cycle('daily-point:'+key, st.point);
   }
   function daily(ctx0){
     const t = (ctx0 && ctx0.n!=null) ? ctx0
             : ((global.Store && Store.today) ? Store.today() : { moments:[], sessions:[], n:0, dir:null, deltas:[] });
     const last = (global.Store && Store.lastCheckin) ? Store.lastCheckin() : null;
     const n = t.n || 0;
-    if(n===0 && !last) return { state:'neutral', n:0, text: cycle('daily-empty', DAILY.empty) };
-    if(n===0)          return { state:last.dom, n:0, text: cycle('daily-none', DAILY.none) };
-    const o = { N:n, FIRST:_feltName(t.first.dom), LAST:_feltName(t.last.dom), DOM:_feltName(t.last.dom) };
-    const rose = (t.deltas||[]).some(d=>d.rose===true);
-    const held = (t.deltas||[]).length>0 && !rose;
-    const parts = [];
-    if(n===1){
-      parts.push(_fillDaily(cycle('daily-one', DAILY.one), o));
-    } else {
-      const key = t.dir==='up' ? 'arc_up' : t.dir==='down' ? 'arc_down' : 'arc_steady';
-      parts.push(_fillDaily(cycle('daily-'+key, DAILY[key]), o));
+    // No check-in today: graceful present/neutral prompt (his copy). Tappable to the
+    // reader when there's prior history, static otherwise.
+    if(n===0){
+      const st0 = DAILY.neutral;
+      const text0 = st0.meet[1] + ' ' + st0.point[1];   // "Somewhere in between..." + "Check in whenever you're ready..."
+      return { state: last ? last.dom : 'neutral', n:0, text: text0 };
     }
-    if(rose)      parts.push(cycle('daily-safety', DAILY.safety_moment));
-    else if(held) parts.push(cycle('daily-held', DAILY.held));
-    return { state:t.last.dom, n, text: parts.join(' ') };
+    const dom = t.last.dom;
+    const st = DAILY[dom] || DAILY.neutral;
+    const parts = [ cycle('daily-meet:'+dom, st.meet), _dailySecond(dom, st) ];
+    // same-day extra line: a post-practice latest moment -> Delta; else 2+ moments -> Arc
+    const M = t.moments || [];
+    const lastM = M[M.length-1], prevM = M.length>=2 ? M[M.length-2] : null;
+    const sBetween = (t.sessions||[]).find(s => s.t < lastM.t && (!prevM || s.t > prevM.t));
+    if(sBetween){
+      const beforeV = prevM ? prevM.v : null;
+      const rose = (beforeV!=null) && (lastM.v > beforeV + 0.04);
+      const dkey = (sBetween.feedback === 'struggle') ? 'struggled' : (rose || sBetween.feedback === 'more') ? 'eased' : 'held';
+      parts.push(cycle('daily-delta', DAILY_DELTA[dkey]));
+    } else if(n >= 2){
+      const distinct = M.map(m=>m.dom).filter((d,i,a)=>a.indexOf(d)===i).length;
+      const akey = distinct >= 3 ? 'mixed' : t.dir==='up' ? 'eased' : t.dir==='down' ? 'charged' : 'steady';
+      parts.push(cycle('daily-arc', DAILY_ARC[akey]));
+    }
+    return { state: dom, n, text: parts.join(' ') };
   }
 
   function label(stateKey){
