@@ -544,7 +544,9 @@
     const breathHTML   = renderWin('breath',   {done:done.breath,   last, reco});
     const checkinHTML  = renderWin('checkin',  {done:done.checkin,  last, reco});
     const practiceHTML = renderWin('practice', {done:done.practice, last, reco});
-    const r = FromJustin.today();
+    const r = (FromJustin.daily ? FromJustin.daily() : FromJustin.today());
+    const td = (Store.today ? Store.today() : null);
+    const dotsHTML = (td && td.n>=1) ? momentDots(td.moments) : '';
     const nm = Store.getName();
     const seg = segOf(Date.now());
     if(todayGreet===null || todayGreetName!==nm){ todayGreet = pickGreeting(segLabel(seg), nm ? escapeHtml(nm) : ''); todayGreetName = nm; }
@@ -558,7 +560,7 @@
       ${checkinHTML}
       ${practiceHTML}
       ${r ? (r.state !== 'neutral'
-        ? `<button class="wincard from-card" id="open-refl"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span><span class="wc-go">${CHEV}</span></button>`
+        ? `<button class="wincard from-card" id="open-refl"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span>${dotsHTML}</span><span class="wc-go">${CHEV}</span></button>`
         : `<div class="wincard from-card from-card-static"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span></div>`
       ) : ''}
     </div>`;
@@ -568,11 +570,58 @@
     const reflBtn = c.querySelector('#open-refl'); if(reflBtn) reflBtn.onclick = screenReflectionDeep;
   }
 
+  // The moment timeline: today's check-ins placed by time (x) and safety (y),
+  // colored by state, with practices marked as gold rings and the newest moment
+  // haloed. Shows from moment one. The model made visible.
+  function momentTimeline(moments, sessions){
+    moments  = (moments||[]).filter(m=>m&&typeof m.t==='number'&&m.dom).slice().sort((a,b)=>a.t-b.t);
+    sessions = (sessions||[]).filter(s=>s&&typeof s.t==='number').slice().sort((a,b)=>a.t-b.t);
+    if(!moments.length) return '';
+    const W=320,H=148,padL=24,padR=14,padT=16,padB=26;
+    const d0=new Date(); d0.setHours(0,0,0,0); const t0=d0.getTime(); const span=864e5;
+    const cl=x=>x<0?0:x>1?1:x;
+    const fx=t=>padL + cl((t-t0)/span)*(W-padL-padR);
+    const fy=v=>padT + (1-cl(v))*(H-padT-padB);
+    const pts=moments.map(m=>({x:fx(m.t),y:fy(m.v),dom:m.dom}));
+    const vAt=t=>{ const a=moments; if(t<=a[0].t) return a[0].v; if(t>=a[a.length-1].t) return a[a.length-1].v;
+      for(let i=1;i<a.length;i++){ if(t<=a[i].t){ const f=(t-a[i-1].t)/((a[i].t-a[i-1].t)||1); return a[i-1].v+(a[i].v-a[i-1].v)*f; } } return a[a.length-1].v; };
+    const midY=(padT+(H-padT-padB)/2).toFixed(0);
+    const line = pts.length>1 ? `<polyline points="${pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ')}" fill="none" stroke="var(--hairline)" stroke-width="1.5" stroke-dasharray="2 3"/>` : '';
+    const rings = sessions.map(s=>{ const x=fx(s.t).toFixed(1), y=fy(vAt(s.t)).toFixed(1); return `<circle cx="${x}" cy="${y}" r="8" fill="none" stroke="#C9A24B" stroke-width="2"/><circle cx="${x}" cy="${y}" r="2" fill="#C9A24B"/>`; }).join('');
+    const dots = pts.map((p,i)=>{ const nw=i===pts.length-1, c=STATE_COLOR(p.dom), x=p.x.toFixed(1), y=p.y.toFixed(1);
+      return (nw?`<circle cx="${x}" cy="${y}" r="12" fill="none" stroke="${c}" stroke-opacity="0.45" stroke-width="2"/>`:'')+`<circle cx="${x}" cy="${y}" r="${nw?8.5:7.5}" fill="${c}"/>`; }).join('');
+    const axis=`<text transform="rotate(-90 11 ${midY})" x="11" y="${midY}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Inter">more safety</text>`+
+      `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="var(--hairline)" stroke-width="1"/>`+
+      `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="var(--hairline)" stroke-width="1"/>`;
+    const labels=[['morning',0.18],['midday',0.45],['evening',0.74],['late',0.96]].map(o=>`<text x="${(padL+o[1]*(W-padL-padR)).toFixed(0)}" y="${H-8}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Inter">${o[0]}</text>`).join('');
+    const present=moments.map(m=>m.dom).filter((d,i,a)=>a.indexOf(d)===i);
+    const leg=present.map(d=>`<span class="mtl-key"><span class="mtl-sw" style="background:${STATE_COLOR(d)}"></span>${escapeHtml(STATE_NAME(d))}</span>`).join('')+
+      (sessions.length?`<span class="mtl-key"><span class="mtl-ring"></span>practice</span>`:'');
+    return `<div class="mtl"><svg viewBox="0 0 ${W} ${H}" class="mtl-svg" role="img" aria-label="your check-ins today, placed by time and safety, colored by state">${axis}${line}${rings}${dots}${labels}</svg><div class="mtl-legend">${leg}</div></div>`;
+  }
+  // compact dots for the today card: today's moments in order, newest ringed.
+  function momentDots(moments){
+    const ms=(moments||[]).filter(m=>m&&m.dom).slice(-8);
+    if(!ms.length) return '';
+    return `<span class="md-row" aria-hidden="true">${ms.map((m,i)=>`<span class="md-dot${i===ms.length-1?' md-new':''}" style="background:${STATE_COLOR(m.dom)}"></span>`).join('')}</span>`;
+  }
+
   function screenReflectionDeep(){
     const note = FromJustin.today();
     const last = Store.lastCheckin();
     const cs   = Store.checkins();
     const paced = groupByDay(cs);
+    // today block (daily altitude): the live daily reflection + the moment timeline,
+    // shown above the weekly letter. From moment one.
+    const td = Store.today ? Store.today() : null;
+    const dailyNote = FromJustin.daily ? FromJustin.daily(td||undefined) : null;
+    const todayBlock = (td && td.n>=1) ? `
+      <section style="margin:0 0 4px">
+        <p class="eyebrow" style="margin:0 0 8px">today, so far</p>
+        ${dailyNote ? `<p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0 0 12px">${escapeHtml(dailyNote.text)}</p>` : ''}
+        ${momentTimeline(td.moments, td.sessions)}
+      </section>
+      <hr style="border:none;border-top:0.5px solid var(--hairline);margin:18px 0 20px">` : '';
 
     // signals over the last 7 days (fall back to all check-ins)
     const wk = cs.filter(c => c.t >= Date.now() - 7*864e5);
@@ -596,7 +645,9 @@
 
     const recentBars = paced.length >= 2 ? `<div class="trendstrip" style="margin:6px 0 2px">${paced.slice(-10).map(c=>{ const h=16+Math.round(c.v*30); return `<div class="bar" style="height:${h}px;background:${STATE_COLOR(c.dom)}"></div>`; }).join('')}</div>` : '';
     const P = (t)=> t ? `<p style="font-size:15px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0 0 12px">${escapeHtml(t)}</p>` : '';
-    const lead = note ? `<p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0 0 4px">${escapeHtml(note.text)}</p>` : '';
+    // the daily note now lives in the today block above; only fall back to a lead
+    // paragraph when there are no moments today (todayBlock empty).
+    const lead = (!todayBlock && dailyNote) ? `<p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0 0 4px">${escapeHtml(dailyNote.text)}</p>` : '';
 
     let bodyHTML;
     if(issue){
@@ -626,6 +677,7 @@
       <div class="scroll">
         <div class="view read" style="gap:0">
           <p class="eyebrow" style="margin-bottom:10px">for you</p>
+          ${todayBlock}
           ${bodyHTML}
         </div>
       </div>`);

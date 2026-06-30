@@ -408,6 +408,77 @@
     return _cache.note;
   }
   function refresh(){ _cache = null; }
+
+  // ---- daily reflection (the reflections system, moment altitude) -------------
+  // Data-driven replacement for the static LIBRARY note. Reads Store.today() and
+  // narrates the day's moments as an arc: name what's here, point once. Scales to
+  // signal — one moment just reports that one; an arc names movement; a practice
+  // that raised safety is credited as a safety moment. Voice rules apply (proper
+  // case, no em dash, no state-agency, dips resolve to hope, moments not days).
+  const DAILY = {
+    empty: [
+      "This is where your day takes shape, moment by moment. Your first check-in starts it.",
+      "Check in whenever you are ready, and the day fills in from your own moments."
+    ],
+    none: [
+      "A new day, a fresh page. Check in whenever it fits, and this fills in from your own moments.",
+      "Today is open so far. Your first check-in starts the shape of it.",
+      "Nothing logged yet today. Check in when you are ready, and the day builds from there."
+    ],
+    one: [
+      "One moment so far today, in {DOM}. Noticing it is already the rep.",
+      "Just one check-in today so far. Come back later and the shape of the day fills in.",
+      "One moment in, sitting in {DOM}. That is enough for now."
+    ],
+    arc_up: [
+      "{N} moments today, and your system moved. It opened in {FIRST} and was easing toward safe by the latest one. The shift itself is worth noticing.",
+      "{N} check-ins so far, and there is movement in them. {FIRST} earlier, something calmer now. A system that can move is doing its job.",
+      "Across {N} moments today, things rose toward safe. Worth noticing what was different about the one that helped."
+    ],
+    arc_down: [
+      "{N} moments today, and it dipped from where it started. That is the goes part, and the comes part tends to follow. Nothing to fix this second.",
+      "{N} check-ins, and the day slid a little from {FIRST}. A dip is information, not the truth about your day. Be a little gentler with the next moment.",
+      "Across {N} moments, things eased off toward {LAST}. States move, including this one, and showing up to notice it already counts."
+    ],
+    arc_steady: [
+      "{N} moments today, holding about level. Even can be its own kind of okay.",
+      "{N} check-ins so far, and the day has stayed in about the same place. Sometimes that is exactly what the body needs.",
+      "Across {N} moments, not much shift today, and you still showed up to track it."
+    ],
+    safety_moment: [
+      "One of those moments came right after a practice, and the next check-in sat a little calmer. That is a safety moment, small and real, and it counts over time.",
+      "A practice sat in the day, and what came after it was a touch more settled. That lift is a safety moment."
+    ],
+    held: [
+      "You stayed with a practice today even though nothing has shifted yet. That staying is the rep, whether or not it shows up today.",
+      "A practice in there today, and the change has not landed yet. That is allowed. Doing it is the part that builds capacity."
+    ]
+  };
+  function _fillDaily(s, o){
+    return String(s||'').replace(/\{N\}/g,String(o.N)).replace(/\{FIRST\}/g,o.FIRST).replace(/\{LAST\}/g,o.LAST).replace(/\{DOM\}/g,o.DOM);
+  }
+  function daily(ctx0){
+    const t = (ctx0 && ctx0.n!=null) ? ctx0
+            : ((global.Store && Store.today) ? Store.today() : { moments:[], sessions:[], n:0, dir:null, deltas:[] });
+    const last = (global.Store && Store.lastCheckin) ? Store.lastCheckin() : null;
+    const n = t.n || 0;
+    if(n===0 && !last) return { state:'neutral', n:0, text: cycle('daily-empty', DAILY.empty) };
+    if(n===0)          return { state:last.dom, n:0, text: cycle('daily-none', DAILY.none) };
+    const o = { N:n, FIRST:_feltName(t.first.dom), LAST:_feltName(t.last.dom), DOM:_feltName(t.last.dom) };
+    const rose = (t.deltas||[]).some(d=>d.rose===true);
+    const held = (t.deltas||[]).length>0 && !rose;
+    const parts = [];
+    if(n===1){
+      parts.push(_fillDaily(cycle('daily-one', DAILY.one), o));
+    } else {
+      const key = t.dir==='up' ? 'arc_up' : t.dir==='down' ? 'arc_down' : 'arc_steady';
+      parts.push(_fillDaily(cycle('daily-'+key, DAILY[key]), o));
+    }
+    if(rose)      parts.push(cycle('daily-safety', DAILY.safety_moment));
+    else if(held) parts.push(cycle('daily-held', DAILY.held));
+    return { state:t.last.dom, n, text: parts.join(' ') };
+  }
+
   function label(stateKey){
     return (DEEP.states[stateKey] && DEEP.states[stateKey].label)
         || (LIBRARY[stateKey] && LIBRARY[stateKey].label) || '';
@@ -560,7 +631,7 @@
   }
 
   global.FromJustin = {
-    today, refresh, pick, label,
+    today, daily, refresh, pick, label,
     deepBody, deepInvite, changeOverlay, stuckOverlay, watchFor,
     rundown, blog,
     LIBRARY, DEEP

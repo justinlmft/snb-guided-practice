@@ -877,3 +877,14 @@ body.reduce-motion .tg-m{transition:none}
 .wincard.done-affirm{opacity:1}
 .wincard.done-affirm .wc-title{color:var(--ink);font-weight:500}
 .wincard.done-rich .wc-go,.wincard.done-affirm .wc-go{color:var(--muted)}
+
+/* ---- moment timeline (reflections system, daily altitude) ---- */
+.mtl{margin:6px 0 2px}
+.mtl-svg{display:block;width:100%;height:auto}
+.mtl-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:6px}
+.mtl-key{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.mtl-sw{width:9px;height:9px;border-radius:50%;display:inline-block}
+.mtl-ring{width:11px;height:11px;border-radius:50%;border:1.5px solid #C9A24B;display:inline-block}
+.md-row{display:inline-flex;align-items:center;gap:6px;margin-top:9px}
+.md-dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+.md-dot.md-new{box-shadow:0 0 0 3px var(--bone),0 0 0 5px rgba(94,90,78,.28)}

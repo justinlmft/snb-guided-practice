@@ -481,6 +481,35 @@
     return { moved, total, rate: moved/total };
   }
 
+  // today: the day's moments as an arc — the atom of the reflections system.
+  // Returns today's check-ins in order, within-day direction (by safety/ventral),
+  // today's sessions, and any practice deltas (a session sitting between two reads).
+  // From moment one: with a single check-in it just reports that one.
+  function today(){
+    const now = Date.now();
+    const d0 = new Date(now); d0.setHours(0,0,0,0); const t0 = d0.getTime();
+    const moments = data.checkins
+      .filter(c => c && typeof c.t==='number' && c.t>=t0 && c.t<=now+1 && c.dom && c.dom!=='neutral')
+      .sort((a,b)=>a.t-b.t);
+    const sess = data.sessions
+      .filter(s => s && typeof s.t==='number' && s.t>=t0 && s.t<=now+1)
+      .sort((a,b)=>a.t-b.t);
+    const n = moments.length;
+    let dir = null;
+    if(n>=2){ const d = moments[n-1].v - moments[0].v; dir = d>0.08?'up' : d<-0.08?'down' : 'steady'; }
+    // practice deltas: the read just before a session vs the first read after it
+    const deltas = [];
+    sess.forEach(s => {
+      const after = moments.find(m => m.t > s.t);
+      if(!after) return;
+      let before = null;
+      for(const m of moments){ if(m.t <= s.t) before = m; else break; }
+      const bv = before ? before.v : null;
+      deltas.push({ t:s.t, beforeV:bv, afterV:after.v, rose: (bv!=null) ? (after.v > bv+0.04) : null });
+    });
+    return { moments, sessions:sess, n, dir, deltas, first: n?moments[0]:null, last: n?moments[n-1]:null };
+  }
+
   // ---- recommender (simulated AI) ----
   function recommend(){
     const last = lastCheckin();
@@ -576,7 +605,7 @@
 
   global.Store = {
     init, signUp, signIn, signOut, user, cloud, syncStatus,
-    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions,
+    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions, today,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
     prefSense, setPrefSense, prefSilence, setPrefSilence,
