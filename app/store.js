@@ -79,7 +79,7 @@
 
   const cacheKey = () => 'snb_cache_' + (auth.user ? auth.user.id : 'anon');
   function saveCache(){ try { localStorage.setItem(cacheKey(), JSON.stringify({ data, outbox })); } catch(e){} }
-  function loadCache(){ try { const o = JSON.parse(localStorage.getItem(cacheKey())); if(o){ data = o.data||{checkins:[],sessions:[]}; outbox = o.outbox||{checkins:[],sessions:[]}; } else { data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } } catch(e){ data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } }
+  function loadCache(){ try { const o = JSON.parse(localStorage.getItem(cacheKey())); if(o){ data = o.data||{checkins:[],sessions:[]}; outbox = o.outbox||{checkins:[],sessions:[]}; } else { data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } } catch(e){ data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } _purgeTombs(); }
 
   // ---- sync plumbing (merge, live-session gating, loud failure) ----
   function notify(){ try{ onChange && onChange(); }catch(e){} }
@@ -204,7 +204,7 @@
       // MERGE (union by t), never overwrite: local + still-queued outbox + cloud.
       // An un-synced check-in stays visible and is never lost to a cloud read.
       if(!cs.error){ data.checkins = unionByT(data.checkins, outbox.checkins, (cs.data||[]).map(rowToCheckin)); changed = true; }
-      if(!ss.error){ data.sessions = unionByT(data.sessions, outbox.sessions, (ss.data||[]).map(rowToSession)); changed = true; }
+      if(!ss.error){ data.sessions = unionByT(data.sessions, outbox.sessions, (ss.data||[]).map(rowToSession)); _purgeTombs(); changed = true; }
       saveCache();
       setSync((outbox.checkins.length||outbox.sessions.length) ? 'error' : 'idle', (cs.error||ss.error)||null);
       if(changed) notify();                          // re-render once fresh data lands (post-init / post-refresh)
@@ -329,16 +329,24 @@
     saveCache(); if(CLOUD) flush();
   }
   function sessions(){ return data.sessions.slice(); }
-  // delete a logged practice session by timestamp (e.g. a test run). Local + cloud.
+  // tombstones: timestamps of sessions the user deleted. A deletion must survive the
+  // cloud re-merge on the next hydrate even before (or if) the cloud DELETE lands, so we
+  // record deleted t's locally and purge them out of data.sessions after every load/hydrate.
+  function _tombKey(){ return 'snb_deleted_sessions_' + (auth.user ? auth.user.id : 'anon'); }
+  function _tombs(){ try{ const a=JSON.parse(localStorage.getItem(_tombKey())); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function _addTomb(t){ try{ const a=_tombs(); if(a.indexOf(t)<0){ a.push(t); localStorage.setItem(_tombKey(), JSON.stringify(a.slice(-500))); } }catch(e){} }
+  function _purgeTombs(){ const a=_tombs(); if(!a.length) return; const set=Object.create(null); a.forEach(t=>set[t]=1); data.sessions = data.sessions.filter(s=> !(s && set[s.t])); }
+  // delete a logged practice session by timestamp (e.g. a test run). Local + cloud + tombstone.
   function deleteSession(t){
+    _addTomb(t);                                              // record the deletion so it sticks across sync
     const i = data.sessions.findIndex(x => x.t===t);
-    if(i < 0) return false;
-    data.sessions.splice(i, 1);
+    if(i >= 0) data.sessions.splice(i, 1);
     const oi = outbox.sessions.findIndex(x => x.t===t);
     if(oi >= 0) outbox.sessions.splice(oi, 1);
     saveCache();
     if(CLOUD && auth.user){
-      try{ sb.from('sessions').delete().eq('user_id', auth.user.id).eq('t', t); }catch(e){}
+      // .then() is required: a supabase-js builder only sends the request when awaited/thened.
+      try{ sb.from('sessions').delete().eq('user_id', auth.user.id).eq('t', t).then(function(){}, function(){}); }catch(e){}
     }
     return true;
   }
