@@ -1,7 +1,7 @@
 {
   "name": "Stuck Not Broken",
   "short_name": "SNB",
-  "description": "Your nervous system, over time — check in, watch it change, and practice your way back to safety.",
+  "description": "Your nervous system, over time. Check in, watch it change, and build your way to safety.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

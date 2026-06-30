@@ -23,7 +23,7 @@
     stillness:   { name: 'stillness',     color: MIX.stillness, weight: (v,s,d) => Math.min(v, d) * (1 - s) },
     safety:      { name: 'safety',        color: BASE.yellow,   weight: (v,s,d) => v * (1 - s) * (1 - d) },
     play:        { name: 'play',          color: MIX.play,      weight: (v,s,d) => Math.min(v, s) * (1 - d) },
-    fightflight: { name: 'fight or flight',color: BASE.red,     weight: (v,s,d) => s * (1 - v) * (1 - d) },
+    fightflight: { name: 'flight/fight',color: BASE.red,     weight: (v,s,d) => s * (1 - v) * (1 - d) },
     freeze:      { name: 'freeze',        color: MIX.freeze,    weight: (v,s,d) => Math.min(s, d) * (1 - v) },
     shutdown:    { name: 'shutdown',      color: BASE.blue,     weight: (v,s,d) => d * (1 - v) * (1 - s) },
   };
@@ -33,7 +33,7 @@
     stillness:   'your system is resting in stillness right now. safe enough to be still.',
     safety:      'your system is leaning toward safety right now.',
     play:        'there is safety here, with some charge moving through. this is play.',
-    fightflight: 'there is a lot of mobilizing energy moving right now. fight or flight.',
+    fightflight: 'there is a lot of mobilizing energy moving right now. flight/fight.',
     freeze:      'a lot is moving and holding still at once right now. this is freeze.',
     shutdown:    'your system is pulling toward shutdown right now. it is protecting you.',
     neutral:     'notice where your system is right now. there is no wrong answer.',

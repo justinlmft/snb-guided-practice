@@ -114,9 +114,9 @@
   // The three brand marks ARE the three nervous-system axes. heart=safety,
   // bolt=fight-or-flight, x=shutdown. One vocabulary across check-in, you-tab, feedback.
   const AXIS_ICON = {
-    v:   { icon:'heart', state:'safety',      sub:'settled, connected' },
-    sym: { icon:'bolt',  state:'fightflight', sub:'charged, mobilized' },
-    dor: { icon:'x',     state:'shutdown',    sub:'heavy, far away' },
+    v:   { icon:'heart', state:'safety',      sub:'connected to self, others, & environment' },
+    sym: { icon:'bolt',  state:'fightflight', sub:'mobile, ready for movement' },
+    dor: { icon:'x',     state:'shutdown',    sub:'immobile, ready for collapse, numb, heavy' },
   };
   const ico = (k,o) => (window.iconSVG ? window.iconSVG(k,o) : '');
   // every state is one or two axes — so every state is one or two marks.
@@ -235,12 +235,12 @@
         <div class="gate-body">
           <p class="eyebrow">stuck not broken</p>
           <h1 style="margin:10px 0 12px">${up?'an app to guide you through emotional regulation.':'your nervous system, over time.'}</h1>
-          <p class="lede" style="margin-bottom:24px">check in on how you feel, watch what shifts over time, and practice your way back to steadier ground.</p>
+          <p class="lede" style="margin-bottom:24px">check in about your polyvagal states, get custom practices and guidance, watch your system build safety over time.</p>
           <div class="field"><label for="em">email</label><input id="em" type="email" autocomplete="email" value="${escapeHtml(lastEmail)}"></div>
           ${up ? '<div class="field"><label for="nm">your name <span style="color:var(--muted);font-weight:400">(optional)</span></label><input id="nm" type="text" autocomplete="name"></div>' : ''}
           <div class="field"><label for="pw">password</label><input id="pw" type="password" autocomplete="${up?'new-password':'current-password'}"></div>
           ${err?`<p class="autherr">${escapeHtml(err)}</p>`:''}
-          <button class="btn block" id="go" style="margin-top:8px"${busy?' disabled':''}>${busy?'one moment…':(up?'Create account':'Sign in')}</button>
+          <button class="btn block" id="go" style="margin-top:8px"${busy?' disabled':''}>${busy?'one moment…':(up?'create account':'sign in')}</button>
           ${up?`<p class="fineprint" style="margin-top:10px">by creating an account, you agree to the <a href="#" data-policy="terms">terms</a> and <a href="#" data-policy="privacy">privacy policy</a>.</p>`:''}
           <p class="fineprint">${up?'already have an account?':'new here?'} <button class="linkbtn" id="toggle" style="font-size:inherit;padding:2px">${up?'sign in':'create an account'}</button></p>
           ${Store.cloud()?'':'<p class="fineprint" style="margin-top:8px">on-device mode: your sign-in works locally now. cross-device sync turns on once Supabase keys are added in config.js.</p>'}
@@ -274,7 +274,7 @@
         <p class="eyebrow">almost there</p>
         <h1 style="margin:12px 0 12px">check your email.</h1>
         <p class="lede" style="margin-bottom:24px">we sent a confirmation link to <b style="font-weight:500">${escapeHtml(email)}</b>. tap it, then come back here to sign in.</p>
-        <button class="btn block" id="back2">Back to sign in</button>
+        <button class="btn block" id="back2">back to sign in</button>
       </div></div>`);
     $('#back2').onclick=()=>{ authMode='in'; screenSignIn(); };
   }
@@ -283,20 +283,20 @@
   function screenPolicy(which){
     const isPriv = which==='privacy';
     const eyebrow = isPriv ? 'privacy policy' : 'terms of use';
-    const title = isPriv ? 'what we keep, and what we don’t.' : 'how to hold this app.';
+    const title = isPriv ? 'what we keep, and what we don’t.' : 'how to get the most out of this app.';
     const lede = isPriv
-      ? 'plain language, because you’re trusting us with something tender.'
-      : 'a few honest notes before you begin.';
+      ? 'written in plain language.'
+      : 'transparency before you begin.';
     const sections = isPriv ? [
-      ['what we keep','your email, and the check-ins, notes, and practice you create. nothing more.'],
-      ['why','so your account works, and your history is here on every device you sign in from.'],
-      ['who sees it','only you. we don’t sell your data, and we don’t share it with advertisers.'],
-      ['your control','you can ask us to delete your account and everything in it, any time.']
+      ['what we keep','this app keeps track of your email, in-app preferences and check-ins.'],
+      ['why','so your account works, your history is here on every device you sign in from, to track progress, and make custom recommendations.'],
+      ['who sees it',"only you. your data isn't sold or given away. no advertisers will see it. justin checks data averages or anonymized results to ensure the app is helpful and to improve it."],
+      ['your control','you can ask to delete your account and everything in it, any time. you can also choose to delete your data in your settings.']
     ] : [
-      ['what this is','a tool for noticing your nervous system and practicing your way back to safety. it isn’t medical care, diagnosis, or therapy.'],
+      ['what this is',"a tool for noticing your daily experiences through the lens of the nervous system and practicing your way back to safety. it isn't medical care, diagnosis, or therapy, nor should it replace any of those or other professional services."],
       ['in a crisis','if you’re in danger or thinking about harming yourself, contact the 988 Suicide &amp; Crisis Lifeline or your local emergency services. this app can’t help in an emergency.'],
-      ['be gentle','every nervous system is different. there’s no failing here, and no streak to keep.'],
-      ['changes','we may update the app and these terms over time. we’ll keep it working, and tell you about anything that matters.']
+      ['be gentle',"everyone is different. there's no failing here, and no streak to keep. use the app as you want and when you want. practice at your cadence."],
+      ['changes',"justin may (and will) update the app and these terms over time. it'll keep it working, and you'll be informed about changes through the app or through the email you used to log in."]
     ];
     const PP=(t)=>`<p style="font-size:15px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0">${t}</p>`;
     setHTML(`
@@ -345,7 +345,7 @@
     try{ if(isStandalone() || !canInstall()) return; if(localStorage.getItem('snb_install_nudge') === 'dismissed') return; }catch(_){ return; }
     const c = content(); if(!c || document.getElementById('install-nudge')) return;
     const b = document.createElement('div'); b.className = 'install-nudge'; b.id = 'install-nudge';
-    b.innerHTML = '<span class="in-txt">add stuck not broken to your home screen.</span><span class="in-actions"><button type="button" class="in-go">install</button><button type="button" class="in-x" aria-label="dismiss">\u00d7</button></span>';
+    b.innerHTML = '<span class="in-txt">install the SNB app.</span><span class="in-actions"><button type="button" class="in-go">install</button><button type="button" class="in-x" aria-label="dismiss">\u00d7</button></span>';
     c.insertBefore(b, c.firstChild);
     const g = b.querySelector('.in-go'); if(g) g.onclick = promptInstall;
     const x = b.querySelector('.in-x'); if(x) x.onclick = ()=>{ try{ localStorage.setItem('snb_install_nudge','dismissed'); }catch(_){} b.remove(); };
@@ -443,13 +443,13 @@
     return ()=>renderPlan(reco);
   }
   const CHECKIN_DONE_LINE = {
-    safety:     "settled and online. worth noticing while it's here.",
-    play:       "energized, with safety in the mix. good fuel.",
-    stillness:  "quiet and safe. rest that actually restores.",
-    fightflight:"revved up and real. it can settle.",
-    shutdown:   "heavy and far away. your body protecting you, not a failing.",
-    freeze:     "a lot held at once. safety is what lets it move.",
-    neutral:    "checked in. that already counts."
+    safety:     "connected & present. notice while it's here.",
+    play:       "energized, with safety in the mix = motivation & play.",
+    stillness:  "immobile & safe = stillness & intimacy.",
+    fightflight:"revved up & ready to move.",
+    shutdown:   "disconnected & ready to collapse.",
+    freeze:     "mobile & immobile at the same time.",
+    neutral:    "no obvious state showing up."
   };
   function renderWin(k, s){
     const { done, last, reco } = s;
@@ -512,20 +512,21 @@
     const pool = name ? [
       `hi, ${name}.`,
       `hey again, ${name}.`,
-      `${name}'s back.`,
+      `${name}'s back!`,
       `good ${seg}, ${name}.`,
       `welcome back, ${name}.`,
-      `there you are, ${name}.`,
+      `hey there, ${name}.`,
       `glad you're here, ${name}.`,
       `hello again, ${name}.`,
-      `you made it back, ${name}.`,
-      `settle in, ${name}.`
+      `you made it back, ${name}!`,
+      `settle in, ${name}.`,
+      `you got this, ${name}.`
     ] : [
       `hi again.`,
       `welcome back.`,
       `good ${seg}.`,
       `there you are.`,
-      `you made it back.`,
+      `you made it back!`,
       `settle in.`,
       `glad you're here.`
     ];
@@ -617,7 +618,7 @@
         </div>
         ${sectionsHTML}`;
     } else {
-      bodyHTML = `${lead}${P('Check in a few times and a more personal summary will show up here.')}`;
+      bodyHTML = `${lead}${P('Check in a few times, and a more personal summary will show up here.')}`;
     }
 
     setHTML(`
@@ -642,7 +643,7 @@
         </div>
         ${extra?`<p class="meta">${extra}</p>`:''}
         <p class="why">${escapeHtml(reco.reason)}</p>
-        <button class="btn" id="startreco">Begin this practice</button>
+        <button class="btn" id="startreco">begin this practice</button>
       </div>`;
   }
   function wireReco(reco){ const b=$('#startreco'); if(b) b.onclick=()=>launchWeaver(reco); }
@@ -673,13 +674,13 @@
     { v:0.90, key:'stretch', label:'stretch me' },
   ];
   const CH_CAP = {
-    settle:  'just settle. we’ll stay with what already feels okay and not reach for anything hard.',
-    gentle:  'a light touch. we’ll glance toward something tender, then come back to safe.',
-    meet:    'meet it. we’ll stay a little longer with what’s hard, with safety kept close. good on a day you’ve got some room.',
-    stretch: 'stretch. we’ll turn toward the harder thing on purpose, staying connected to safety. best when you’ve got safety to spare.',
+    settle:  'just connecting to the external present moment and your natural breath. no pressure. just presence.',
+    gentle:  "simple mindfulness but taken a step further through connecting with safety in your body if it's there.",
+    meet:    'anchor into safety, then use beginner skills to gently connect with defense.',
+    stretch: 'anchor into safety, then use advanced skills to connect with defense at a deeper level. more potential for self-regulation, but more challenge. only approach this with a strong safety baseline.',
   };
   // short labels for the segmented control (the nuance lives in the caption below)
-  const CH_SHORT = { settle:'settle', gentle:'gentle', meet:'meet', stretch:'stretch' };
+  const CH_SHORT = { settle:'simple mindfulness', gentle:'safety-focused', meet:'beginner defense', stretch:'advanced defense' };
 
   let _snackT=null;
   function actionSnack(msg, label, fn){
@@ -732,22 +733,22 @@
 
         <div class="ci-block">
           <div class="sliders">
-            ${sliderHTML('v','safety','settled, connected','r-v',v)}
-            ${sliderHTML('sym','fight or flight','charged, mobilized','r-sym',s)}
-            ${sliderHTML('dor','shutdown','heavy, far away','r-dor',d)}
+            ${sliderHTML('v','safety','connected to self, others, & environment','r-v',v)}
+            ${sliderHTML('sym','flight/fight','mobile, ready for movement','r-sym',s)}
+            ${sliderHTML('dor','shutdown','immobile, ready for collapse, numb, heavy','r-dor',d)}
           </div>
           <p class="ci-readout" id="ci-readout"></p>
         </div>
 
         <div class="ci-block ci-challenge">
-          <p class="dash-prompt">how far do you want to go today?</p>
+          <p class="dash-prompt">what practice level would you like next?</p>
           <div class="ch-seg" id="ch-seg">
             ${CH_LEVELS.map(l=>`<button class="ch-opt${l.v===ch?' on':''}" type="button" data-ch="${l.v}" data-chkey="${l.key}">${CH_SHORT[l.key]||l.label}</button>`).join('')}
           </div>
           <p class="ch-cap" id="ch-cap"></p>
         </div>
 
-        <div class="actionbar"><button class="btn block" id="save">${editRec?'Save changes':'Save check-in'}</button></div>
+        <div class="actionbar"><button class="btn block" id="save">${editRec?'save changes':'save check-in'}</button></div>
       </div>`;
 
     const amt = x => x<12?'barely':x<35?'a little':x<65?'some':x<88?'a lot':'fully';
@@ -878,10 +879,10 @@
         </div>`;
       }).join('');
       c.innerHTML = `<div class="view"><div class="map-empty">
-        <p class="map-lede">three states move through everyone. none of them is wrong.</p>
+        <p class="map-lede">your three autonomic states.</p>
         <div class="map-rows">${teach}</div>
-        <p class="map-foot">check in twice and your own pattern starts to show here.</p>
-        <button class="btn" id="goci">Check in</button></div></div>`;
+        <p class="map-foot">check in twice to start seeing your autonomic patterns.</p>
+        <button class="btn" id="goci">check in</button></div></div>`;
       $('#goci').onclick = screenCheckin; return;
     }
 
@@ -936,7 +937,7 @@
       }
       let dayByDay, arcBuckets=null;
       if(paced.length<3){
-        dayByDay=`<p class="panel-empty">a few more days of check-ins and your timeline fills in here.</p>`;
+        dayByDay=`<p class="panel-empty">a few more days of check-ins, and your timeline fills in here.</p>`;
       } else {
         const minT=paced[0].t, maxT=paced[paced.length-1].t, spanD=(maxT-minT)/864e5;
         const unit = spanD>75?'month': spanD>21?'week':'day';
@@ -945,7 +946,7 @@
         const bmap=new Map();
         paced.forEach(p=>{ const k=keyOf(p.t); if(!bmap.has(k)) bmap.set(k,{t:p.t,vs:[],dom:{}}); const bb=bmap.get(k); bb.vs.push(p.v); bb.dom[p.dom]=(bb.dom[p.dom]||0)+1; });
         arcBuckets=[...bmap.values()].sort((a,b)=>a.t-b.t).map(b=>({t:b.t, label:labOf(b.t), avg:b.vs.reduce((s,v)=>s+v,0)/b.vs.length, dom:Object.entries(b.dom).sort((x,y)=>y[1]-x[1])[0][0]}));
-        dayByDay=`<div class="chart-toggle"><button class="ct-btn${chartMode==='safety'?' on':''}" type="button" data-mode="safety">safety</button><button class="ct-btn${chartMode==='states'?' on':''}" type="button" data-mode="states">states</button></div><div id="chart-host">${chartInner(chartMode, arcBuckets, safetyColor)}</div>`;
+        dayByDay=`<div class="chart-toggle"><button class="ct-btn${chartMode==='safety'?' on':''}" type="button" data-mode="safety">safety</button><button class="ct-btn${chartMode==='states'?' on':''}" type="button" data-mode="states">all states</button></div><div id="chart-host">${chartInner(chartMode, arcBuckets, safetyColor)}</div>`;
       }
 
       // ---- does practice help: safety on practice days vs other days ----
@@ -958,7 +959,7 @@
       } else {
         const onP=Math.round(avg(on)*100), offP=Math.round(avg(off)*100), diff=onP-offP;
         let verdict, good=false;
-        if(diff>=4){ good=true; verdict=`yes, your safety runs ${diff} points higher on the days you practice.`; }
+        if(diff>=4){ good=true; verdict=`yes, your safety runs ${diff} points higher after you practice.`; }
         else if(diff<=-4){ verdict=`you tend to reach for practice on your harder days, that's a good thing, not a setback.`; }
         else { verdict=`about even so far. keep going, the pattern takes time to show.`; }
         helpHTML=`
@@ -976,7 +977,7 @@
           const k=Math.max(2,Math.floor(allCs.length/4));
           const startV=avg(allCs.slice(0,k).map(x=>x.v)), recentV=avg(allCs.slice(-k).map(x=>x.v));
           const g=Math.round((recentV-startV)*100), up=g>=3, down=g<=-3;
-          const cap=up?'higher than when you started. the reps add up.':down?'safety moves in waves, and this is a dip. it tends to come back.':'about steady since you started, and steady counts.';
+          const cap=up?'higher than when you started. your practice reps add up!':down?"safety comes and goes for everyone. this is a dip. it'll come back.":'about steady since you started.';
           growthHead=`<p class="growth-head"><span class="growth-num ${up?'up':down?'down':'flat'}">${g>0?'+':''}${g} pts</span><span class="growth-cap">${cap}</span></p>`;
         }
       })();
@@ -993,31 +994,31 @@
           <div class="carousel" id="carousel">
             <section class="panel">
               ${shareBtn('safety')}<p class="panel-title">your safety</p>
-              <p class="panel-sub">how much safe-and-social your system held, on average</p>
+              <p class="panel-sub">the average level of safety in your system during the last ${periodTxt}</p>
               <div class="safety-wrap${rising?' rising':''}" id="safety-wrap">
                 <div class="safety-num"><span class="safety-num-val">${safetyPct}</span><span class="pct">%</span></div>
                 <div class="safety-trend ${dir}">${dir==='rising'?'and rising \u2191':dir==='falling'?'and dipping \u2193':'and steady'}</div>
               </div>
               <div class="safety-meter"><span class="safety-meter-fill" style="width:${safetyPct}%"></span></div>
-              ${topState?`<div class="safety-foot"><span class="tg-host">${triGlyph(topState)}</span><span class="sf-txt">most often in <b>${({play:'regulated mobility',stillness:'regulated immobility'}[topState])||STATE_NAME(topState)}</b></span></div>`:''}
+              ${topState?`<div class="safety-foot"><span class="tg-host">${triGlyph(topState)}</span><span class="sf-txt">your typical safety type is <b>${({play:'regulated mobility',stillness:'regulated immobility'}[topState])||STATE_NAME(topState)}</b></span></div>`:''}
               ${rising?'<p class="bloom-line">your system is finding more safety.</p>':''}
             </section>
 
             <section class="panel">
-              ${shareBtn('mix')}<p class="panel-title">your mix</p>
-              <p class="panel-sub">where your check-ins landed${periodTxt==='all time'?', all time':', over '+periodTxt}</p>
+              ${shareBtn('mix')}<p class="panel-title">your state mix</p>
+              <p class="panel-sub">${periodTxt==='all time'?'your state averages, all time':'your check-in averages, over '+periodTxt}</p>
               <div class="dist-bars">${mixHTML}</div>
             </section>
 
             <section class="panel">
-              ${shareBtn('day')}<p class="panel-title">your growth</p>
-              <p class="panel-sub">your safety over time, and how far you've come since you started.</p>
+              ${shareBtn('day')}<p class="panel-title">your safety changes</p>
+              <p class="panel-sub">your safety state over time, and how far you've come since you started.</p>
               ${growthHead}${dayByDay}
             </section>
 
             <section class="panel">
-              ${shareBtn('practice')}<p class="panel-title">does practice help?</p>
-              <p class="panel-sub">your average safety on the days you practice vs. the days you don't</p>
+              ${shareBtn('practice')}<p class="panel-title">is practice helping?</p>
+              <p class="panel-sub">your average safety after you practice vs. not</p>
               ${helpHTML}
             </section>
           </div>
@@ -1038,7 +1039,7 @@
               ${(function(){const L=Store.learned();let h='';if(L.favPractice)h+=`<div class="deep-row"><span class="deep-lbl">you return to</span><span class="deep-val">${Store.practiceLabel(L.favPractice)}</span></div>`;if(L.favSense)h+=`<div class="deep-row"><span class="deep-lbl">anchored through</span><span class="deep-val">${L.favSense}</span></div>`;return h;})()}
             </div>
           </div>
-          <p class="deep-hint" style="font-size:11px;opacity:.5;text-align:center;margin:6px 0 2px">tap a symbol to learn what it means</p>
+          <p class="deep-hint" style="font-size:11px;opacity:.5;text-align:center;margin:6px 0 2px">tap a symbol to learn more</p>
           <button class="change-link" id="change-ci" type="button">change a recent check-in</button>
         </div>`;
 
@@ -1087,11 +1088,11 @@
   }
   const STATE_DETAIL = {
     safety:      { headline:'safety',        color:'#F4D58D', about:"Safety is your nervous system open and online, not braced for anything. It spends its energy on rest, connection, and repair instead of defense. Safety isn't the absence of hard emotions. It's having enough capacity inside to meet them.", whenDrops: null },
-    fightflight: { headline:'fight or flight',color:'#E89B9B', about:"Fight or flight is sympathetic energy without enough safety yet. Your body picked up danger and mobilized to handle it. Flight first, the urge to escape, anxiety. Then fight, the urge to push back, anger. It's protection, not a flaw, even when it spills onto people you care about.", whenDrops:"Move a little on purpose, a short walk, shake out your hands, push your palms against a wall. Give the energy somewhere to go, then name the feeling under it. A long, slow exhale helps too.", practice:{practiceKey:'anchoring',sense:'movement',silence:8} },
+    fightflight: { headline:'flight/fight',color:'#E89B9B', about:"Flight/fight is sympathetic energy without enough safety yet. Your body picked up danger and mobilized to handle it. Flight first, the urge to escape, anxiety. Then fight, the urge to push back, anger. It's protection, not a flaw, even when it spills onto people you care about.", whenDrops:"Move a little on purpose, a short walk, shake out your hands, push your palms against a wall. Give the energy somewhere to go, then name the feeling under it. A long, slow exhale helps too.", practice:{practiceKey:'anchoring',sense:'movement',silence:8} },
     shutdown:    { headline:'shutdown',       color:'#A3C0DD', about:"Shutdown is the oldest brake your body has, heavy, flat, far away. Your system powered down to protect you when things got to be too much. A lot of what gets called depression is the body in shutdown. It isn't weakness, and it isn't who you are.", whenDrops:"Very small, very low demand. One sip of water, a dimmer light, one thing you can see or hear right now. You don't force your way out of shutdown. You add a little safety, and the body lets some energy come back.", practice:{practiceKey:'mindfulness',sense:'touch',silence:8} },
-    play:        { headline:'play/motivation', sub:'regulated mobilization', color:'#E8A871', about:"Play is safety and energy at the same time, the social, mobilized kind shared with people you trust. On your own, the same drive shows up as motivation. It's the same fuel as fight or flight, with safety mixed in, so it runs as creativity and drive instead of defense.", whenDrops:"If the safety thins and the energy stays, watch for the tip toward fight or flight. Keep a little safety in the mix, slow down enough to feel it, and aim the energy at one thing that matters.", practice:{practiceKey:'anchoring',sense:'touch',silence:8} },
+    play:        { headline:'play/motivation', sub:'regulated mobilization', color:'#E8A871', about:"Play is safety and energy at the same time, the social, mobilized kind shared with people you trust. On your own, the same drive shows up as motivation. It's the same fuel as flight/fight, with safety mixed in, so it runs as creativity and drive instead of defense.", whenDrops:"If the safety thins and the energy stays, watch for the tip toward flight/fight. Keep a little safety in the mix, slow down enough to feel it, and aim the energy at one thing that matters.", practice:{practiceKey:'anchoring',sense:'touch',silence:8} },
     stillness:   { headline:'stillness/intimacy', sub:'regulated immobilization', color:'#9FC498', about:"Stillness is the body slowed and quiet, without fear. The same powering-down as shutdown, but with safety mixed in, so it restores instead of collapses. On your own it's stillness; shared with someone safe, it's intimacy. A deeply regulated state.", whenDrops:"If the quiet starts to feel flat or heavy or scared instead of restful, that's the cue to add a small bit of safety, not to force yourself up and out.", practice:{practiceKey:'anchoring',sense:'sound',silence:8} },
-    freeze:      { headline:'freeze',         color:'#B89AC4', about:"Freeze is a mixed state, fight-or-flight energy held down by shutdown. Gas and brake at once. It isn't a deeper shutdown, it's both pedals down, which is why it can feel panicked and paralyzed at the same time. A braced, protective state, not nothing.", whenDrops:"The smallest movement, plus a cue of safety. Let your eyes go where they want, then wiggle your toes or roll your wrists, slow. Don't force it, that adds gas to a slammed brake. Get smaller and safer.", practice:{practiceKey:'most',skill:'pendulation',sense:'touch',silence:8} },
+    freeze:      { headline:'freeze',         color:'#B89AC4', about:"Freeze is a mixed state, flight/fight energy held down by shutdown. Gas and brake at once. It isn't a deeper shutdown, it's both pedals down, which is why it can feel panicked and paralyzed at the same time. A braced, protective state, not nothing.", whenDrops:"The smallest movement, plus a cue of safety. Let your eyes go where they want, then wiggle your toes or roll your wrists, slow. Don't force it, that adds gas to a slammed brake. Get smaller and safer.", practice:{practiceKey:'most',skill:'pendulation',sense:'touch',silence:8} },
   };
 
   function screenStateDetail(key){
@@ -1236,17 +1237,17 @@
   function practiceContextLine(last){
     const nm = Store.getName();
     if(!last || !sameDay(last.t)){
-      return nm ? 'a steady place to begin, '+escapeHtml(nm)+'.' : 'a steady place to begin.';
+      return nm ? 'something simple before your first check-in, '+escapeHtml(nm)+'.' : 'something simple before your first check-in.';
     }
     const map = {
-      safety:      'you checked in with real safety. here is a way to use it.',
-      play:        'there is safety with some charge today. let us point it somewhere kind.',
-      stillness:   'you are settled and still. a quiet practice to match.',
-      fightflight: 'a lot of energy is moving. let us help it settle.',
-      shutdown:    'things feel heavy right now. nothing to push against, just a little safety.',
-      freeze:      'held and braced today. we will start with the smallest movement.',
+      safety:      "you checked in with safety. here's what to do next.",
+      play:        "your body has safety and mobility. let's see if we can connect with those. remain open to what else is within you.",
+      stillness:   "you're okay with simply being as you are and where you are. let's deepen that potential with this practice. be open to what the moment brings you.",
+      fightflight: "energy within. let's see if you can also connect with safety.",
+      shutdown:    "things feel heavy right now. we don't reject it. but we also see if there is potential to connect to the present.",
+      freeze:      "sounds like some tension currently. good job noticing honestly and calling it as it is. let's see what happens when we connect to the present.",
     };
-    return map[last.dom] || 'a practice shaped to where you are.';
+    return map[last.dom] || 'a practice for you in this moment.';
   }
 
   function renderForYou(){
@@ -1300,7 +1301,7 @@
       (reco.practiceKey!=='mindfulness' && reco.sense) ? `anchored through ${hl(reco.sense)}` : null,
       reco.skill ? `practicing ${hl(skillLabel(reco.skill))}` : null,
       `with ${hl(silLabel(reco.silence))} silence between guidance`,
-      chLabel ? `meeting you at ${hl(chLabel)}` : null,
+      chLabel ? `challenge level at ${hl(chLabel)}` : null,
     ].filter(Boolean);
     const joinList = (a)=> a.length<=1 ? (a[0]||'') : a.slice(0,-1).join(', ')+' and '+a[a.length-1];
     const shapedSentence = shapeBits.length ? `Tuned for you, ${joinList(shapeBits)}.` : '';
@@ -1320,17 +1321,17 @@
         </div>
       </div>
       <div class="plan-sec">
-        <p class="dash-prompt">Why this, for you</p>
+        <p class="dash-prompt">Why this practice was chosen for you</p>
         <p class="plan-why">${escapeHtml(properCase(reco.reason))}</p>
       </div>
       <div class="plan-sec">
-        <p class="dash-prompt">What to expect</p>
+        <p class="dash-prompt">What to expect in your custom practice</p>
         <p class="plan-about">${escapeHtml(properCase(aboutOf(reco.practiceKey, reco.sense)))}</p>
         ${shapedSentence?`<p class="plan-about plan-shaped">${shapedSentence}</p>`:''}
       </div>
       <div class="plan-actions">
-        <button class="set-quiet actionbar-aux" id="plan-change">Change this practice</button>
-        <button class="btn block" id="plan-begin">Begin</button>
+        <button class="set-quiet actionbar-aux" id="plan-change">change this practice</button>
+        <button class="btn block" id="plan-begin">begin</button>
       </div>
     </div>`;
     $('#plan-begin').onclick = ()=>launchWeaver(reco);
@@ -1415,7 +1416,7 @@
       </div>
       ${key?`<div class="actionbar">
         <button class="set-quiet actionbar-aux" id="p-cancel">cancel</button>
-        <button class="btn block" id="p-begin"${canBegin?'':' disabled'}>Begin</button>
+        <button class="btn block" id="p-begin"${canBegin?'':' disabled'}>begin</button>
       </div>`:''}
     </div>`;
 
@@ -1519,11 +1520,11 @@
   function fbThanks(val){
     // closing line in Justin's voice — the report tunes the tone, never judges it
     const CLOSE = {
-      more:    { h:'something opened up.',           s:"that's worth noticing." },
-      same:    { h:'you showed up.',                 s:'that counts more than it feels like.' },
-      less:    { h:'you stayed with it.',            s:"that's not nothing." },
-      struggle:{ h:'hard ones are still practice.',  s:"you're still here." },
-      unsure:  { h:'not knowing is allowed.',        s:'you still showed up.' },
+      more:    { h:'something shifted toward connection.', s:"that's worth a small pat on your nervous system's back." },
+      same:    { h:'no major change, but you showed up.',  s:"that's a solid rep and your system thanks you for it." },
+      less:    { h:'you stayed with it.',                  s:"that's not nothing. imperfect practice is still practice. it's a chance to learn, adjust, and give yourself kudos for the effort. adjust for the next one. maybe take it easier and work your way back to more challenge. don't rush it." },
+      struggle:{ h:'hard ones are still practice.',        s:"you're still here. you showed up. struggling with practices is very normal. come back to it when you're ready, but maybe focus on an easier skill. customize the next practice to your content." },
+      unsure:  { h:'not knowing is allowed.',             s:'you still showed up. well done. stay curious and open for the next one.' },
     };
     const cl = CLOSE[val] || CLOSE.same;
     setHTML(`
@@ -1540,7 +1541,7 @@
         </div>
         <p class="settle-note">safety doesn't erase the rest. it just holds them.</p>
         <div class="fb-after">
-          <button class="btn block" id="fb-checkin">do a full check-in</button>
+          <button class="btn block" id="fb-checkin">do a post-practice check-in</button>
           <button class="navlink" id="fb-home" style="align-self:center">back to today</button>
         </div>
       </div></div>`);
@@ -1575,7 +1576,7 @@
         </div>
 
         <div class="set-rows">
-          <div class="row"><span class="k">name</span><input class="name-input" id="nm-val" type="text" value="${escapeHtml(Store.getName())}" placeholder="add your name"></div>
+          <div class="row"><span class="k">name</span><input class="name-input" id="nm-val" type="text" value="${escapeHtml(Store.getName())}" placeholder="add your name for a custom feel"></div>
           <div class="row"><span class="k">account</span><span class="val" style="font-weight:400">${escapeHtml(u.email||'on this device')}</span></div>
         </div>
 

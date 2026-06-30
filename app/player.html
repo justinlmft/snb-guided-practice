@@ -455,7 +455,7 @@ body.embed .foot{padding-top:clamp(10px,2vh,18px)}
         <p class="summary" id="summary"></p>
         <p class="begin-help" id="beginhelp">not sure? this is the simplest place to start.</p>
         <button class="surprise-all" id="surprise" type="button">surprise me</button>
-        <button class="btn primary" id="begin">Begin</button>
+        <button class="btn primary" id="begin">begin</button>
       </div>
     </div>
   </main>
@@ -487,14 +487,14 @@ body.embed .foot{padding-top:clamp(10px,2vh,18px)}
       </div>
       <!-- endings: graceful close, and a quiet escape -->
       <div class="endings">
-        <button class="btn quiet endbtn" id="endbtn">Begin ease out</button>
+        <button class="btn quiet endbtn" id="endbtn">begin ease out</button>
         <button class="endnow" id="stopbtn" aria-label="End now">end now</button>
       </div>
     </div>
     <!-- gentle completion state -->
     <div class="done" id="done">
-      <button class="btn quiet" id="againbtn">Go again</button>
-      <button class="btn quiet" id="overbtn">Choose another</button>
+      <button class="btn quiet" id="againbtn">go again</button>
+      <button class="btn quiet" id="overbtn">choose another</button>
       <button class="endnow" id="restbtn">end</button>
     </div>
     <!-- terminal rest: ending is an honored, complete choice -->
@@ -802,7 +802,7 @@ const MEDS={
  'uye':{title:'Use Your Ears',cue:'grounding through sound',track:'anchoring',est:'~10 min',file:'uye.pack.json'},
  'eye':{title:'Use Your Eyes',cue:'grounding through sight',track:'anchoring',est:'~9 min',file:'eye.pack.json'},
  'daily-dysregulation':{title:'Daily Dysregulation',cue:'meeting a recent activation',track:'most',est:'~16 min',file:'daily-dysregulation.pack.json'},
- 'outside-the-cave':{title:'Outside the Cave',cue:'a deeper imagery journey',track:'most',est:'~32 min',file:'outside-the-cave.pack.json'}
+ 'outside-the-cave':{title:'Outside the Cave',cue:'a deeper imagery journey to connect with non-safety',track:'most',est:'~32 min',file:'outside-the-cave.pack.json'}
 };
 const MEDS_ORDER=['uye','eye','daily-dysregulation','outside-the-cave'];   // gentlest first
 /* skills offered within self-regulation (like the anchor menu) */
@@ -810,12 +810,12 @@ const SKILLS={
   most:[['imagery','imagery & invitation'],['obstacles','obstacles'],['balancing','balancing'],['pendulation','pendulation']]
 };
 const EXP={
- mindfulness:{key:'mindfulness',t:'Practice simple mindfulness',cue:'the gentlest — a calm place to start',d:"",sense:'touch',silence:8,gentle:true,mind:true,tier:0,
-   sum:"We'll arrive, follow the breath, and move gently through your senses."},
+ mindfulness:{key:'mindfulness',t:'Practice simple mindfulness',cue:'the simplest. a calm place to start',d:"",sense:'touch',silence:8,gentle:true,mind:true,tier:0,
+   sum:"A super simple practice to connect with the present moment as it is through the senses and the breath. No pressure. Just presence."},
  anchoring:{key:'anchoring',t:'Connect with safety',cue:'a step in — settling into safety',d:'',sense:'touch',silence:8,gentle:true,mind:false,tier:1,
-   sum:"We'll settle into safety through your {sense}, and stay there a while."},
+   sum:"Connect into safety through your {sense}, and stay there a while."},
  most:{key:'most',t:'Practice self-regulation',cue:'the deepest — meeting what is hard',d:"",sense:'touch',skill:'imagery',descDefense:false,silence:4,gentle:false,mind:false,tier:3,
-   sum:"We'll hold safety and not-safety, and let them take turns. This one goes deepest."},
+   sum:"Intentionally and compassionately hold safety and non-safety."},
  more:{key:'more',t:'More meditations',cue:'standalone guided sessions',d:"",standalone:true,silence:8,mind:false,tier:9,
    sum:"Full guided practices — pick one and begin."}
 };
@@ -976,8 +976,7 @@ function renderSetup(){
   // summary
   const o=buildPlan();
   const time = o.loop ? '<b>The practice continues until you choose to stop.</b>' : '<b>About '+estimate(o)+' min.</b>';
-  const pre = practices.length>1 ? (['','','Two','Three'][practices.length]+' practices, back to back. ') : '';
-  $('summary').innerHTML = pre + time;
+  $('summary').innerHTML = time;
   // size the reveal to its content so the customization grows in / recedes smoothly (deterministic inside the flex column)
   const rv=$('reveal'); if(rv) rv.style.maxHeight = picked ? rv.scrollHeight+'px' : '0px';
 }

@@ -492,7 +492,7 @@
                : (L.challengeAvg!=null ? L.challengeAvg : 0.55);
     if(!last){
       return cfg('mindfulness', null, prefSense()||L.favSense||'touch', 8,
-        'a calm place to start. when you check in, i will tune this to where your system actually is.', 'simplest place to begin');
+        'a simple place to start. after checking in, you will get a practice attuned to your system.', 'simplest place to begin');
     }
     // first few days: keep the practice gentle and build from there, unless they explicitly asked to stretch.
     const _tn = tenure();
@@ -504,31 +504,31 @@
     if(dom==='shutdown' || dom==='freeze'){
       let reason = dom==='shutdown'
         ? 'you are pulling toward shutdown. nothing to push against. we will just find a little safety, gently.'
-        : 'a lot is held still and moving at once. we will steady, then look for safety.';
-      if(tr && tr.dir==='falling') reason = 'safety has been slipping the last few check-ins. let us spend this one just building it back.';
-      else if(want>=0.78) reason += ' you asked to go further today, and we will, by settling first.';
+        : "a lot is frozen within. let's practice through settling, then look for safety.";
+      if(tr && tr.dir==='falling') reason = "safety has been slipping in the last few check-ins. let's spend this one just on rebuilding it.";
+      else if(want>=0.78) reason += ' you asked to go further, and we will, by settling first.';
       return cfg('anchoring', null, sense, L.endsEarlyOften?12:10, reason, 'meet you where you are');
     }
     if(dom==='fightflight' || dom==='play'){
       let reason = dom==='play'
-        ? 'there is safety here with some charge moving. a good place to practice noticing.'
-        : 'a lot of energy is moving. we will slow down and let some of it settle before anything else.';
+        ? "there's safety with some energy within. a good opportunity to practice noticing."
+        : "a lot of energy within. we'll slow down and let some of it settle before anything else.";
       if(want<=0.3) reason = dom==='play'
-        ? 'energy with safety mixed in. you asked to keep it gentle, so let us just enjoy the steadiness.'
-        : 'a lot of energy is moving, and you asked for gentle. we will only settle today.';
+        ? "energy with safety mixed in. you asked to keep it gentle, so let's see if we can find more calm."
+        : "a lot of energy within you, and you asked for gentle. we'll only settle for now.";
       return cfg('mindfulness', null, sense, moreSilence, reason, 'settle the charge');
     }
     // safe / regulated — this is where the challenge appetite has the most room to act
     if(want<=0.35 || early){
       const reason = early
-        ? 'you have real safety here. you are just getting started, so let us keep these first few gentle and let the calm land.'
-        : 'you have real safety, and you asked to keep it gentle. let us just deepen the calm and let it land.';
+        ? "you have real safety here. you're just getting started, so let's keep these first few gentle and connect with the calm within."
+        : "you have real safety, and you asked to keep it gentle. let's connect more deeply with calm.";
       return cfg('anchoring', null, sense, moreSilence, reason, early ? 'gentle start' : 'stay gentle');
     }
     const skill = want>=0.78 ? 'pendulation' : (L.favSkill || 'imagery');
-    let reason = 'there is real safety here right now. if you are willing, this is a chance to gently meet something harder, knowing you can come back.';
-    if(want>=0.78) reason = 'you have safety, and you asked to be stretched. let us use that capacity and meet something real.';
-    else if(L.sessionsDone>=3 && L.favPractice==='most') reason = 'you have safety, and self-regulation is where you keep going back. let us pick that thread up again.';
+    let reason = "there is real safety here right now. if you're willing, this is a chance to gently meet defense, knowing you can come back.";
+    if(want>=0.78) reason = "you have safety, and you asked for more challenge. let's use that capacity to connect with non-safety.";
+    else if(L.sessionsDone>=3 && L.favPractice==='most') reason = "you have safety, and self-regulation is where you keep going back. let's pick that thread up again.";
     return cfg('most', skill, sense, want>=0.78?4:(L.endsEarlyOften?8:6), reason, 'room to go deeper');
 
     function cfg(practiceKey, skill, sense, silence, reason, tag){
@@ -540,10 +540,10 @@
 
   // ---- challenge appetite: shared levels + label (used by check-in + advisor + you) ----
   const CHALLENGE_LEVELS = [
-    { v:0.12, key:'settle',  label:'just settle' },
-    { v:0.40, key:'gentle',  label:'go gently' },
-    { v:0.65, key:'meet',    label:'meet it' },
-    { v:0.90, key:'stretch', label:'go deeper' },
+    { v:0.12, key:'settle',  label:'simple mindfulness' },
+    { v:0.40, key:'gentle',  label:'safety-focused' },
+    { v:0.65, key:'meet',    label:'beginner defense' },
+    { v:0.90, key:'stretch', label:'advanced defense' },
   ];
   function challengeLabel(v){
     if(v==null||isNaN(v)) return null;
