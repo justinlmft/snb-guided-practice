@@ -481,18 +481,17 @@
     return { moved, total, rate: moved/total };
   }
 
-  // today: the day's moments as an arc — the atom of the reflections system.
-  // Returns today's check-ins in order, within-day direction (by safety/ventral),
-  // today's sessions, and any practice deltas (a session sitting between two reads).
-  // From moment one: with a single check-in it just reports that one.
-  function today(){
-    const now = Date.now();
-    const d0 = new Date(now); d0.setHours(0,0,0,0); const t0 = d0.getTime();
+  // dayArc: any one calendar day's moments as an arc — the atom of the reflections
+  // system. Returns that day's check-ins in order, within-day direction (by
+  // safety/ventral), that day's sessions, and any practice deltas (a session
+  // sitting between two reads). From moment one. `today()` is dayArc of today.
+  function dayArc(t0){
+    const tEnd = t0 + 864e5;
     const moments = data.checkins
-      .filter(c => c && typeof c.t==='number' && c.t>=t0 && c.t<=now+1 && c.dom && c.dom!=='neutral')
+      .filter(c => c && typeof c.t==='number' && c.t>=t0 && c.t<tEnd && c.dom && c.dom!=='neutral')
       .sort((a,b)=>a.t-b.t);
     const sess = data.sessions
-      .filter(s => s && typeof s.t==='number' && s.t>=t0 && s.t<=now+1)
+      .filter(s => s && typeof s.t==='number' && s.t>=t0 && s.t<tEnd)
       .sort((a,b)=>a.t-b.t);
     const n = moments.length;
     let dir = null;
@@ -508,6 +507,24 @@
       deltas.push({ t:s.t, beforeV:bv, afterV:after.v, rose: (bv!=null) ? (after.v > bv+0.04) : null });
     });
     return { moments, sessions:sess, n, dir, deltas, first: n?moments[0]:null, last: n?moments[n-1]:null };
+  }
+  function today(){ const d=new Date(); d.setHours(0,0,0,0); return dayArc(d.getTime()); }
+
+  // ---- mint store: dated, immutable reflections (the archive / keepsake moat) ----
+  // A reflection lives while its span is open and MINTS (snapshots, frozen) at the
+  // span's close. Frozen because the copy arrays cycle randomly — recomputing would
+  // change the words. Per device for now (localStorage); cloud sync is a later add.
+  function _mintKey(){ return 'snb_mint_' + (auth.user ? auth.user.id : 'anon'); }
+  function _mintsRaw(){ try{ const a = JSON.parse(localStorage.getItem(_mintKey())); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+  function mints(tier){ let a = _mintsRaw(); if(tier) a = a.filter(m => m.tier===tier); return a.sort((x,y)=> y.dateMs - x.dateMs); }
+  function hasMint(tier, date){ return _mintsRaw().some(m => m.tier===tier && m.date===date); }
+  function saveMint(entry){
+    if(!entry || !entry.tier || !entry.date || !entry.text) return false;
+    if(hasMint(entry.tier, entry.date)) return false;               // immutable: never overwrite
+    const a = _mintsRaw();
+    a.push({ id: entry.tier+':'+entry.date, tier: entry.tier, date: entry.date, dateMs: entry.dateMs, text: entry.text, ts: Date.now() });
+    try{ localStorage.setItem(_mintKey(), JSON.stringify(a)); }catch(e){}
+    return true;
   }
 
   // ---- recommender (simulated AI) ----
@@ -605,7 +622,8 @@
 
   global.Store = {
     init, signUp, signIn, signOut, user, cloud, syncStatus,
-    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions, today,
+    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions, today, dayArc,
+    mints, hasMint, saveMint,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
     prefSense, setPrefSense, prefSilence, setPrefSilence,

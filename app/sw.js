@@ -3,17 +3,17 @@
    cache (and to the cached index.html for navigations). Audio lives OUTSIDE this
    scope (/clips, /packs at the repo root) and streams from the network — we never
    intercept it. Bump SHELL_VERSION on any shell change to roll the cache. */
-const SHELL_VERSION = 'snb-app-shell-v109';
+const SHELL_VERSION = 'snb-app-shell-v110';
 
 const SHELL = [
   './',
   './index.html',
-  './app.css?v=28',
-  './app.js?v=34',
+  './app.css?v=29',
+  './app.js?v=35',
   './icons.js',
   './current.js',
   './config.js',
-  './store.js?v=27',
+  './store.js?v=28',
   './from-justin.js',
   './player.html',
   './manifest.webmanifest',

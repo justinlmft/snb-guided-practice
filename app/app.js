@@ -319,8 +319,10 @@
   }
 
   // ---------------------------------------------------------------- app shell
+  let _mintedThisSession = false;
   function app(tab){
     currentTab = tab;
+    if(!_mintedThisSession){ _mintedThisSession = true; mintPastDays(); }
     const u = Store.user();
     setHTML(`
       <header class="appbar">
@@ -672,6 +674,8 @@
       bodyHTML = `${lead}${P('Check in a few times, and a more personal summary will show up here.')}`;
     }
 
+    const hasArchive = (Store.mints && Store.mints('daily').length > 0);
+    const archiveLink = hasArchive ? `<button class="linkbtn arch-link" id="open-arch" style="margin-top:26px">past reflections →</button>` : '';
     setHTML(`
       <header class="appbar"><button class="backbtn" id="deep-back">today</button></header>
       <div class="scroll">
@@ -679,9 +683,71 @@
           <p class="eyebrow" style="margin-bottom:10px">for you</p>
           ${todayBlock}
           ${bodyHTML}
+          ${archiveLink}
         </div>
       </div>`);
     $('#deep-back').onclick = ()=>app('today');
+    const ab = $('#open-arch'); if(ab) ab.onclick = screenArchive;
+  }
+
+  // ---- reflections archive (minted past reflections) -------------------------
+  function fmtMintDate(ms){
+    try{ return new Date(ms).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' }); }
+    catch(e){ return new Date(ms).toDateString(); }
+  }
+  // mint each closed day's daily reflection once (freeze the text — arrays cycle, so
+  // recomputing would change the words). Idempotent: skips days already minted.
+  function mintPastDays(){
+    try{
+      if(!(FromJustin.daily && Store.dayArc && Store.saveMint && Store.hasMint)) return;
+      const cs = Store.checkins(); if(!cs.length) return;
+      const sod = (function(){ const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
+      const seen = {};
+      cs.forEach(c => { if(c && typeof c.t==='number'){ const d=new Date(c.t); d.setHours(0,0,0,0); const t0=d.getTime(); if(t0 < sod) seen[t0]=true; } });
+      Object.keys(seen).map(Number).forEach(t0 => {
+        const key = new Date(t0).toDateString();
+        if(Store.hasMint('daily', key)) return;
+        const ctx = Store.dayArc(t0);
+        if(!ctx || ctx.n < 1) return;
+        const note = FromJustin.daily(ctx);
+        if(note && note.text) Store.saveMint({ tier:'daily', date:key, dateMs:t0, text:note.text });
+      });
+    }catch(e){}
+  }
+  function screenArchive(){
+    const list = Store.mints ? Store.mints('daily') : [];
+    const rows = list.length
+      ? list.map(m => {
+          const snip = String(m.text||'').split('. ')[0];
+          return `<button class="arch-row" data-id="${escapeHtml(m.id)}"><span class="arch-row-main"><span class="arch-date">${escapeHtml(fmtMintDate(m.dateMs))}</span><span class="arch-snip">${escapeHtml(snip)}.</span></span><span class="wc-go">${CHEV}</span></button>`;
+        }).join('')
+      : `<p style="font-size:15px;line-height:1.6;color:var(--muted);margin:8px 0 0">your reflections will collect here as each day closes.</p>`;
+    setHTML(`
+      <header class="appbar"><button class="backbtn" id="arch-back">for you</button></header>
+      <div class="scroll">
+        <div class="view read" style="gap:0">
+          <p class="eyebrow" style="margin-bottom:14px">past reflections</p>
+          ${rows}
+        </div>
+      </div>`);
+    $('#arch-back').onclick = screenReflectionDeep;
+    document.querySelectorAll('.arch-row').forEach(b => b.onclick = ()=>screenMintedEntry(b.dataset.id));
+  }
+  function screenMintedEntry(id){
+    const m = (Store.mints ? Store.mints('daily') : []).find(x => x.id===id);
+    if(!m) return screenArchive();
+    const ctx = Store.dayArc ? Store.dayArc(m.dateMs) : null;
+    const tl = (ctx && ctx.n >= 1) ? momentTimeline(ctx.moments, ctx.sessions) : '';
+    setHTML(`
+      <header class="appbar"><button class="backbtn" id="me-back">past reflections</button></header>
+      <div class="scroll">
+        <div class="view read" style="gap:0">
+          <p class="eyebrow" style="margin-bottom:8px">${escapeHtml(fmtMintDate(m.dateMs))}</p>
+          <p style="font-size:16px;line-height:1.65;color:var(--ink-80);text-wrap:pretty;margin:0 0 16px">${escapeHtml(m.text)}</p>
+          ${tl}
+        </div>
+      </div>`);
+    $('#me-back').onclick = screenArchive;
   }
 
   function recoCardHTML(reco){
