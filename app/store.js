@@ -204,7 +204,8 @@
       // MERGE (union by t), never overwrite: local + still-queued outbox + cloud.
       // An un-synced check-in stays visible and is never lost to a cloud read.
       if(!cs.error){ data.checkins = unionByT(data.checkins, outbox.checkins, (cs.data||[]).map(rowToCheckin)); changed = true; }
-      if(!ss.error){ data.sessions = unionByT(data.sessions, outbox.sessions, (ss.data||[]).map(rowToSession)); _purgeTombs(); changed = true; }
+      if(!ss.error){ data.sessions = unionByT(data.sessions, outbox.sessions, (ss.data||[]).map(rowToSession)); changed = true; }
+      _purgeTombs();                                   // re-apply deletions over whatever the cloud just merged back
       saveCache();
       setSync((outbox.checkins.length||outbox.sessions.length) ? 'error' : 'idle', (cs.error||ss.error)||null);
       if(changed) notify();                          // re-render once fresh data lands (post-init / post-refresh)
@@ -329,16 +330,20 @@
     saveCache(); if(CLOUD) flush();
   }
   function sessions(){ return data.sessions.slice(); }
-  // tombstones: timestamps of sessions the user deleted. A deletion must survive the
-  // cloud re-merge on the next hydrate even before (or if) the cloud DELETE lands, so we
-  // record deleted t's locally and purge them out of data.sessions after every load/hydrate.
-  function _tombKey(){ return 'snb_deleted_sessions_' + (auth.user ? auth.user.id : 'anon'); }
-  function _tombs(){ try{ const a=JSON.parse(localStorage.getItem(_tombKey())); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-  function _addTomb(t){ try{ const a=_tombs(); if(a.indexOf(t)<0){ a.push(t); localStorage.setItem(_tombKey(), JSON.stringify(a.slice(-500))); } }catch(e){} }
-  function _purgeTombs(){ const a=_tombs(); if(!a.length) return; const set=Object.create(null); a.forEach(t=>set[t]=1); data.sessions = data.sessions.filter(s=> !(s && set[s.t])); }
+  // tombstones: timestamps the user deleted, per kind ('sessions' | 'checkins'). A deletion
+  // must survive the cloud re-merge on the next hydrate even before (or if) the cloud DELETE
+  // lands, so we record deleted t's locally and purge them after every load/hydrate.
+  function _tombKey(kind){ return 'snb_deleted_' + kind + '_' + (auth.user ? auth.user.id : 'anon'); }
+  function _tombs(kind){ try{ const a=JSON.parse(localStorage.getItem(_tombKey(kind))); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function _addTomb(kind, t){ try{ const a=_tombs(kind); if(a.indexOf(t)<0){ a.push(t); localStorage.setItem(_tombKey(kind), JSON.stringify(a.slice(-500))); } }catch(e){} }
+  function _tombSet(kind){ const a=_tombs(kind); if(!a.length) return null; const set=Object.create(null); a.forEach(t=>set[t]=1); return set; }
+  function _purgeTombs(){
+    const ss=_tombSet('sessions'); if(ss) data.sessions = data.sessions.filter(s=> !(s && ss[s.t]));
+    const cc=_tombSet('checkins'); if(cc) data.checkins = data.checkins.filter(c=> !(c && cc[c.t]));
+  }
   // delete a logged practice session by timestamp (e.g. a test run). Local + cloud + tombstone.
   function deleteSession(t){
-    _addTomb(t);                                              // record the deletion so it sticks across sync
+    _addTomb('sessions', t);                                  // record the deletion so it sticks across sync
     const i = data.sessions.findIndex(x => x.t===t);
     if(i >= 0) data.sessions.splice(i, 1);
     const oi = outbox.sessions.findIndex(x => x.t===t);
@@ -347,6 +352,19 @@
     if(CLOUD && auth.user){
       // .then() is required: a supabase-js builder only sends the request when awaited/thened.
       try{ sb.from('sessions').delete().eq('user_id', auth.user.id).eq('t', t).then(function(){}, function(){}); }catch(e){}
+    }
+    return true;
+  }
+  // delete a check-in by timestamp. Same tombstone + fire-the-cloud-delete pattern.
+  function deleteCheckin(t){
+    _addTomb('checkins', t);
+    const i = data.checkins.findIndex(x => x.t===t);
+    if(i >= 0) data.checkins.splice(i, 1);
+    const oi = outbox.checkins.findIndex(x => x.t===t);
+    if(oi >= 0) outbox.checkins.splice(oi, 1);
+    saveCache();
+    if(CLOUD && auth.user){
+      try{ sb.from('checkins').delete().eq('user_id', auth.user.id).eq('t', t).then(function(){}, function(){}); }catch(e){}
     }
     return true;
   }
@@ -643,7 +661,7 @@
 
   global.Store = {
     init, signUp, signIn, signOut, user, cloud, syncStatus,
-    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions, deleteSession, today, dayArc,
+    addCheckin, updateCheckin, deleteCheckin, checkins, lastCheckin, addSession, sessions, deleteSession, today, dayArc,
     mints, hasMint, saveMint,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,

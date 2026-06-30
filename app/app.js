@@ -956,16 +956,22 @@
   function screenChangeCheckin(){
     const recent = Store.checkins().slice(-6).reverse();
     clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
-    const rows = recent.length ? recent.map((c,i)=>`<button class="change-row" data-i="${i}" type="button"><span class="change-when">${relTime(c.t)}</span><span class="change-mark">${stateMarks(c.dom)}<span class="change-state">${STATE_NAME(c.dom)}</span></span><span class="wc-go">${CHEV}</span></button>`).join('') : '<p class="panel-empty">no check-ins to change yet.</p>';
+    const rows = recent.length ? recent.map((c,i)=>`<div class="ci-row"><button class="change-row ci-edit" data-i="${i}" type="button"><span class="change-when">${relTime(c.t)}</span><span class="change-mark">${stateMarks(c.dom)}<span class="change-state">${STATE_NAME(c.dom)}</span></span><span class="wc-go">${CHEV}</span></button><button class="pr-del ci-del" data-t="${c.t}" type="button">remove</button></div>`).join('') : '<p class="panel-empty">no check-ins to change yet.</p>';
     setHTML(`
       <header class="appbar"><button class="backbtn" id="cc-back">back</button></header>
       <div class="scroll"><div class="view" style="gap:14px">
         <div class="scr-head"><p class="eyebrow"></p><h2 class="scr-h">change a check-in</h2></div>
-        <p class="map-sub" style="margin:0">pick one of your recent check-ins to adjust.</p>
+        <p class="map-sub" style="margin:0">tap a recent check-in to adjust it, or remove one you didn't mean to keep.</p>
         <div class="change-list">${rows}</div>
       </div></div>`);
     $('#cc-back').onclick=()=>app('current');
-    root.querySelectorAll('.change-row').forEach(b=>b.onclick=()=>screenCheckin(recent[+b.dataset.i]));
+    root.querySelectorAll('.ci-edit').forEach(b=>b.onclick=()=>screenCheckin(recent[+b.dataset.i]));
+    root.querySelectorAll('.ci-del').forEach(b=>b.onclick=()=>{
+      const t = +b.dataset.t;
+      if(confirm('Remove this check-in? This cannot be undone.')){
+        Store.deleteCheckin(t); haptic('save'); FromJustin.refresh(); screenChangeCheckin();
+      }
+    });
   }
 
   // manage logged practices: remove a session you didn't mean to keep (e.g. a test run)

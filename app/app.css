@@ -917,3 +917,9 @@ body.reduce-motion .tg-m{transition:none}
 .sc-name{font-size:14px;font-weight:500;color:#F4F1E8}
 .sc-brand{margin-left:auto;font-size:11px;color:#B9B09A}
 .sc-share{margin:0 0 6px}
+
+/* ---- change-a-check-in row: tappable edit + a remove button ---- */
+.ci-row{display:flex;align-items:center;gap:8px;border-top:0.5px solid var(--hairline)}
+.ci-row:first-of-type{border-top:none}
+.ci-row .change-row{flex:1;min-width:0;border-top:none}
+.ci-row .ci-del{flex:0 0 auto}
