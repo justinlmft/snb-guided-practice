@@ -827,6 +827,34 @@
     $('#cc-back').onclick=()=>app('current');
     root.querySelectorAll('.change-row').forEach(b=>b.onclick=()=>screenCheckin(recent[+b.dataset.i]));
   }
+
+  // manage logged practices: remove a session you didn't mean to keep (e.g. a test run)
+  function _fbShort(k){ return ({ more:'felt more present', same:'about the same', less:'less connected', struggle:'struggled', unsure:'not sure' })[k] || ''; }
+  function screenManagePractices(){
+    const recent = Store.sessions().slice(-8).reverse();
+    clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
+    const rows = recent.length
+      ? recent.map(s => {
+          const fb = s.feedback ? ` · ${escapeHtml(_fbShort(s.feedback))}` : '';
+          const ended = (s.completed===false || s.endedEarly) ? ' · ended early' : '';
+          return `<div class="pr-row"><span class="pr-main"><span class="change-when">${relTime(s.t)}</span><span class="pr-label">${escapeHtml(Store.practiceLabel(s.practiceKey))}${fb}${ended}</span></span><button class="pr-del" data-t="${s.t}" type="button">remove</button></div>`;
+        }).join('')
+      : '<p class="panel-empty">no practices to manage yet.</p>';
+    setHTML(`
+      <header class="appbar"><button class="backbtn" id="mp-back">back</button></header>
+      <div class="scroll"><div class="view" style="gap:14px">
+        <div class="scr-head"><p class="eyebrow"></p><h2 class="scr-h">manage your practices</h2></div>
+        <p class="map-sub" style="margin:0">remove a logged practice you didn't mean to keep, like a test. this can't be undone.</p>
+        <div class="change-list">${rows}</div>
+      </div></div>`);
+    $('#mp-back').onclick=()=>app('current');
+    root.querySelectorAll('.pr-del').forEach(b=>b.onclick=()=>{
+      const t = +b.dataset.t;
+      if(confirm('Remove this practice? This cannot be undone.')){
+        Store.deleteSession(t); haptic('save'); screenManagePractices();
+      }
+    });
+  }
   function screenCheckin(editRec){
     if(editRec && typeof editRec.t!=='number') editRec = null;   // the today-card onclick passes its click EVENT as editRec; an event is not a check-in to edit -> start a fresh check-in (fixes "change your check-in" / "NaNd ago" / silent no-save)
     clearFigures(); document.body.classList.remove('in-practice'); document.body.classList.remove('show-fab');
@@ -1159,6 +1187,7 @@
           </div>
           <p class="deep-hint" style="font-size:11px;opacity:.5;text-align:center;margin:6px 0 2px">tap a symbol to learn more</p>
           <button class="change-link" id="change-ci" type="button">change a recent check-in</button>
+          ${Store.sessions().length ? '<button class="change-link" id="manage-pr" type="button">manage your practices</button>' : ''}
         </div>`;
 
       function stopPlay(){ if(playTimer){ clearInterval(playTimer); playTimer=null; } const p=$('#ot-play'); if(p) p.innerHTML='<svg viewBox="0 0 24 24"><path d="M8 6 L18 12 L8 18 Z"/></svg>'; }
@@ -1166,6 +1195,7 @@
       c.querySelectorAll('.period-pill').forEach(b=>b.addEventListener('click',()=>{ stopPlay(); const cv=$('#carousel'); const sl=cv?cv.scrollLeft:0; activePeriod=b.dataset.period; render(); const nv=$('#carousel'); if(nv){ nv.scrollLeft=sl; const i=Math.round(sl/(nv.clientWidth||1)); c.querySelectorAll('#dots .dot-i').forEach((d,j)=>d.classList.toggle('on',j===i)); } }));
       const setBtn=$('#set-btn'); if(setBtn) setBtn.onclick=screenSettings;
       const chgBtn=$('#change-ci'); if(chgBtn) chgBtn.onclick=screenChangeCheckin;
+      const mpBtn=$('#manage-pr'); if(mpBtn) mpBtn.onclick=screenManagePractices;
       const addBtn=$('#add-ci'); if(addBtn) addBtn.onclick=screenCheckin;
       c.querySelectorAll('.panel-share').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); openShare(`my nervous system, lately, ${safetyPct}% safe-and-social, most often in ${STATE_NAME(topState||'safety')}. stuck not broken`); }));
       c.querySelectorAll('.distrow').forEach(b=>b.addEventListener('click',()=>screenStateDetail(b.dataset.stateDetail)));

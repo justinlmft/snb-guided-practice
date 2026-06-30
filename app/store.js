@@ -329,6 +329,19 @@
     saveCache(); if(CLOUD) flush();
   }
   function sessions(){ return data.sessions.slice(); }
+  // delete a logged practice session by timestamp (e.g. a test run). Local + cloud.
+  function deleteSession(t){
+    const i = data.sessions.findIndex(x => x.t===t);
+    if(i < 0) return false;
+    data.sessions.splice(i, 1);
+    const oi = outbox.sessions.findIndex(x => x.t===t);
+    if(oi >= 0) outbox.sessions.splice(oi, 1);
+    saveCache();
+    if(CLOUD && auth.user){
+      try{ sb.from('sessions').delete().eq('user_id', auth.user.id).eq('t', t); }catch(e){}
+    }
+    return true;
+  }
 
   // ---- learned preferences ----
   function learned(){
@@ -622,7 +635,7 @@
 
   global.Store = {
     init, signUp, signIn, signOut, user, cloud, syncStatus,
-    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions, today, dayArc,
+    addCheckin, updateCheckin, checkins, lastCheckin, addSession, sessions, deleteSession, today, dayArc,
     mints, hasMint, saveMint,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,
