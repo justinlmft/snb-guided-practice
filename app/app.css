@@ -905,3 +905,15 @@ body.reduce-motion .tg-m{transition:none}
 .pr-label{font-size:14px;color:var(--ink);line-height:1.4}
 .pr-del{flex:0 0 auto;background:none;border:0.5px solid var(--hairline);border-radius:var(--radius,8px);padding:6px 12px;font-size:12.5px;color:var(--danger,#9A3B3B);cursor:pointer}
 .pr-del:active{transform:scale(0.98)}
+
+/* ---- weekly share card + archive weekly tag ---- */
+.arch-tag{display:inline-block;margin-left:8px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border:0.5px solid var(--hairline);border-radius:999px;padding:1px 7px;vertical-align:middle}
+.share-card{background:var(--ink);border-radius:16px;padding:18px;margin:2px 0 14px}
+.sc-eyebrow{font-size:10px;letter-spacing:.12em;color:#B9B09A;margin-bottom:12px}
+.sc-line{font-size:18px;line-height:1.4;color:#F4F1E8}
+.sc-foot{display:flex;align-items:center;margin-top:18px}
+.sc-attrib{display:flex;align-items:center;gap:9px}
+.sc-attrib .triglyph{height:26px;width:auto}
+.sc-name{font-size:14px;font-weight:500;color:#F4F1E8}
+.sc-brand{margin-left:auto;font-size:11px;color:#B9B09A}
+.sc-share{margin:0 0 6px}

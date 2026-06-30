@@ -322,7 +322,7 @@
   let _mintedThisSession = false;
   function app(tab){
     currentTab = tab;
-    if(!_mintedThisSession){ _mintedThisSession = true; mintPastDays(); }
+    if(!_mintedThisSession){ _mintedThisSession = true; mintPastDays(); mintWeeks(); }
     const u = Store.user();
     setHTML(`
       <header class="appbar">
@@ -674,7 +674,7 @@
       bodyHTML = `${lead}${P('Check in a few times, and a more personal summary will show up here.')}`;
     }
 
-    const hasArchive = (Store.mints && Store.mints('daily').length > 0);
+    const hasArchive = (Store.mints && Store.mints().length > 0);
     const archiveLink = hasArchive ? `<button class="linkbtn arch-link" id="open-arch" style="margin-top:26px">past reflections →</button>` : '';
     setHTML(`
       <header class="appbar"><button class="backbtn" id="deep-back">today</button></header>
@@ -714,14 +714,139 @@
       });
     }catch(e){}
   }
+  // ---- weekly altitude: mint each closed Sunday-week's letter (the for-you reader
+  // content), computed over that exact 7-day window so it's honest even on a late open.
+  const WEEK_MS = 7*864e5;
+  function _sundayStart(t){ const d=new Date(t); d.setHours(0,0,0,0); d.setDate(d.getDate()-d.getDay()); return d.getTime(); }
+  // windowed equivalent of Store.weekMix() over an explicit set of in-window check-ins
+  function _windowMix(cs){
+    const n=cs.length; if(n<6) return null;                 // weekMix self-gates >=6; below that no secondary lines
+    const cnt={}; cs.forEach(c=>cnt[c.dom]=(cnt[c.dom]||0)+1);
+    const order=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
+    const dom=order[0], second=order[1]||null;
+    const REG={safety:1,play:1,stillness:1}, DYS={fightflight:1,shutdown:1,freeze:1};
+    let reg=0; cs.forEach(c=>{ if(REG[c.dom]) reg++; });
+    const regShare=reg/n, lean = regShare>=0.6?'regulated' : regShare<=0.4?'dysregulated' : 'even';
+    return { n, dom, domShare:Math.round(cnt[dom]/n*100), second, secondShare: second?Math.round(cnt[second]/n*100):0,
+             reg, dys:n-reg, regShare, lean, distinct:order.length, defenseStates:order.filter(d=>DYS[d]) };
+  }
+  function weeklyIssueFor(ws){
+    if(!FromJustin.blog) return null;
+    const we = ws + WEEK_MS;
+    const cs = Store.checkins().filter(c=>c&&typeof c.t==='number'&&c.t>=ws&&c.t<we&&c.dom&&c.dom!=='neutral').sort((a,b)=>a.t-b.t);
+    const n = cs.length;
+    if(n < 3) return null;                                   // sparse week: skip minting in v1
+    const freq={}; cs.forEach(c=>freq[c.dom]=(freq[c.dom]||0)+1);
+    let dom=null,bestN=-1; for(const k in freq){ if(freq[k]>bestN){ bestN=freq[k]; dom=k; } }
+    const share = Math.round(bestN/n*100);
+    const dv = cs[n-1].v - cs[0].v; const dir = dv>0.08?'rising' : dv<-0.08?'falling' : 'steady';
+    const avgV = cs.reduce((s,c)=>s+c.v,0)/n;
+    const sd = Math.sqrt(cs.reduce((s,c)=>s+(c.v-avgV)*(c.v-avgV),0)/n);
+    const variance = sd>0.18 ? 'shifts' : 'consistent';
+    const mix = _windowMix(cs);
+    // force the full-week framing (it IS a complete week) + suppress the from-now secondary
+    // lines (transitions/time-of-day/recovery/payoff) with empty overrides so the snapshot
+    // never borrows current data.
+    const issue = FromJustin.blog({ dom, share, dir, variance, count:n, mix,
+      trans:{}, tod:{}, recovery:{}, practiceEffect:{}, stage:'week', tenure:{stage:'week',days:7,returning:false} });
+    if(!issue) return null;
+    const doms = Object.keys(freq).sort((a,b)=>freq[b]-freq[a]);     // doms[0] = the week's dominant state (lights the triGlyph)
+    const traj = dir==='rising' ? 'leaned toward safe' : dir==='falling' ? 'kept showing up all week' : 'stayed with it all week';
+    const card = {
+      dateLabel: 'week of ' + new Date(ws).toLocaleDateString(undefined,{month:'long',day:'numeric'}),
+      n: n, dir: dir, traj: traj, doms: doms
+    };
+    const summary = (issue.bullets && issue.bullets[0]) ? issue.bullets[0].text : (n + ' check-ins this week.');
+    return { issue, card, summary };
+  }
+  function mintWeeks(){
+    try{
+      if(!(FromJustin.blog && Store.saveMint && Store.hasMint)) return;
+      const cs = Store.checkins(); if(!cs.length) return;
+      let firstT = Infinity; cs.forEach(c=>{ if(c&&typeof c.t==='number'&&c.t<firstT) firstT=c.t; });
+      if(!isFinite(firstT)) return;
+      const thisWeek = _sundayStart(Date.now());
+      for(let ws = _sundayStart(firstT); ws < thisWeek; ws += WEEK_MS){
+        const key = 'w' + new Date(ws).toISOString().slice(0,10);
+        if(Store.hasMint('weekly', key)) continue;
+        const built = weeklyIssueFor(ws);
+        if(!built) continue;
+        Store.saveMint({ tier:'weekly', date:key, dateMs:ws, text:built.summary, data:{ issue:built.issue, card:built.card } });
+      }
+    }catch(e){}
+  }
+
+  // the guardrailed share card: the user's name + their personal triGlyph (the brand
+  // logo) lit to the week's dominant state. Proud = showing-up + trajectory, never a ranking.
+  function _cardLine(card){
+    const name = (Store.getName && Store.getName()) || '';
+    return (name ? 'Checked' : 'I checked') + ' in ' + card.n + ' times this week, and ' + (card.traj || 'stayed with it all week') + '.';
+  }
+  // solid-fill triGlyph (explicit fills, no CSS) for rasterizing into the share image
+  function triGlyphSolid(key, dimCol){
+    const col = STATE_COLOR(key), I = window.SNB_ICONS || {};
+    const active = (STATE_AXES[key]||[]).map(a=>a[0]);
+    const paths = TRI_ORDER.map(m=>`<path d="${(I[m]&&I[m].d)||''}" fill="${active.indexOf(m)>=0?col:dimCol}"/>`).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${TRI_VB}">${paths}</svg>`;
+  }
+  function shareCardHTML(card){
+    const name = (Store.getName && Store.getName()) || '';
+    const dom = (card.doms && card.doms[0]) || 'safety';
+    const nameTag = name ? `<span class="sc-name">${escapeHtml(name)}</span>` : '';
+    // name + triGlyph sit at the bottom, like an attribution under a quote.
+    return `<div class="share-card"><div class="sc-eyebrow">${escapeHtml(String(card.dateLabel||'').toUpperCase())}</div><div class="sc-line">${escapeHtml(_cardLine(card))}</div><div class="sc-foot"><span class="sc-attrib">${triGlyph(dom)}${nameTag}</span><span class="sc-brand">stuck not broken</span></div></div>
+      <button class="btn block sc-share" id="sc-share" type="button">share this</button>`;
+  }
+  function _wrapText(g, text, x, y, maxW, lh){ const words=String(text).split(' '); let line='', yy=y; for(const w of words){ const test=line?line+' '+w:w; if(g.measureText(test).width>maxW && line){ g.fillText(line,x,yy); line=w; yy+=lh; } else line=test; } if(line) g.fillText(line,x,yy); return yy; }
+  async function shareWeekCard(card){
+    try{
+      const W=1080, H=1080, PAD=96, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const g=cv.getContext('2d'); g.fillStyle='#1A1F2A'; g.fillRect(0,0,W,H); g.textBaseline='top';
+      g.fillStyle='#B9B09A'; g.font='500 30px Inter, sans-serif'; g.fillText(String(card.dateLabel||'').toUpperCase(), PAD, 300);
+      // the quote line, large, up top
+      g.fillStyle='#F4F1E8'; g.font='500 66px Inter, sans-serif'; _wrapText(g, _cardLine(card), PAD, 372, W-PAD*2, 88);
+      // attribution at the bottom: the personal triGlyph (lit to the week's dominant state) + name
+      const dom = (card.doms && card.doms[0]) || 'safety';
+      const vb = String(TRI_VB).split(/\s+/).map(Number); const aspect = (vb[2]||1)/(vb[3]||1);
+      const gw = 210, gh = gw/aspect, by = H - 150 - gh;
+      try{
+        const svg = triGlyphSolid(dom, '#565961');
+        const img = new Image();
+        await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); });
+        g.drawImage(img, PAD, by, gw, gh);
+      }catch(_){}
+      const name = (Store.getName && Store.getName()) || '';
+      if(name){ g.fillStyle='#F4F1E8'; g.font='500 44px Inter, sans-serif'; g.fillText(name, PAD + gw + 26, by + gh/2 - 26); }
+      g.fillStyle='#B9B09A'; g.font='400 30px Inter, sans-serif'; g.textAlign='right'; g.fillText('stuck not broken', W-PAD, by + gh/2 - 16); g.textAlign='left';
+      const blob = await new Promise(res=>cv.toBlob(res,'image/png'));
+      if(!blob) throw new Error('no blob');
+      const file = new File([blob], 'snb-week.png', { type:'image/png' });
+      if(navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
+        await navigator.share({ files:[file], text: _cardLine(card) });
+      } else {
+        const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='snb-week.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1500);
+      }
+    }catch(e){ /* user cancelled or unsupported — no-op */ }
+  }
+  // render a frozen weekly issue (short version + sections) like the live for-you reader
+  function renderIssue(issue){
+    const P=(t)=> t?`<p style="font-size:15px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0 0 12px">${escapeHtml(t)}</p>`:'';
+    const bulletsHTML = (issue.bullets||[]).map(b=>{ const jump=b.jumpId?` <a href="#${b.jumpId}" style="color:var(--link);text-decoration:none;white-space:nowrap;font-size:12.5px">${escapeHtml(b.jumpLabel)} ↓</a>`:''; return `<li style="margin:0 0 8px;line-height:1.55;color:var(--ink-80)">${escapeHtml(b.text)}${jump}</li>`; }).join('');
+    const sectionsHTML = (issue.sections||[]).map(sec=>`<section style="margin-top:22px"><h3 id="${sec.id}" class="eyebrow" style="margin:0 0 10px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>${(sec.paras||[]).map(P).join('')}</section>`).join('');
+    return `<div style="margin-top:14px"><p class="eyebrow" style="margin:0 0 10px">the short version</p><ul style="margin:0;padding-left:18px">${bulletsHTML}</ul></div>${sectionsHTML}`;
+  }
+
   function screenArchive(){
-    const list = Store.mints ? Store.mints('daily') : [];
+    const list = Store.mints ? Store.mints() : [];
     const rows = list.length
       ? list.map(m => {
+          const weekly = m.tier==='weekly';
+          const label = weekly ? ((m.data&&m.data.card&&m.data.card.dateLabel) || fmtMintDate(m.dateMs)) : fmtMintDate(m.dateMs);
+          const tag = weekly ? '<span class="arch-tag">weekly</span>' : '';
           const snip = String(m.text||'').split('. ')[0];
-          return `<button class="arch-row" data-id="${escapeHtml(m.id)}"><span class="arch-row-main"><span class="arch-date">${escapeHtml(fmtMintDate(m.dateMs))}</span><span class="arch-snip">${escapeHtml(snip)}.</span></span><span class="wc-go">${CHEV}</span></button>`;
+          return `<button class="arch-row" data-id="${escapeHtml(m.id)}"><span class="arch-row-main"><span class="arch-date">${escapeHtml(label)}${tag}</span><span class="arch-snip">${escapeHtml(snip)}.</span></span><span class="wc-go">${CHEV}</span></button>`;
         }).join('')
-      : `<p style="font-size:15px;line-height:1.6;color:var(--muted);margin:8px 0 0">your reflections will collect here as each day closes.</p>`;
+      : `<p style="font-size:15px;line-height:1.6;color:var(--muted);margin:8px 0 0">your reflections will collect here as each day and week closes.</p>`;
     setHTML(`
       <header class="appbar"><button class="backbtn" id="arch-back">for you</button></header>
       <div class="scroll">
@@ -734,8 +859,23 @@
     document.querySelectorAll('.arch-row').forEach(b => b.onclick = ()=>screenMintedEntry(b.dataset.id));
   }
   function screenMintedEntry(id){
-    const m = (Store.mints ? Store.mints('daily') : []).find(x => x.id===id);
+    const m = (Store.mints ? Store.mints() : []).find(x => x.id===id);
     if(!m) return screenArchive();
+    if(m.tier==='weekly' && m.data && m.data.issue){
+      const card = m.data.card || {};
+      setHTML(`
+        <header class="appbar"><button class="backbtn" id="me-back">past reflections</button></header>
+        <div class="scroll">
+          <div class="view read" style="gap:0">
+            <p class="eyebrow" style="margin-bottom:12px">${escapeHtml(card.dateLabel || fmtMintDate(m.dateMs))}</p>
+            ${shareCardHTML(card)}
+            ${renderIssue(m.data.issue)}
+          </div>
+        </div>`);
+      $('#me-back').onclick = screenArchive;
+      const sb = $('#sc-share'); if(sb) sb.onclick = ()=>shareWeekCard(card);
+      return;
+    }
     const ctx = Store.dayArc ? Store.dayArc(m.dateMs) : null;
     const tl = (ctx && ctx.n >= 1) ? momentTimeline(ctx.moments, ctx.sessions) : '';
     setHTML(`
@@ -1699,6 +1839,32 @@
   }
 
   // ---------------------------------------------------------------- YOU
+  // ---- offline ("save all practices") — bulk precache into the existing snb-audio-v1 SW cache ----
+  const OFFLINE_FLAG = 'snb_offline_all';
+  async function offlineManifest(){
+    try{ const r = await fetch('./offline-manifest.json', {cache:'no-store'}); if(!r.ok) return [];
+      const arr = await r.json(); return (Array.isArray(arr)?arr:[]).map(p=>new URL(p, location.href).href); }
+    catch(e){ return []; }
+  }
+  async function offlineCachedCount(){
+    try{ const c = await caches.open('snb-audio-v1'); const keys = await c.keys();
+      return keys.filter(req=>/\/(clips|packs)\//.test(new URL(req.url).pathname)).length; }catch(e){ return 0; }
+  }
+  // post the clip list to the SW, which bulk-caches with progress; resolves when done
+  async function downloadOffline(urls, onProgress){
+    const reg = await navigator.serviceWorker.ready;
+    const sw = reg.active || navigator.serviceWorker.controller;
+    if(!sw) throw new Error('no active service worker');
+    return new Promise((resolve)=>{
+      const onMsg = (ev)=>{ const d = ev.data||{};
+        if(d.type==='PRECACHE_PROGRESS'){ try{ onProgress && onProgress(d); }catch(e){} }
+        else if(d.type==='PRECACHE_DONE'){ navigator.serviceWorker.removeEventListener('message', onMsg); resolve(d); } };
+      navigator.serviceWorker.addEventListener('message', onMsg);
+      sw.postMessage({ type:'PRECACHE_AUDIO', urls });
+    });
+  }
+  async function clearOffline(){ try{ await caches.delete('snb-audio-v1'); }catch(e){} }
+
   function screenSettings(){
     clearFigures(); document.body.classList.remove('in-practice');
     currentTab='current';
@@ -1714,6 +1880,7 @@
     const rm = (localStorage.getItem('snb_reduce_motion')==='1');
     const th = (localStorage.getItem('snb_theme')||'');
     const hp = (localStorage.getItem('snb_haptics')!=='0');   // on by default
+    const offOn = (localStorage.getItem('snb_offline_all')==='1');   // offline download — off by default
     const ps = Store.prefSense(); const psil = Store.prefSilence();
     const segBtn=(group,val,lbl,on)=>`<button type="button" data-${group}="${val}"${on?' class="on"':''}>${lbl}</button>`;
     $('#content').innerHTML = `
@@ -1772,6 +1939,15 @@
           <div class="set-row-inline" id="install-row">${installRowInner()}</div>
         </div>
 
+        <div class="set-group">
+          <p class="dash-prompt">offline</p>
+          <div class="set-seg" id="seg-offline">
+            ${segBtn('off','0','off',!offOn)}${segBtn('off','1','on',offOn)}
+          </div>
+          <p class="fineprint" id="offline-status" style="margin-top:8px">about 94 mb. best on wi-fi. lets every meditation play without a connection.</p>
+          <p class="fineprint" style="margin-top:4px;opacity:.7">on iphone, the system may clear this if the app goes unused for a while. just turn it back on if that happens.</p>
+        </div>
+
         <div class="hr"></div>
 
         <div class="set-actions">
@@ -1806,6 +1982,37 @@
       segSil.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
     });
     const irow = $('#install-row'); if(irow){ const ig = irow.querySelector('.in-go'); if(ig) ig.onclick = promptInstall; }
+    // offline: bulk download / clear, with an honest iOS-eviction check on render
+    const segOff = $('#seg-offline'); const offStatus = $('#offline-status');
+    const setOff = (t)=>{ if(offStatus) offStatus.textContent = t; };
+    (async ()=>{
+      if(localStorage.getItem(OFFLINE_FLAG)==='1'){
+        const mani = await offlineManifest(); const have = await offlineCachedCount();
+        setOff(mani.length && have>=mani.length ? 'saved for offline ✓' : 'your device cleared the offline copy. turn on to download it again.');
+      }
+    })();
+    let offBusy = false;
+    if(segOff) segOff.querySelectorAll('[data-off]').forEach(b=>b.onclick=async ()=>{
+      if(offBusy) return;
+      const want = b.dataset.off==='1';
+      segOff.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+      if(want){
+        offBusy = true; haptic('save'); setOff('preparing…');
+        const urls = await offlineManifest();
+        if(!urls.length){ setOff("couldn't read the practice list. try again."); offBusy=false; return; }
+        try{
+          const res = await downloadOffline(urls, d=>setOff('saving… '+d.done+'/'+d.total));
+          localStorage.setItem(OFFLINE_FLAG,'1');
+          try{ if(navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }catch(e){}
+          const have = await offlineCachedCount();
+          if(res.quota || have < urls.length) setOff("didn't all fit — saved "+have+" of "+urls.length+". free up space and turn on again.");
+          else setOff('saved for offline ✓');
+        }catch(e){ setOff('download failed. check your connection and try again.'); }
+        offBusy = false;
+      } else {
+        offBusy = true; await clearOffline(); localStorage.removeItem(OFFLINE_FLAG); setOff('offline copy removed.'); offBusy = false;
+      }
+    });
     $('#export').onclick = ()=>{
       const blob = new Blob([JSON.stringify(Store.checkins(),null,2)],{type:'application/json'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='my-checkins.json'; a.click();

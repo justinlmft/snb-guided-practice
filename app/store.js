@@ -535,7 +535,7 @@
     if(!entry || !entry.tier || !entry.date || !entry.text) return false;
     if(hasMint(entry.tier, entry.date)) return false;               // immutable: never overwrite
     const a = _mintsRaw();
-    a.push({ id: entry.tier+':'+entry.date, tier: entry.tier, date: entry.date, dateMs: entry.dateMs, text: entry.text, ts: Date.now() });
+    a.push({ id: entry.tier+':'+entry.date, tier: entry.tier, date: entry.date, dateMs: entry.dateMs, text: entry.text, data: entry.data || null, ts: Date.now() });
     try{ localStorage.setItem(_mintKey(), JSON.stringify(a)); }catch(e){}
     return true;
   }
