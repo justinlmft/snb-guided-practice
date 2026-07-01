@@ -322,7 +322,7 @@
   let _mintedThisSession = false;
   function app(tab){
     currentTab = tab;
-    if(!_mintedThisSession){ _mintedThisSession = true; mintPastDays(); mintWeeks(); }
+    if(!_mintedThisSession){ _mintedThisSession = true; mintPastDays(); mintWeeks(); mintMonths(); mintQuarters(); }
     const u = Store.user();
     setHTML(`
       <header class="appbar">
@@ -776,6 +776,54 @@
     }catch(e){}
   }
 
+  // ---- monthly + quarterly minting (long-range altitudes) --------------------
+  function _monthStart(t){ const d=new Date(t); d.setHours(0,0,0,0); d.setDate(1); return d.getTime(); }
+  function _addMonths(t, n){ const d=new Date(t); d.setDate(1); d.setMonth(d.getMonth()+n); return d.getTime(); }
+  function mintMonths(){
+    try{
+      if(!(FromJustin.monthly && Store.periodStats && Store.saveMint && Store.hasMint)) return;
+      const first = Store.firstCheckinT ? Store.firstCheckinT() : null; if(!first) return;
+      const thisMonth = _monthStart(Date.now());
+      for(let ms = _monthStart(first); ms < thisMonth; ){
+        const me = _addMonths(ms, 1);
+        const key = 'm' + new Date(ms).toISOString().slice(0,7);
+        if(!Store.hasMint('monthly', key)){
+          const st = Store.periodStats(ms, me);
+          if(st && st.n>=8){
+            const note = FromJustin.monthly({ stats:st, baseline:Store.baselineDelta(ms,me), recovery:(Store.recovery?Store.recovery():null) });
+            if(note && note.text){
+              const label = new Date(ms).toLocaleDateString(undefined,{ month:'long', year:'numeric' });
+              Store.saveMint({ tier:'monthly', date:key, dateMs:ms, text:note.text, data:{ label } });
+            }
+          }
+        }
+        ms = me;
+      }
+    }catch(e){}
+  }
+  function mintQuarters(){
+    try{
+      if(!(FromJustin.quarterly && Store.periodStats && Store.saveMint && Store.hasMint)) return;
+      const first = Store.firstCheckinT ? Store.firstCheckinT() : null; if(!first) return;
+      const now = Date.now();
+      for(let q=1; q<=40; q++){
+        const start = _addMonths(first, (q-1)*3), end = _addMonths(first, q*3);
+        if(end > now) break;
+        const key = 'q' + q + '-' + new Date(start).toISOString().slice(0,10);
+        if(Store.hasMint('quarterly', key)) continue;
+        const st = Store.periodStats(start, end);
+        if(!st || st.n<12) continue;
+        const mark = (q%4===0)?'year' : (q%4===2)?'half' : 'q';
+        const note = FromJustin.quarterly({ stats:st, baseline:Store.baselineDelta(start,end), recovery:(Store.recovery?Store.recovery():null), mark:mark });
+        if(note && note.text){
+          const lead = mark==='year'?'a year' : mark==='half'?'6 months' : 'a quarter';
+          const label = lead + ' to ' + new Date(end-1).toLocaleDateString(undefined,{ month:'long', day:'numeric', year:'numeric' });
+          Store.saveMint({ tier:'quarterly', date:key, dateMs:start, text:note.text, data:{ label, mark } });
+        }
+      }
+    }catch(e){}
+  }
+
   // the guardrailed share card: the user's name + their personal triGlyph (the brand
   // logo) lit to the week's dominant state. Proud = showing-up + trajectory, never a ranking.
   function _cardLine(card){
@@ -840,9 +888,10 @@
     const list = Store.mints ? Store.mints() : [];
     const rows = list.length
       ? list.map(m => {
-          const weekly = m.tier==='weekly';
-          const label = weekly ? ((m.data&&m.data.card&&m.data.card.dateLabel) || fmtMintDate(m.dateMs)) : fmtMintDate(m.dateMs);
-          const tag = weekly ? '<span class="arch-tag">weekly</span>' : '';
+          const tierLabel = { weekly:'weekly', monthly:'monthly', quarterly:'quarterly' }[m.tier] || '';
+          const label = (m.tier==='weekly') ? ((m.data&&m.data.card&&m.data.card.dateLabel) || fmtMintDate(m.dateMs))
+                      : (m.data&&m.data.label) ? m.data.label : fmtMintDate(m.dateMs);
+          const tag = tierLabel ? `<span class="arch-tag">${tierLabel}</span>` : '';
           const snip = String(m.text||'').split('. ')[0];
           return `<button class="arch-row" data-id="${escapeHtml(m.id)}"><span class="arch-row-main"><span class="arch-date">${escapeHtml(label)}${tag}</span><span class="arch-snip">${escapeHtml(snip)}.</span></span><span class="wc-go">${CHEV}</span></button>`;
         }).join('')
@@ -874,6 +923,19 @@
         </div>`);
       $('#me-back').onclick = screenArchive;
       const sb = $('#sc-share'); if(sb) sb.onclick = ()=>shareWeekCard(card);
+      return;
+    }
+    if(m.tier==='monthly' || m.tier==='quarterly'){
+      const label = (m.data && m.data.label) || fmtMintDate(m.dateMs);
+      setHTML(`
+        <header class="appbar"><button class="backbtn" id="me-back">past reflections</button></header>
+        <div class="scroll">
+          <div class="view read" style="gap:0">
+            <p class="eyebrow" style="margin-bottom:10px">${escapeHtml(label)}</p>
+            <p style="font-size:16px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0">${escapeHtml(m.text)}</p>
+          </div>
+        </div>`);
+      $('#me-back').onclick = screenArchive;
       return;
     }
     const ctx = Store.dayArc ? Store.dayArc(m.dateMs) : null;

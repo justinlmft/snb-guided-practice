@@ -564,6 +564,52 @@
     return { moments, sessions:sess, n, dir, deltas, first: n?moments[0]:null, last: n?moments[n-1]:null };
   }
   function today(){ const d=new Date(); d.setHours(0,0,0,0); return dayArc(d.getTime()); }
+  // earliest check-in timestamp — the anchor for per-user quarterly anniversaries.
+  function firstCheckinT(){ let m=Infinity; data.checkins.forEach(c=>{ if(c && typeof c.t==='number' && c.t<m) m=c.t; }); return isFinite(m)?m:null; }
+
+  // periodStats: aggregate signals over an arbitrary window [startMs, endMs). Powers the
+  // monthly + quarterly reflections (the long-range altitudes). All deterministic, on-device.
+  const _REGDOM = { safety:1, play:1, stillness:1 }, _DYSDOM = { fightflight:1, shutdown:1, freeze:1 };
+  function periodStats(startMs, endMs){
+    const cs = data.checkins
+      .filter(c => c && typeof c.t==='number' && c.t>=startMs && c.t<endMs && c.dom && c.dom!=='neutral')
+      .sort((a,b)=>a.t-b.t);
+    const n = cs.length;
+    if(!n) return null;
+    const cnt={}; cs.forEach(c=>cnt[c.dom]=(cnt[c.dom]||0)+1);
+    const order = Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
+    const dist={}; order.forEach(k=>dist[k]=Math.round(cnt[k]/n*100));
+    const dom = order[0], second = order[1] || null;
+    let reg=0; cs.forEach(c=>{ if(_REGDOM[c.dom]) reg++; });
+    const regShare = reg/n, lean = regShare>=0.6?'regulated' : regShare<=0.4?'dysregulated' : 'even';
+    const avgV = cs.reduce((s,c)=>s+c.v,0)/n;
+    // then vs now: first third vs last third of the window's average safety
+    const third = Math.max(1, Math.floor(n/3));
+    const firstAvg = cs.slice(0,third).reduce((s,c)=>s+c.v,0)/third;
+    const lastAvg  = cs.slice(-third).reduce((s,c)=>s+c.v,0)/third;
+    const days = new Set(cs.map(c=>new Date(c.t).toDateString())).size;
+    // day-of-week rhythm: the weekday whose check-ins average the most safety (>=3 samples)
+    const dow={}; cs.forEach(c=>{ const d=new Date(c.t).getDay(); (dow[d]=dow[d]||[]).push(c.v); });
+    let bestDow=null, bestDowAvg=-1;
+    Object.keys(dow).forEach(d=>{ const a=dow[d]; if(a.length>=3){ const m=a.reduce((s,v)=>s+v,0)/a.length; if(m>bestDowAvg){ bestDowAvg=m; bestDow=+d; } } });
+    // then-vs-now dominant state (first vs last third), for the identity arc
+    const domOf = arr => { const c2={}; arr.forEach(x=>c2[x.dom]=(c2[x.dom]||0)+1); return Object.keys(c2).sort((a,b)=>c2[b]-c2[a])[0]||null; };
+    return {
+      n, days, dom, domShare:dist[dom], second, secondShare: second?dist[second]:0, dist, order,
+      reg, dys:n-reg, regShare, lean, avgV, firstAvg, lastAvg,
+      firstDom: domOf(cs.slice(0,third)), lastDom: domOf(cs.slice(-third)),
+      bestDow, defenseStates: order.filter(d=>_DYSDOM[d]), regStates: order.filter(d=>_REGDOM[d])
+    };
+  }
+  // baselineDelta: change in average safety between two windows (this period vs the one before).
+  function baselineDelta(startMs, endMs){
+    const span = endMs - startMs;
+    const cur = periodStats(startMs, endMs), prev = periodStats(startMs-span, startMs);
+    if(!cur) return null;
+    if(!prev) return { dir:'new', deltaPct:0, cur:cur.avgV };
+    const d = cur.avgV - prev.avgV;
+    return { dir: d>0.05?'up' : d<-0.05?'down' : 'flat', deltaPct: Math.round(d*100), cur:cur.avgV, prev:prev.avgV };
+  }
 
   // ---- mint store: dated, immutable reflections (the archive / keepsake moat) ----
   // A reflection lives while its span is open and MINTS (snapshots, frozen) at the
@@ -678,6 +724,7 @@
   global.Store = {
     init, signUp, signIn, signOut, user, cloud, syncStatus,
     addCheckin, updateCheckin, deleteCheckin, checkins, lastCheckin, addSession, sessions, deleteSession, today, dayArc,
+    periodStats, baselineDelta, firstCheckinT,
     mints, hasMint, saveMint,
     learned, trend, transitions, timeOfDay, tenure, _stageFor, weekMix, recovery, practiceEffect, recommend, practiceLabel, reset, getName, setName,
     challengeLabel, noteFeedback, CHALLENGE_LEVELS,

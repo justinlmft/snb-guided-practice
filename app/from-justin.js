@@ -650,8 +650,87 @@
     return { stateName: ctx.stateName, stage:stage, bullets:bullets, sections:sec };
   }
 
+  // ---- monthly + quarterly reflections (the long-range altitudes) ------------
+  // DRAFT copy in Justin's voice — pending his word-review. Single flowing narrative
+  // (a few named patterns), assembled from periodStats + baselineDelta + recovery.
+  const _DOW = ['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
+  function _fillMQ(t, o){
+    return String(t==null?'':t)
+      .replace(/\{DOM\}/g,o.DOM||'').replace(/\{FIRST\}/g,o.FIRST||'').replace(/\{LAST\}/g,o.LAST||'')
+      .replace(/\{PCT\}/g,o.PCT!=null?String(o.PCT):'').replace(/\{DAY\}/g,o.DAY||'').replace(/\{SPAN\}/g,o.SPAN||'this stretch')
+      .replace(/\{N\}/g,o.N||'').replace(/\{DAYS\}/g,o.DAYS!=null?String(o.DAYS):'');
+  }
+  const _QSPAN = { q:'these past three months', half:'these past six months', year:'this past year' };
+  const MONTHLY = {
+    opener: ["A month of moments now.","A whole month of check-ins behind you.","You've shown up for around thirtyish days, and we have enough data to see the patterns of your nervous system."],
+    where: ["Most of your check-ins reflect {DOM} about {PCT}%.","About {PCT}% of this month's check-ins leaned mostly toward {DOM}."],
+    baseline: {
+      up: ["Your safety state level is higher now than at the start of the month, up about {PCT}%. This is a meaningful shift worth celebrating and leaning a bit more into.","Across the month, safety showed up more than it had been. That climb is yours."],
+      down: ["You're reporting safety a little less often than earlier in the month. (It tends to come and go.) Go easy, keep doing the basics, and sneak in a safety practice or two.","A quieter month for safety than the one before. Not a setback, just a season. Small steady reps are how it returns."],
+      flat: ["Your safety state stayed pretty steady across the month. This is solid grounding to work from."]
+    },
+    rhythm_dow: ["Looks like your {DAY} tend to carry a bit more safety state than other days. Worth noticing what's different about them, so you can do more of it.","Your {DAY} come in a little steadier than the rest, more often than not. A small clue about what's working for you."],
+    recovery: ["There's also a pattern in how your system rebounds after a dip into defense. It tends to return to safety within {N}. It knows the way back. Now you pay attention and follow its lead.","After an energized stretch, you usually find your way to more safety within {N}. That shows capacity building."],
+    close: ["No grades here. Just a month of getting to know your nervous system, one honest check-in at a time. Keep going.","A month in, and this picture is yours now. It gets clearer the longer you stay with it.","Whatever this month held, you showed up for it. That's the part that compounds."]
+  };
+  function monthly(ctx0){
+    ctx0 = ctx0 || {}; const st = ctx0.stats; if(!st || st.n<8) return null;
+    const o = { DOM:_feltName(st.dom), PCT:st.domShare, DAY: st.bestDow!=null?_DOW[st.bestDow]:'' };
+    const parts = [ cycle('mo-open', MONTHLY.opener), _fillMQ(cycle('mo-where', MONTHLY.where), o) ];
+    const bd = ctx0.baseline;
+    if(bd && bd.dir && bd.dir!=='new' && MONTHLY.baseline[bd.dir]) parts.push(_fillMQ(cycle('mo-base:'+bd.dir, MONTHLY.baseline[bd.dir]), { PCT:Math.abs(bd.deltaPct) }));
+    if(st.bestDow!=null) parts.push(_fillMQ(cycle('mo-dow', MONTHLY.rhythm_dow), o));
+    const rec = ctx0.recovery;
+    if(rec && rec.avg!=null) parts.push(_fillMQ(cycle('mo-rec', MONTHLY.recovery), { N:_recoveryPhrase(rec) }));
+    parts.push(cycle('mo-close', MONTHLY.close));
+    return { text: parts.join(' '), stats: st };
+  }
+  const QUARTERLY = {
+    opener: {
+      q:    ["Three months of check-ins now.","A full quarter behind you, long enough to see a real arc and not just a week."],
+      half: ["Half a year of check-ins. Well done. Now, you can see a clear picture of your nervous system over the long term.","You're six months in! Let's take a look at what your nervous system has been up to."],
+      year: ["A year of check-ins, wow! Let's slow down and see what the data says.","A full year of check-ins behind you. We'll look at your nervous system history in detail before you get going on the next year's worth."]
+    },
+    thennow: {
+      improved: ["When {SPAN} began, your check-ins reflected mostly {FIRST}. Lately they reflect more {LAST}. That's not just a mood, it's a sustainable autonomic shift that you earned. (And are still earning.)","By the end of {SPAN} you're sitting closer to {LAST}, after starting mostly in {FIRST}. The data is just showing what you've been building."],
+      steady_reg: ["Across {SPAN}, your system stayed mostly steady, {FIRST} early and {LAST} lately. A long regulated run like this shows sustainable progress."],
+      holding: ["Across {SPAN}, there's been a lot of {FIRST}, and it's close to {LAST}. Stuck defense can last a while, can't it? It won't last forever, though."]
+    },
+    baseline: {
+      up: ["Your safety state baseline is higher than where {SPAN} began, up about {PCT}%. That's the kind of change only months can show.","Your safety state runs higher now than at the start of {SPAN}. A slow climb, and a real one."],
+      down: ["You've been reporting safety a little less than at the start of {SPAN}. It happens. The basics and small safety reps are how it comes back.","Your safety state was less obvious this period than the last. Go gently. It'll return."],
+      flat: ["Your safety state baseline held fairly level across {SPAN}. Stable is good. You can build on stable."]
+    },
+    recovery: ["And in how you come back: after dropping into a defense state, you tend to return to safety within {N}. That's capacity you've earned.","You come back faster than you might think, usually within {N} once you've dipped. That's real."],
+    totals: ["Across {SPAN}: {N} check-ins over {DAYS} days. Every one of them was you, paying attention."],
+    close: {
+      q:    ["You're a little more familiar with your own nervous system than you were three months ago. Keep going."],
+      half: ["Six months of check-ins and practices. You know your patterns now in a way you didn't before. Knowing is a win. And what comes next will be a win, too."],
+      year: ["You're not who you were a year ago. The data says what you've been living and already know. And if you didn't know, now you do!"]
+    }
+  };
+  function quarterly(ctx0){
+    ctx0 = ctx0 || {}; const st = ctx0.stats; if(!st || st.n<12) return null;
+    const mark = (ctx0.mark==='year'||ctx0.mark==='half') ? ctx0.mark : 'q';
+    const o = { FIRST:_feltName(st.firstDom||st.dom), LAST:_feltName(st.lastDom||st.dom), N:st.n, DAYS:st.days, SPAN:_QSPAN[mark] };
+    const parts = [ cycle('q-open:'+mark, QUARTERLY.opener[mark]) ];
+    // then-vs-now identity arc
+    const reg = { safety:1, play:1, stillness:1 };
+    let tnKey = 'holding';
+    if(reg[st.lastDom] && !reg[st.firstDom]) tnKey='improved';
+    else if(reg[st.firstDom] && reg[st.lastDom]) tnKey='steady_reg';
+    parts.push(_fillMQ(cycle('q-tn:'+tnKey, QUARTERLY.thennow[tnKey]), o));
+    const bd = ctx0.baseline;
+    if(bd && bd.dir && bd.dir!=='new' && QUARTERLY.baseline[bd.dir]) parts.push(_fillMQ(cycle('q-base:'+bd.dir, QUARTERLY.baseline[bd.dir]), Object.assign({}, o, { PCT:Math.abs(bd.deltaPct) })));
+    const rec = ctx0.recovery;
+    if(rec && rec.avg!=null) parts.push(_fillMQ(cycle('q-rec', QUARTERLY.recovery), { N:_recoveryPhrase(rec) }));
+    parts.push(_fillMQ(cycle('q-tot', QUARTERLY.totals), o));
+    parts.push(cycle('q-close:'+mark, QUARTERLY.close[mark]));
+    return { text: parts.join(' '), stats: st, mark: mark };
+  }
+
   global.FromJustin = {
-    today, daily, refresh, pick, label,
+    today, daily, monthly, quarterly, refresh, pick, label,
     deepBody, deepInvite, changeOverlay, stuckOverlay, watchFor,
     rundown, blog,
     LIBRARY, DEEP
