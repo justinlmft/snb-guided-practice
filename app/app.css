@@ -934,3 +934,6 @@ body.reduce-motion .tg-m{transition:none}
 .vz-key{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
 .vz-sw{width:9px;height:9px;border-radius:50%;display:inline-block}
 .sec-glyph .triglyph{height:40px;width:auto}
+
+/* ---- reader section heading: flows with the body, not the uppercase eyebrow ---- */
+.sec-h{font-size:15px;font-weight:600;color:var(--ink);text-transform:none;letter-spacing:0;line-height:1.3}

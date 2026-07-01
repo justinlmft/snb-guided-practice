@@ -670,8 +670,7 @@
     if(!c) return '';
     if(id==='blog-1' && c.dist && c.order) return stateMixBar(c.dist, c.order);
     if(id==='blog-2' && c.dom) return stateGlyphViz(c.dom);
-    if(id==='blog-3') return trendArc(c.dayV);
-    if(id==='blog-4') return forkViz(c.dayV, c.dom, c.defenseState);
+    // trend-arc (blog-3) + fork (blog-4) removed per Justin; helpers kept for possible reuse.
     return '';
   }
 
@@ -732,14 +731,14 @@
       }).join('');
       const sectionsHTML = issue.sections.map(sec=>`
         <section style="margin-top:22px">
-          <h3 id="${sec.id}" class="eyebrow" style="margin:0 0 10px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>
+          <h3 id="${sec.id}" class="sec-h" style="margin:0 0 8px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>
           ${sec.paras.map(P).join('')}
           ${sectionViz(sec.id, vizCtx)}
         </section>`).join('');
       bodyHTML = `
         ${lead}
         <div style="margin-top:14px">
-          <p class="eyebrow" style="margin:0 0 10px">the short version</p>
+          <p class="sec-h" style="margin:0 0 10px">the short version</p>
           <ul style="margin:0;padding-left:18px">${bulletsHTML}</ul>
         </div>
         ${sectionsHTML}`;
@@ -953,8 +952,8 @@
   function renderIssue(issue){
     const P=(t)=> t?`<p style="font-size:15px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0 0 12px">${escapeHtml(t)}</p>`:'';
     const bulletsHTML = (issue.bullets||[]).map(b=>{ const jump=b.jumpId?` <a href="#${b.jumpId}" style="color:var(--link);text-decoration:none;white-space:nowrap;font-size:12.5px">${escapeHtml(b.jumpLabel)} ↓</a>`:''; return `<li style="margin:0 0 8px;line-height:1.55;color:var(--ink-80)">${escapeHtml(b.text)}${jump}</li>`; }).join('');
-    const sectionsHTML = (issue.sections||[]).map(sec=>`<section style="margin-top:22px"><h3 id="${sec.id}" class="eyebrow" style="margin:0 0 10px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>${(sec.paras||[]).map(P).join('')}</section>`).join('');
-    return `<div style="margin-top:14px"><p class="eyebrow" style="margin:0 0 10px">the short version</p><ul style="margin:0;padding-left:18px">${bulletsHTML}</ul></div>${sectionsHTML}`;
+    const sectionsHTML = (issue.sections||[]).map(sec=>`<section style="margin-top:22px"><h3 id="${sec.id}" class="sec-h" style="margin:0 0 8px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>${(sec.paras||[]).map(P).join('')}</section>`).join('');
+    return `<div style="margin-top:14px"><p class="sec-h" style="margin:0 0 10px">the short version</p><ul style="margin:0;padding-left:18px">${bulletsHTML}</ul></div>${sectionsHTML}`;
   }
 
   function screenArchive(){
