@@ -950,7 +950,8 @@ body.reduce-motion .tg-m{transition:none}
 .tb-greet{font-size:17px;font-weight:500;color:var(--ink);letter-spacing:-.005em;text-wrap:pretty}
 
 .tb-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;transition:flex-basis .6s var(--ease),gap .6s var(--ease),padding .6s var(--ease)}
-.tb-cluster{display:flex;flex-direction:column;align-items:center;gap:9px;width:100%;transition:opacity .6s var(--ease)}
+/* check-in readout sits just under the greeting (a header row); the ring owns the centered hero below */
+.tb-cluster{display:flex;flex-direction:column;align-items:center;gap:9px;width:100%;margin-top:14px;transition:opacity .6s var(--ease)}
 
 .tb-state{display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:flex-start;background:transparent;border:0;color:inherit;font-size:13.5px;font-weight:500;cursor:pointer;padding:14px 2px}
 .tb-state .triglyph{height:18px;width:auto;flex:none}
@@ -1000,16 +1001,16 @@ body.breathing .tabbar{opacity:0;pointer-events:none}
 .today.tb.breathing .tb-ring{animation:none}
 .today.tb.breathing .tb-halo{animation:none;opacity:.42}
 
-/* settled (breath taken): instruction gone, ring quiet, cards open into the space */
-.today.tb.breathed .tb-hero{flex:0 0 auto;gap:16px;padding-top:4px}
-.today.tb.breathed .tb-stage{width:96px;height:96px}
-.today.tb.breathed .tb-ring{width:82px;height:82px;animation-duration:13s;opacity:.5}
+/* settled (breath taken): instruction gone, ring quiets — but the hero keeps
+   filling so the cards stay anchored (no bottom void); reason shows in full */
+.today.tb.breathed .tb-stage{width:132px;height:132px}
+.today.tb.breathed .tb-ring{width:104px;height:104px;animation-duration:13s;opacity:.5}
 .today.tb.breathed .tb-halo{animation-duration:13s;opacity:.4}
 .today.tb.breathed .tb-below{opacity:0;max-height:0;min-height:0;margin:0}
 .today.tb.breathed .tb-foot{margin-top:30px}
 .today.tb.breathed .tb-row{padding:18px 2px}
 .today.tb.breathed .tb-refl{-webkit-line-clamp:3}
-.today.tb.breathed .tb-reason{max-height:44px;opacity:1;margin-top:5px}
+.today.tb.breathed .tb-reason{max-height:200px;opacity:1;margin-top:5px}
 
 @keyframes bloom{0%,100%{transform:scale(.96);opacity:.30}50%{transform:scale(1.05);opacity:.55}}
 @media (prefers-reduced-motion:reduce){.tb-halo,.tb-ring{animation:none;transform:scale(.98)}}

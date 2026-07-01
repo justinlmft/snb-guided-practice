@@ -377,138 +377,7 @@
     };
   }
 
-  let breathing = false, repeatBreath = false;
-  function guideOneBreath(){
-    if(breathing) return;
-    const ring = $('#tring'), label = $('#breathlabel'), phase = document.getElementById('bh-phase');
-    if(!ring) return;
-    breathing = true;
-    document.body.classList.add('breathing');
-    const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
-
-    const startCycle = ()=>{
-      const finish = ()=>{
-        breathing = false; repeatBreath = false; markBreath();
-        document.body.classList.remove('breathing');
-        if(phase){ phase.classList.remove('show'); setTimeout(()=>{if(phase)phase.textContent='';},800); }
-        if(label) label.textContent = 'one breath taken';
-        const tick = document.getElementById('breathtick');
-        if(tick){ requestAnimationFrame(()=>{ tick.style.transition='opacity .5s .1s ease'; tick.style.opacity='1'; }); }
-        ring.style.transition = 'transform 1.8s ease, opacity 1.8s';
-        ring.style.transform  = 'scale(.96)'; ring.style.opacity = '.6';
-        const hero = document.querySelector('.breathhero');
-        if(hero){ hero.style.transition=''; hero.style.opacity=''; }
-        { const hh=document.getElementById('breathhint'); if(hh) hh.textContent='take another?'; }
-        setTimeout(()=>{ ring.style.transition=''; ring.style.transform=''; ring.style.opacity=''; ring.style.animation=''; }, 1900);
-      };
-      if(reduce){ if(phase){phase.textContent='in';phase.classList.add('show');} setTimeout(finish,1200); return; }
-      // inhale from rest
-      ring.getBoundingClientRect();
-      ring.style.transition = 'transform 4s cubic-bezier(.4,0,.5,1), opacity 4s';
-      ring.style.transform = 'scale(1.28)'; ring.style.opacity = '.78';
-      if(phase){ phase.textContent='in'; phase.classList.add('show'); }
-      setTimeout(()=>{
-        if(phase) phase.textContent='out';
-        ring.style.transition = 'transform 6s cubic-bezier(.4,0,.5,1), opacity 6s';
-        ring.style.transform = 'scale(.78)'; ring.style.opacity = '.4';
-      }, 4300);
-      setTimeout(finish, 10600);
-    };
-
-    // Stop ambient animation, glide back to rest, then begin
-    ring.style.animation = 'none';
-    ring.style.transition = 'transform 0.35s ease, opacity 0.35s ease';
-    ring.getBoundingClientRect();
-    ring.style.transform = 'scale(.86)'; ring.style.opacity = '.5';
-    setTimeout(startCycle, 380);
-  }
-
-  const WINS = ['breath','checkin','practice'];
-  function winAction(k, reco){
-    if(k==='breath') return ()=>{
-      haptic('start');               // soft tap when the one-breath ring is triggered
-      if(winsDone().breath && !repeatBreath){
-        repeatBreath = true;
-        const hero = document.querySelector('.breathhero');
-        if(hero){ hero.classList.remove('is-done'); hero.style.transition='opacity .5s ease'; hero.style.opacity='1'; }
-        const lbl = document.getElementById('breathlabel');
-        const tickr = document.getElementById('breathtick');
-        if(lbl) lbl.textContent = Store.getName() ? 'take one intentional breath, '+Store.getName()+'.' : 'take one intentional breath.';
-        if(tickr){ tickr.style.transition='none'; tickr.style.opacity='0'; }
-        requestAnimationFrame(()=>guideOneBreath());
-      }
-      else guideOneBreath();
-    };
-    if(k==='checkin') return screenCheckin;
-    // recommended-practice card → the practice detail/plan screen (not straight into the
-    // player); from there the user can Begin or customize.
-    return ()=>renderPlan(reco);
-  }
-  const CHECKIN_DONE_LINE = {
-    safety:     "connected & present. notice while it's here.",
-    play:       "energized, with safety in the mix = motivation & play.",
-    stillness:  "immobile & safe = stillness & intimacy.",
-    fightflight:"revved up & ready to move.",
-    shutdown:   "disconnected & ready to collapse.",
-    freeze:     "mobile & immobile at the same time.",
-    neutral:    "no obvious state showing up."
-  };
-  function renderWin(k, s){
-    const { done, last, reco } = s;
-    if(k==='breath'){
-      const isDone = done && !repeatBreath;
-      const title = isDone ? 'one breath taken' : (Store.getName() ? 'take one intentional breath, '+escapeHtml(Store.getName())+'.' : 'take one intentional breath.');
-      const hint = isDone ? 'take another?' : 'tap the ring to begin';
-      return `
-        <button class="breathhero" data-win="breath">
-          <span class="bh-phase" id="bh-phase" aria-live="polite"></span>
-          <span class="bh-stage">
-            <span class="wc-ring" id="tring" aria-hidden="true"><span class="t-core"></span></span>
-          </span>
-          <span class="bh-rowwrap">
-            <span class="bh-row">
-              <span class="wc-text">
-                <span class="wc-kicker">one breath</span>
-                <span class="bh-title" id="breathlabel">${title}</span>
-                <span class="bh-hint" id="breathhint" style="opacity:1">${hint}</span>
-              </span>
-            </span>
-          </span>
-        </button>`;
-    }
-    if(k==='checkin'){
-      const seg = segOf(Date.now());
-      if(done){
-        return `
-        <button class="wincard done-rich" data-win="checkin">
-          <span class="dr-logo">${triGlyph(last.dom)}</span>
-          <span class="wc-text">
-            <span class="wc-kicker">checked in · this ${segLabel(segOf(last.t))}</span>
-            <span class="wc-title">${STATE_NAME(last.dom)}</span>
-            <span class="dr-line">${CHECKIN_DONE_LINE[last.dom]||CHECKIN_DONE_LINE.neutral}</span>
-          </span>
-          <span class="wc-go">${CHEV}</span>
-        </button>`;
-      }
-      return `
-        <button class="wincard" data-win="checkin">
-          <span class="wc-text">
-            <span class="wc-kicker">${seg+' check-in'}</span>
-            <span class="wc-title">how's your ${segPoss(seg)}?</span>
-          </span>
-          <span class="wc-go">${CHEV}</span>
-        </button>`;
-    }
-    return `
-      <button class="wincard practice-row ${done?'done-affirm':''}" id="practice-main-btn">
-        <span class="wc-text">
-          <span class="wc-kicker">${done ? 'practiced · '+Store.practiceLabel(reco.practiceKey) : 'recommended practice'}</span>
-          <span class="wc-title">${done ? 'notice anything shift?' : Store.practiceLabel(reco.practiceKey)}</span>
-          ${!done && reco.reason ? '<span class="wc-reason">'+escapeHtml(reco.reason)+'</span>' : ''}
-        </span>
-        <span class="wc-go">${CHEV}</span>
-      </button>`;
-  }
+  let breathing = false;
   let todayGreet = null, todayGreetName = null;
   function pickGreeting(seg, name){
     const pool = name ? [
@@ -567,8 +436,8 @@
 
     c.innerHTML = `<div class="view today tb${settled?' breathed':''}">
       <div class="tb-head"><h2 class="tb-greet">${greet}</h2></div>
+      <div class="tb-cluster">${stateHTML}</div>
       <div class="tb-hero">
-        <div class="tb-cluster">${stateHTML}</div>
         <button class="tb-breath" id="tb-breath" aria-label="take one intentional breath">
           <span class="tb-stage" style="--halo:${halo}">
             <span class="tb-halo"></span><span class="tb-halo b"></span>
