@@ -79,7 +79,7 @@
 
   const cacheKey = () => 'snb_cache_' + (auth.user ? auth.user.id : 'anon');
   function saveCache(){ try { localStorage.setItem(cacheKey(), JSON.stringify({ data, outbox })); } catch(e){} }
-  function loadCache(){ try { const o = JSON.parse(localStorage.getItem(cacheKey())); if(o){ data = o.data||{checkins:[],sessions:[]}; outbox = o.outbox||{checkins:[],sessions:[]}; } else { data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } } catch(e){ data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } _purgeTombs(); }
+  function loadCache(){ try { const o = JSON.parse(localStorage.getItem(cacheKey())); if(o){ data = o.data||{checkins:[],sessions:[]}; outbox = o.outbox||{checkins:[],sessions:[]}; } else { data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } } catch(e){ data={checkins:[],sessions:[]}; outbox={checkins:[],sessions:[]}; } _reconcile(); }
 
   // ---- sync plumbing (merge, live-session gating, loud failure) ----
   function notify(){ try{ onChange && onChange(); }catch(e){} }
@@ -205,7 +205,7 @@
       // An un-synced check-in stays visible and is never lost to a cloud read.
       if(!cs.error){ data.checkins = unionByT(data.checkins, outbox.checkins, (cs.data||[]).map(rowToCheckin)); changed = true; }
       if(!ss.error){ data.sessions = unionByT(data.sessions, outbox.sessions, (ss.data||[]).map(rowToSession)); changed = true; }
-      _purgeTombs();                                   // re-apply deletions over whatever the cloud just merged back
+      _reconcile();                                    // re-apply deletions + edits over whatever the cloud just merged back
       saveCache();
       setSync((outbox.checkins.length||outbox.sessions.length) ? 'error' : 'idle', (cs.error||ss.error)||null);
       if(changed) notify();                          // re-render once fresh data lands (post-init / post-refresh)
@@ -301,10 +301,15 @@
                 challenge:(typeof c.challenge==='number'?c.challenge:old.challenge) });
     data.checkins[i] = rec;
     const oi = outbox.checkins.findIndex(x=>x.t===t);
-    if(oi>=0) outbox.checkins[oi] = rec;
+    if(oi>=0) outbox.checkins[oi] = rec;                          // still un-synced: the outbox INSERT carries the edit
     saveCache();
-    if(CLOUD && auth.user && oi<0){
-      try{ sb.from('checkins').update({ v:rec.v, sym:rec.sym, dor:rec.dor, fr:rec.fr, dom:rec.dom }).eq('user_id', auth.user.id).eq('t', t); }catch(e){}
+    if(CLOUD && auth.user && oi<0){                                // already synced: UPDATE the cloud row, keep a pending overlay
+      _setEdit(t, { v:rec.v, sym:rec.sym, dor:rec.dor, fr:rec.fr, dom:rec.dom, challenge:rec.challenge });
+      try{
+        // .then() is required or the request never sends; on success drop the overlay.
+        sb.from('checkins').update({ v:rec.v, sym:rec.sym, dor:rec.dor, fr:rec.fr, dom:rec.dom }).eq('user_id', auth.user.id).eq('t', t)
+          .then(function(res){ if(res && !res.error) _clearEdit(t); }, function(){});
+      }catch(e){}
     }
     return rec;
   }
@@ -341,6 +346,17 @@
     const ss=_tombSet('sessions'); if(ss) data.sessions = data.sessions.filter(s=> !(s && ss[s.t]));
     const cc=_tombSet('checkins'); if(cc) data.checkins = data.checkins.filter(c=> !(c && cc[c.t]));
   }
+  // pending check-in edits: unionByT puts the cloud row LAST, so a stale cloud read would
+  // overwrite a fresh local edit on the next hydrate. We overlay the edited fields back on
+  // after every load/hydrate until the cloud UPDATE confirms (then the edit is cleared).
+  function _editKey(){ return 'snb_pending_checkin_edits_' + (auth.user ? auth.user.id : 'anon'); }
+  function _edits(){ try{ const o=JSON.parse(localStorage.getItem(_editKey())); return (o && typeof o==='object') ? o : {}; }catch(e){ return {}; } }
+  function _saveEdits(o){ try{ localStorage.setItem(_editKey(), JSON.stringify(o)); }catch(e){} }
+  function _setEdit(t, fields){ const o=_edits(); o[t]=fields; _saveEdits(o); }
+  function _clearEdit(t){ const o=_edits(); if(o[String(t)]!=null){ delete o[String(t)]; _saveEdits(o); } }
+  function _applyEdits(){ const o=_edits(); const ks=Object.keys(o); if(!ks.length) return; ks.forEach(k=>{ const t=+k; const i=data.checkins.findIndex(x=>x && x.t===t); if(i>=0) data.checkins[i]=Object.assign({}, data.checkins[i], o[k]); }); }
+  // re-apply local intent (deletions + edits) over whatever a load/hydrate just produced.
+  function _reconcile(){ _purgeTombs(); _applyEdits(); }
   // delete a logged practice session by timestamp (e.g. a test run). Local + cloud + tombstone.
   function deleteSession(t){
     _addTomb('sessions', t);                                  // record the deletion so it sticks across sync
