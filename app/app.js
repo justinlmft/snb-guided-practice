@@ -608,6 +608,73 @@
     return `<span class="md-row" aria-hidden="true">${ms.map((m,i)=>`<span class="md-dot${i===ms.length-1?' md-new':''}" style="background:${STATE_COLOR(m.dom)}"></span>`).join('')}</span>`;
   }
 
+  // ---- for-you reader section visuals: each pictures the words of its section ----
+  const _safeToY = (v, top, bot) => top + (1 - Math.max(0, Math.min(1, v))) * (bot - top);
+  // light 3-point smoothing so a trend line reads as a trajectory, not day-to-day noise.
+  function _smoothV(pts){
+    if(!pts || pts.length<3) return pts||[];
+    return pts.map((p,i)=>{ const a=pts[i-1]||p, b=pts[i+1]||p; return { x:p.x, v:(a.v+p.v+b.v)/3 }; });
+  }
+  // "where you've been": a proportional bar of the state mix + a labeled legend.
+  function stateMixBar(dist, order){
+    const states = (order||[]).filter(k=>dist && dist[k]>0);
+    if(!states.length) return '';
+    const segs = states.map(k=>`<div style="width:${dist[k]}%;background:${STATE_COLOR(k)}"></div>`).join('');
+    const legend = states.map(k=>`<span class="vz-key"><span class="vz-sw" style="background:${STATE_COLOR(k)}"></span>${escapeHtml(STATE_NAME(k))} ${dist[k]}%</span>`).join('');
+    return `<div class="sec-viz"><div class="mix-bar">${segs}</div><div class="vz-legend">${legend}</div></div>`;
+  }
+  // "what that state is": the brand triGlyph lit to the dominant state — the state's face.
+  function stateGlyphViz(dom){ return `<div class="sec-viz sec-glyph">${triGlyph(dom)}</div>`; }
+  // "your movement": a smooth safety trend line over the recent days.
+  function trendArc(dayV){
+    const pts = _smoothV((dayV||[]).filter(d=>d && typeof d.v==='number'));
+    if(pts.length<2) return '';
+    const W=320,H=84,padL=8,padR=8,top=14,bot=64;
+    const maxX = Math.max.apply(null, pts.map(p=>p.x)) || 1;
+    const fx = x => padL + (x/maxX)*(W-padL-padR);
+    const P = pts.map(p=>`${fx(p.x).toFixed(1)},${_safeToY(p.v,top,bot).toFixed(1)}`);
+    const last = pts[pts.length-1];
+    return `<div class="sec-viz"><div class="vz-cap">your safety, recently</div><svg viewBox="0 0 ${W} ${H}" class="vz-svg" role="img" aria-label="your safety trend over recent days">`+
+      `<line x1="${padL}" y1="${bot}" x2="${W-padR}" y2="${bot}" stroke="var(--hairline)" stroke-width="1"/>`+
+      `<polyline points="${P.join(' ')}" fill="none" stroke="#C9A24B" stroke-width="2.5"/>`+
+      `<polyline points="${P.join(' ')} ${fx(last.x).toFixed(1)},${bot} ${padL},${bot}" fill="#F4D58D" fill-opacity="0.14" stroke="none"/>`+
+      `<circle cx="${fx(last.x).toFixed(1)}" cy="${_safeToY(last.v,top,bot).toFixed(1)}" r="3.5" fill="#C9A24B"/>`+
+      `</svg></div>`;
+  }
+  // "the fork ahead": the person's real trajectory flowing into a split — up toward more
+  // safety, down toward THEIR most-common defense state. Both equal weight: awareness, not a prediction.
+  function forkViz(dayV, dom, defenseState){
+    const pts = _smoothV((dayV||[]).filter(d=>d && typeof d.v==='number'));
+    if(pts.length<2 || !dom) return '';
+    const W=320,H=124,padL=8,top=16,bot=104;
+    const maxX = Math.max.apply(null, pts.map(p=>p.x)) || 1;
+    const nodeX = padL + 0.52*(W-2*padL);                       // split sits mid-canvas
+    const fx = x => padL + (x/maxX)*(nodeX-padL);               // real line spans left half, into the node
+    const traj = pts.map(p=>`${fx(p.x).toFixed(1)},${_safeToY(p.v,top,bot).toFixed(1)}`);
+    const ny = _safeToY(pts[pts.length-1].v, top, bot);
+    const upEnd = top+8, downEnd = bot-8, bx = W-8;
+    const defCol = defenseState ? STATE_COLOR(defenseState) : '#A3C0DD';
+    const defName = defenseState ? STATE_NAME(defenseState) : 'defense';
+    return `<div class="sec-viz"><svg viewBox="0 0 ${W} ${H}" class="vz-svg" role="img" aria-label="a forking path from your current level toward more safety or toward ${escapeHtml(defName)}">`+
+      `<line x1="${padL}" y1="${bot}" x2="${W-8}" y2="${bot}" stroke="var(--hairline)" stroke-width="1"/>`+
+      `<polyline points="${traj.join(' ')}" fill="none" stroke="#C9A24B" stroke-width="2.5"/>`+
+      `<path d="M${nodeX},${ny.toFixed(1)} C${(nodeX+60).toFixed(0)},${(ny-8).toFixed(0)} ${(bx-60)},${upEnd+8} ${bx},${upEnd}" fill="none" stroke="#9FC498" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>`+
+      `<path d="M${nodeX},${ny.toFixed(1)} C${(nodeX+60).toFixed(0)},${(ny+8).toFixed(0)} ${(bx-60)},${downEnd-8} ${bx},${downEnd}" fill="none" stroke="${defCol}" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>`+
+      `<circle cx="${nodeX}" cy="${ny.toFixed(1)}" r="6" fill="${STATE_COLOR(dom)}" stroke="#C9A24B" stroke-width="1.5"/>`+
+      `<text x="${bx}" y="${upEnd-4}" text-anchor="end" font-size="9" fill="var(--muted)" font-family="Inter">toward more safety</text>`+
+      `<text x="${bx}" y="${downEnd+13}" text-anchor="end" font-size="9" fill="var(--muted)" font-family="Inter">toward ${escapeHtml(defName)}</text>`+
+      `</svg></div>`;
+  }
+  // route a section id to its visual (from the reader's real signals)
+  function sectionViz(id, c){
+    if(!c) return '';
+    if(id==='blog-1' && c.dist && c.order) return stateMixBar(c.dist, c.order);
+    if(id==='blog-2' && c.dom) return stateGlyphViz(c.dom);
+    if(id==='blog-3') return trendArc(c.dayV);
+    if(id==='blog-4') return forkViz(c.dayV, c.dom, c.defenseState);
+    return '';
+  }
+
   function screenReflectionDeep(){
     const note = FromJustin.today();
     const last = Store.lastCheckin();
@@ -645,7 +712,13 @@
 
     const issue = (dom && FromJustin.blog) ? FromJustin.blog({ dom:dom, share:share, dir:dir, variance:variance, count:base.length, streak:streak }) : null;
 
-    const recentBars = paced.length >= 2 ? `<div class="trendstrip" style="margin:6px 0 2px">${paced.slice(-10).map(c=>{ const h=16+Math.round(c.v*30); return `<div class="bar" style="height:${h}px;background:${STATE_COLOR(c.dom)}"></div>`; }).join('')}</div>` : '';
+    // per-section visuals: computed from the reader's own recent signals so each picture
+    // illustrates the words of its section (mix bar, state glyph, trend line, personal fork).
+    const _now = Date.now();
+    const dayV = [];
+    for(let i=13;i>=0;i--){ const d=new Date(_now - i*864e5); d.setHours(0,0,0,0); const a=Store.dayArc?Store.dayArc(d.getTime()):null; if(a && a.n) dayV.push({ x:(13-i), v:a.moments.reduce((s,m)=>s+m.v,0)/a.n }); }
+    const _ps = Store.periodStats ? Store.periodStats(_now-7*864e5, _now) : null;
+    const vizCtx = { dom:dom, dayV:dayV, dist:_ps?_ps.dist:null, order:_ps?_ps.order:null, defenseState:(_ps&&_ps.defenseStates&&_ps.defenseStates[0])||null };
     const P = (t)=> t ? `<p style="font-size:15px;line-height:1.7;color:var(--ink-80);text-wrap:pretty;margin:0 0 12px">${escapeHtml(t)}</p>` : '';
     // the daily note now lives in the today block above; only fall back to a lead
     // paragraph when there are no moments today (todayBlock empty).
@@ -661,10 +734,10 @@
         <section style="margin-top:22px">
           <h3 id="${sec.id}" class="eyebrow" style="margin:0 0 10px;scroll-margin-top:14px">${escapeHtml(sec.heading)}</h3>
           ${sec.paras.map(P).join('')}
+          ${sectionViz(sec.id, vizCtx)}
         </section>`).join('');
       bodyHTML = `
         ${lead}
-        ${recentBars}
         <div style="margin-top:14px">
           <p class="eyebrow" style="margin:0 0 10px">the short version</p>
           <ul style="margin:0;padding-left:18px">${bulletsHTML}</ul>
