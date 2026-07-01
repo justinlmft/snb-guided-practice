@@ -147,7 +147,7 @@ p{margin:0;text-wrap:pretty}
 .today-greet,.from-justin,.appbar,.tabbar,.today > *{transition:opacity .9s var(--ease)}
 body.breathing .appbar,
 body.breathing .tabbar,
-body.breathing .today > :not(.breathhero){opacity:0;pointer-events:none}
+body.breathing .today:not(.tb) > :not(.breathhero){opacity:0;pointer-events:none}
 body.breathing .breathhero{background:transparent}
 body.breathing .breathhero .bh-row{opacity:0}
 /* completed cards shrink and fade back */
@@ -937,3 +937,79 @@ body.reduce-motion .tg-m{transition:none}
 
 /* ---- reader section heading: flows with the body, not the uppercase eyebrow ---- */
 .sec-h{font-size:15px;font-weight:600;color:var(--ink);text-transform:none;letter-spacing:0;line-height:1.3}
+
+/* ============================================================================
+   TODAY — breath-first, state-aware redesign
+   One calm centerpiece: a breathing ring whose halo carries the current state
+   color. Check-in readout above (outlined full-width when checked in, filled CTA
+   when not), practice + reflections quiet at the foot. After a breath the
+   instruction recedes, the ring quiets, and the cards open into the freed space.
+   ============================================================================ */
+.today.tb{display:flex;flex-direction:column;gap:0;padding:22px 22px 18px;height:100%;overflow-y:auto}
+.tb-head{margin:2px 0 0;transition:opacity .6s var(--ease)}
+.tb-greet{font-size:17px;font-weight:500;color:var(--ink);letter-spacing:-.005em;text-wrap:pretty}
+
+.tb-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;transition:flex-basis .6s var(--ease),gap .6s var(--ease),padding .6s var(--ease)}
+.tb-cluster{display:flex;flex-direction:column;align-items:center;gap:9px;width:100%;transition:opacity .6s var(--ease)}
+
+.tb-state{display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:flex-start;background:transparent;border:0;color:inherit;font-size:13.5px;font-weight:500;cursor:pointer;padding:14px 2px}
+.tb-state .triglyph{height:18px;width:auto;flex:none}
+.tb-state-txt{color:var(--ink-80)}
+.tb-state .tb-chev{margin-left:auto;display:inline-flex;color:var(--muted)}
+.tb-chev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tb-state:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* checked in → outlined full-width (matches the divider language) */
+.tb-state-line{border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
+@media(hover:hover){.tb-state-line:hover .tb-state-txt{color:var(--ink)}}
+/* not checked in → filled full-width CTA (the check-in is the priority) */
+.tb-state-cta{background:var(--bone-deep);border-radius:14px;padding:15px 16px}
+.tb-state-cta .tb-state-txt{color:var(--ink);font-weight:600}
+.tb-state-cta .tb-chev{color:var(--ink-80)}
+
+.tb-breath{display:flex;flex-direction:column;align-items:center;gap:18px;background:transparent;border:0;cursor:pointer;color:inherit}
+.tb-breath:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:16px}
+.tb-stage{position:relative;width:190px;height:190px;display:flex;align-items:center;justify-content:center;transition:width .6s var(--ease),height .6s var(--ease)}
+.tb-halo{position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid var(--halo);opacity:.5;animation:bloom 9s var(--ease) infinite;will-change:transform,opacity}
+.tb-halo.b{width:86%;height:86%;animation-delay:.6s;opacity:.32}
+.tb-ring{width:146px;height:146px;border-radius:50%;border:1.5px solid var(--ink);opacity:.72;display:flex;align-items:center;justify-content:center;animation:t-breathe 9s var(--ease) infinite;transition:width .6s var(--ease),height .6s var(--ease);will-change:transform,opacity}
+.tb-core{width:8px;height:8px;border-radius:50%;background:var(--ink);opacity:.7}
+.tb-below{position:relative;display:flex;align-items:center;justify-content:center;min-height:46px;overflow:hidden;transition:opacity .4s var(--ease),max-height .6s var(--ease),margin .6s var(--ease);max-height:80px}
+.tb-txt{display:flex;flex-direction:column;gap:6px;transition:opacity .4s var(--ease)}
+.tb-line{font-size:19px;font-weight:500;color:var(--ink)}
+.tb-hint{font-size:13px;color:var(--muted)}
+.tb-phase{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);font-size:22px;font-weight:500;color:var(--ink-80);letter-spacing:.12em;text-transform:lowercase;opacity:0;transition:opacity .7s var(--ease);pointer-events:none}
+.tb-phase.show{opacity:1}
+
+.tb-foot{display:flex;flex-direction:column;transition:margin .6s var(--ease)}
+.tb-row{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--hairline);padding:14px 2px;cursor:pointer;color:inherit;transition:padding .6s var(--ease)}
+.tb-row:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tb-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tb-row-title{font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.25}
+.tb-row-sub{font-size:12.5px;color:var(--muted);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-refl{font-size:12.5px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+.tb-reason{font-size:12.5px;color:var(--muted);line-height:1.45;max-height:0;opacity:0;overflow:hidden;transition:max-height .5s var(--ease),opacity .45s var(--ease),margin .45s var(--ease)}
+.tb-row .wc-go{flex:none;display:flex;align-items:center;color:var(--muted)}
+.tb-row .wc-go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* breathing: the ring is the whole screen — everything else clears, incl. the tab bar */
+body.breathing .tabbar{opacity:0;pointer-events:none}
+.today.tb.breathing .tb-head,
+.today.tb.breathing .tb-cluster,
+.today.tb.breathing .tb-foot,
+.today.tb.breathing .tb-txt{opacity:0;pointer-events:none}
+.today.tb.breathing .tb-ring{animation:none}
+.today.tb.breathing .tb-halo{animation:none;opacity:.42}
+
+/* settled (breath taken): instruction gone, ring quiet, cards open into the space */
+.today.tb.breathed .tb-hero{flex:0 0 auto;gap:16px;padding-top:4px}
+.today.tb.breathed .tb-stage{width:96px;height:96px}
+.today.tb.breathed .tb-ring{width:82px;height:82px;animation-duration:13s;opacity:.5}
+.today.tb.breathed .tb-halo{animation-duration:13s;opacity:.4}
+.today.tb.breathed .tb-below{opacity:0;max-height:0;min-height:0;margin:0}
+.today.tb.breathed .tb-foot{margin-top:30px}
+.today.tb.breathed .tb-row{padding:18px 2px}
+.today.tb.breathed .tb-refl{-webkit-line-clamp:3}
+.today.tb.breathed .tb-reason{max-height:44px;opacity:1;margin-top:5px}
+
+@keyframes bloom{0%,100%{transform:scale(.96);opacity:.30}50%{transform:scale(1.05);opacity:.55}}
+@media (prefers-reduced-motion:reduce){.tb-halo,.tb-ring{animation:none;transform:scale(.98)}}

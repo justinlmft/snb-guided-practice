@@ -543,33 +543,110 @@
     const last = Store.lastCheckin();
     const reco = Store.recommend();
     const done = winsDone();
-    const breathHTML   = renderWin('breath',   {done:done.breath,   last, reco});
-    const checkinHTML  = renderWin('checkin',  {done:done.checkin,  last, reco});
-    const practiceHTML = renderWin('practice', {done:done.practice, last, reco});
-    const r = (FromJustin.daily ? FromJustin.daily() : FromJustin.today());
-    const td = (Store.today ? Store.today() : null);
-    const dotsHTML = (td && td.n>=1) ? momentDots(td.moments) : '';
     const nm = Store.getName();
     const seg = segOf(Date.now());
     if(todayGreet===null || todayGreetName!==nm){ todayGreet = pickGreeting(segLabel(seg), nm ? escapeHtml(nm) : ''); todayGreetName = nm; }
     const greet = todayGreet;
-    c.innerHTML = `<div class="view today">
-      <div class="scr-head">
-        <p class="eyebrow"></p>
-        <h2 class="scr-h">${greet}</h2>
+
+    // state readout doubles as the check-in control: outlined full-width when
+    // you've checked in today (shows your state), a filled CTA when you haven't.
+    const checkedIn = !!(last && sameDay(last.t));
+    const dom  = checkedIn ? last.dom : null;
+    const halo = checkedIn ? STATE_COLOR(dom) : 'var(--hairline)';
+    const stateHTML = checkedIn
+      ? `<button class="tb-state tb-state-line" id="tb-state"><span class="tb-glyph">${triGlyph(dom)}</span><span class="tb-state-txt">${STATE_NAME(dom)} · this ${segLabel(segOf(last.t))}</span><span class="tb-chev">${CHEV}</span></button>`
+      : `<button class="tb-state tb-state-cta" id="tb-state"><span class="tb-glyph">${triGlyph('neutral')}</span><span class="tb-state-txt">check in — how are you?</span><span class="tb-chev">${CHEV}</span></button>`;
+
+    const pracName   = escapeHtml(Store.practiceLabel(reco.practiceKey));
+    const pracReason = reco.reason ? escapeHtml(reco.reason) : '';
+    const r  = (FromJustin.daily ? FromJustin.daily() : FromJustin.today());
+    const reflText = (r && r.text) ? escapeHtml(r.text) : '';
+    const td = (Store.today ? Store.today() : null);
+    const dotsHTML = (td && td.n>=1) ? momentDots(td.moments) : '';
+    const settled = done.breath;   // once you've breathed today, land in the calm collapsed state
+
+    c.innerHTML = `<div class="view today tb${settled?' breathed':''}">
+      <div class="tb-head"><h2 class="tb-greet">${greet}</h2></div>
+      <div class="tb-hero">
+        <div class="tb-cluster">${stateHTML}</div>
+        <button class="tb-breath" id="tb-breath" aria-label="take one intentional breath">
+          <span class="tb-stage" style="--halo:${halo}">
+            <span class="tb-halo"></span><span class="tb-halo b"></span>
+            <span class="tb-ring" id="tring"><span class="tb-core"></span></span>
+          </span>
+          <span class="tb-below">
+            <span class="tb-txt"><span class="tb-line">take a breath</span><span class="tb-hint">tap the ring to breathe</span></span>
+            <span class="tb-phase" id="tb-phase" aria-live="polite"></span>
+          </span>
+        </button>
       </div>
-      ${breathHTML}
-      ${checkinHTML}
-      ${practiceHTML}
-      ${r ? (r.state !== 'neutral'
-        ? `<button class="wincard from-card" id="open-refl"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span>${dotsHTML}</span><span class="wc-go">${CHEV}</span></button>`
-        : `<div class="wincard from-card from-card-static"><span class="wc-text"><span class="wc-kicker">for you</span><span class="wc-fj-text">${escapeHtml(r.text)}</span></span></div>`
-      ) : ''}
+      <div class="tb-foot">
+        <button class="tb-row" id="tb-practice">
+          <span class="tb-row-text">
+            <span class="tb-row-title">recommended practice</span>
+            <span class="tb-row-sub">${pracName}</span>
+            ${pracReason ? `<span class="tb-reason">${pracReason}</span>` : ''}
+          </span><span class="wc-go">${CHEV}</span>
+        </button>
+        ${reflText ? `<button class="tb-row" id="tb-refl">
+          <span class="tb-row-text">
+            <span class="tb-row-title">your reflections</span>
+            <span class="tb-refl">${reflText}</span>${dotsHTML}
+          </span><span class="wc-go">${CHEV}</span>
+        </button>` : ''}
+      </div>
     </div>`;
-    const breathBtn  = c.querySelector('[data-win="breath"]');  if(breathBtn)  breathBtn.onclick  = winAction('breath', reco);
-    const checkinBtn = c.querySelector('[data-win="checkin"]'); if(checkinBtn) checkinBtn.onclick = winAction('checkin', reco);
-    const mainBtn    = c.querySelector('#practice-main-btn');   if(mainBtn)    mainBtn.onclick    = winAction('practice', reco);
-    const reflBtn = c.querySelector('#open-refl'); if(reflBtn) reflBtn.onclick = screenReflectionDeep;
+
+    const stateBtn  = c.querySelector('#tb-state');    if(stateBtn)  stateBtn.onclick  = screenCheckin;
+    const breathBtn = c.querySelector('#tb-breath');   if(breathBtn) breathBtn.onclick = runBreath;
+    const pracBtn   = c.querySelector('#tb-practice');  if(pracBtn)   pracBtn.onclick   = ()=>renderPlan(reco);
+    const reflBtn   = c.querySelector('#tb-refl');      if(reflBtn)   reflBtn.onclick   = screenReflectionDeep;
+  }
+
+  // Breath engine for the redesigned Today. On tap the ring becomes the whole
+  // screen (everything else + the tab bar fade) with "in / out" beneath it; when
+  // it settles the instruction is gone, the ring quiets, and the cards open up.
+  function runBreath(){
+    if(breathing) return;
+    const view  = content().querySelector('.today.tb');
+    const ring  = document.getElementById('tring');
+    const phase = document.getElementById('tb-phase');
+    if(!view || !ring) return;
+    try{ haptic('start'); }catch(_){}
+    breathing = true;
+    view.classList.remove('breathed');
+    view.classList.add('breathing');
+    document.body.classList.add('breathing');
+    const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const finish = ()=>{
+      try{ markBreath(); }catch(_){}
+      if(phase){ phase.classList.remove('show'); setTimeout(()=>{ if(phase) phase.textContent=''; }, 700); }
+      ring.style.transition = 'transform 1.6s ease, opacity 1.6s';
+      ring.style.transform  = 'scale(.96)'; ring.style.opacity = '.55';
+      setTimeout(()=>{
+        ring.style.transition=''; ring.style.transform=''; ring.style.opacity=''; ring.style.animation='';
+        document.body.classList.remove('breathing');
+        view.classList.remove('breathing'); view.classList.add('breathed');
+        breathing = false;
+      }, 1200);
+    };
+    // stop the ambient animation, glide to rest, then inhale / exhale
+    ring.style.animation = 'none';
+    ring.style.transition = 'transform .35s ease, opacity .35s ease';
+    ring.getBoundingClientRect();
+    ring.style.transform = 'scale(.86)'; ring.style.opacity = '.5';
+    setTimeout(()=>{
+      if(reduce){ if(phase){ phase.textContent='in'; phase.classList.add('show'); } setTimeout(finish, 1200); return; }
+      ring.style.transition = 'transform 4s cubic-bezier(.4,0,.5,1), opacity 4s';
+      ring.style.transform = 'scale(1.28)'; ring.style.opacity = '.8';
+      if(phase){ phase.textContent='in'; phase.classList.add('show'); }
+      setTimeout(()=>{
+        if(phase) phase.textContent='out';
+        ring.style.transition = 'transform 6s cubic-bezier(.4,0,.5,1), opacity 6s';
+        ring.style.transform  = 'scale(.78)'; ring.style.opacity = '.4';
+      }, 4300);
+      setTimeout(finish, 10600);
+    }, 380);
   }
 
   // The moment timeline: today's check-ins placed by time (x) and safety (y),
